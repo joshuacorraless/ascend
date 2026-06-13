@@ -15,33 +15,39 @@ function devApiPlugin(): Plugin {
     apply: 'serve',
     configureServer(server) {
       server.middlewares.use('/api/analyze-label', async (req, res) => {
-        const json = (status: number, payload: unknown) => {
-          res.statusCode = status;
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify(payload));
-        };
         try {
-          const core = await server.ssrLoadModule('/api/_core.ts');
-          if (req.method === 'GET') {
-            json(200, { available: core.isAiConfigured() });
-            return;
-          }
-          if (req.method !== 'POST') {
-            json(405, { error: 'Método no permitido.' });
-            return;
-          }
+          // Reutiliza exactamente el mismo handler que corre en Vercel.
+          const mod = await server.ssrLoadModule('/api/analyze-label.ts');
+          const handler = mod.default as (req: unknown, res: unknown) => Promise<void>;
+
           const chunks: Buffer[] = [];
           for await (const chunk of req) chunks.push(chunk as Buffer);
           const raw = Buffer.concat(chunks).toString('utf8');
-          const body = raw ? JSON.parse(raw) : {};
-          const result = await core.analyzeLabelCore({
-            base64: body.base64,
-            mimeType: body.mimeType,
-            productName: body.productName,
-          });
-          json(result.ok ? 200 : result.status, result.ok ? { analysis: result.analysis } : { error: result.error });
+
+          const vReq = {
+            method: req.method,
+            headers: req.headers,
+            socket: req.socket,
+            body: raw ? JSON.parse(raw) : {},
+          };
+          let statusCode = 200;
+          const vRes = {
+            setHeader: (k: string, v: string) => res.setHeader(k, v),
+            status(code: number) {
+              statusCode = code;
+              return this;
+            },
+            json(payload: unknown) {
+              res.statusCode = statusCode;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify(payload));
+            },
+          };
+          await handler(vReq, vRes);
         } catch {
-          json(500, { error: 'Error del middleware de IA en desarrollo.' });
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Error del middleware de IA en desarrollo.' }));
         }
       });
     },
