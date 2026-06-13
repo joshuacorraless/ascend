@@ -31,7 +31,7 @@ import { formatDuration } from '@/lib/datetime';
 import { round, weightToDisplay, weightToKg } from '@/lib/units';
 import { cn } from '@/lib/cn';
 import { parseDecimalInput } from '@/lib/numberInput';
-import type { Exercise, ExerciseLog, SetLog, SetType } from '@/lib/schema';
+import type { Exercise, ExerciseLog, SetLog, SetType, WeightUnit } from '@/lib/schema';
 
 const SET_TYPE_CYCLE: SetType[] = ['efectiva', 'calentamiento', 'dropset', 'fallo'];
 
@@ -201,8 +201,11 @@ function ExerciseCard({
 }) {
   const { settings } = useSettings();
   const repos = getRepositories();
+  const unit = log.weightUnit ?? settings.weightUnit;
   const ordered = [...sets].sort((a, b) => a.setNumber - b.setNumber);
   const prev = useLiveQuery(() => previousExerciseSets(log.exerciseId, log.sessionId), [log.exerciseId, log.sessionId], [] as SetLog[]);
+
+  const setUnit = (u: WeightUnit) => repos.workout.putExerciseLog(touch({ ...log, weightUnit: u }));
 
   const copyPrevious = async () => {
     const previous = prev ?? [];
@@ -226,6 +229,7 @@ function ExerciseCard({
         <h3 className="flex-1 font-semibold">{log.exerciseName}</h3>
         {!readOnly && (
           <>
+            <UnitToggle unit={unit} onChange={setUnit} />
             <button className="rounded p-1 text-zinc-400 hover:text-brand-600 disabled:opacity-30" onClick={onMoveUp} disabled={isFirst} aria-label="Subir">
               <ArrowUp className="h-4 w-4" />
             </button>
@@ -242,7 +246,7 @@ function ExerciseCard({
       {prev && prev.length > 0 && (
         <div className="mb-2 flex items-center justify-between rounded-lg bg-zinc-50 px-2 py-1.5 text-xs text-zinc-500 dark:bg-zinc-800/50">
           <span className="truncate">
-            Anterior: {prev.map((s) => `${round(weightToDisplay(s.weightKg, settings.weightUnit), 1)}×${s.reps}`).join(', ')}
+            Anterior: {prev.map((s) => `${round(weightToDisplay(s.weightKg, unit), 1)}×${s.reps}`).join(', ')}
           </span>
           {!readOnly && (
             <button className="ml-2 flex shrink-0 items-center gap-1 font-medium text-brand-600" onClick={copyPrevious}>
@@ -254,7 +258,7 @@ function ExerciseCard({
 
       <div className="grid grid-cols-[2rem_1fr_1fr_2.5rem_2rem] items-center gap-2 px-1 pb-1 text-[11px] font-medium text-zinc-400">
         <span>#</span>
-        <span>{settings.weightUnit}</span>
+        <span>{unit}</span>
         <span>Reps</span>
         <span>RPE</span>
         <span></span>
@@ -262,7 +266,7 @@ function ExerciseCard({
 
       <div className="space-y-1.5">
         {ordered.map((s) => (
-          <SetRow key={s.id} set={s} readOnly={readOnly} />
+          <SetRow key={s.id} set={s} unit={unit} readOnly={readOnly} />
         ))}
       </div>
 
@@ -276,25 +280,24 @@ function ExerciseCard({
 }
 
 // ── Fila de una serie (autoguardado) ─────────────────────────────────────────
-function SetRow({ set, readOnly }: { set: SetLog; readOnly: boolean }) {
-  const { settings } = useSettings();
+function SetRow({ set, unit, readOnly }: { set: SetLog; unit: WeightUnit; readOnly: boolean }) {
   const repos = getRepositories();
-  const [weight, setWeight] = useState(() => (set.weightKg ? String(round(weightToDisplay(set.weightKg, settings.weightUnit), 2)) : ''));
+  const [weight, setWeight] = useState(() => (set.weightKg ? String(round(weightToDisplay(set.weightKg, unit), 2)) : ''));
   const [reps, setReps] = useState(() => (set.reps ? String(set.reps) : ''));
   const [rpe, setRpe] = useState(() => (set.rpe != null ? String(set.rpe) : ''));
 
-  // Resincroniza si el set cambia desde fuera (p. ej. "Copiar anterior").
+  // Resincroniza si el set o la unidad cambian desde fuera (p. ej. "Copiar anterior" o cambiar kg/lb).
   useEffect(() => {
-    setWeight(set.weightKg ? String(round(weightToDisplay(set.weightKg, settings.weightUnit), 2)) : '');
+    setWeight(set.weightKg ? String(round(weightToDisplay(set.weightKg, unit), 2)) : '');
     setReps(set.reps ? String(set.reps) : '');
     setRpe(set.rpe != null ? String(set.rpe) : '');
-  }, [set.weightKg, set.reps, set.rpe, settings.weightUnit]);
+  }, [set.weightKg, set.reps, set.rpe, unit]);
 
   const persist = (patch: Partial<SetLog>) => repos.workout.putSetLog(touch({ ...set, ...patch }));
 
   const persistWeight = () => {
     const v = parseDecimalInput(weight);
-    persist({ weightKg: Number.isFinite(v) && v > 0 ? weightToKg(v, settings.weightUnit) : 0 });
+    persist({ weightKg: Number.isFinite(v) && v > 0 ? weightToKg(v, unit) : 0 });
   };
   const persistReps = () => {
     const v = Number(reps);
@@ -399,6 +402,29 @@ function AddExerciseModal({ open, onClose, onPick }: { open: boolean; onClose: (
         </div>
       </div>
     </Modal>
+  );
+}
+
+// ── Toggle compacto kg/lb por ejercicio ──────────────────────────────────────
+function UnitToggle({ unit, onChange }: { unit: WeightUnit; onChange: (u: WeightUnit) => void }) {
+  return (
+    <div className="inline-flex overflow-hidden rounded-lg border border-zinc-200 text-[11px] font-bold dark:border-zinc-700">
+      {(['kg', 'lb'] as const).map((u) => (
+        <button
+          key={u}
+          onClick={() => onChange(u)}
+          aria-pressed={unit === u}
+          className={cn(
+            'px-2 py-1 transition',
+            unit === u
+              ? 'bg-brand-600 text-white'
+              : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800',
+          )}
+        >
+          {u}
+        </button>
+      ))}
+    </div>
   );
 }
 

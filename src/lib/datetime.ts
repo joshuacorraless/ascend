@@ -85,6 +85,28 @@ export function keyToDisplayDate(key: DateKey): Date {
   return new Date(`${key}T12:00:00Z`);
 }
 
+/** Primer día del mes de una clave (YYYY-MM-01). */
+export function startOfMonthKey(key: DateKey): DateKey {
+  return `${key.slice(0, 7)}-01`;
+}
+
+/** Suma (o resta) meses, devolviendo el primer día del mes resultante. */
+export function addMonthsToKey(key: DateKey, months: number): DateKey {
+  const y = Number(key.slice(0, 4));
+  const m = Number(key.slice(5, 7));
+  const total = y * 12 + (m - 1) + months;
+  const ny = Math.floor(total / 12);
+  const nm = (total % 12) + 1;
+  return `${ny.toString().padStart(4, '0')}-${nm.toString().padStart(2, '0')}-01`;
+}
+
+/** Todas las claves de día del mes al que pertenece `key`. */
+export function daysInMonth(key: DateKey): DateKey[] {
+  const start = startOfMonthKey(key);
+  const lastDay = addDaysToKey(addMonthsToKey(start, 1), -1);
+  return rangeOfKeys(start, lastDay);
+}
+
 const HUMAN_FMT = new Intl.DateTimeFormat('es', {
   weekday: 'long',
   day: 'numeric',
@@ -97,6 +119,17 @@ const SHORT_FMT = new Intl.DateTimeFormat('es', {
   month: 'short',
   timeZone: 'UTC',
 });
+
+const MONTH_FMT = new Intl.DateTimeFormat('es', {
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+/** "junio de 2026" */
+export function formatMonthKey(key: DateKey): string {
+  return MONTH_FMT.format(keyToDisplayDate(key));
+}
 
 /** "lunes, 12 de junio" */
 export function formatKeyHuman(key: DateKey): string {

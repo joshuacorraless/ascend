@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Download, Upload, Trash2, ShieldCheck, Database } from 'lucide-react';
+import { Download, Upload, Trash2, ShieldCheck, Database, Dumbbell, FileDown } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Modal } from '@/components/ui/Modal';
@@ -14,6 +14,11 @@ import { createGoal, SUGGESTED_GOAL } from '@/lib/defaults';
 import { touch } from '@/lib/factories';
 import { todayKey } from '@/lib/datetime';
 import { applyBackup, downloadBackup, parseBackup } from '@/lib/backup/exportImport';
+import {
+  applyRoutineImport,
+  downloadRoutineTemplate,
+  parseRoutineImport,
+} from '@/lib/training/routineImport';
 import type { ThemePreference, VolumeUnit, WeightUnit } from '@/lib/schema';
 
 const TIME_ZONES = [
@@ -45,8 +50,10 @@ export function SettingsScreen() {
   const exportBusy = useBusy();
   const importBusy = useBusy();
   const clearBusy = useBusy();
+  const routineBusy = useBusy();
   const repos = getRepositories();
   const fileRef = useRef<HTMLInputElement>(null);
+  const routineFileRef = useRef<HTMLInputElement>(null);
 
   const latestGoal = useLiveQuery(() => repos.goals.latest(), []);
   const counts = useLiveQuery(() => repos.storage.counts(), []);
@@ -106,6 +113,41 @@ export function SettingsScreen() {
         success('Datos restaurados.');
       } catch (err) {
         error('No se pudo restaurar el respaldo. El archivo puede estar dañado.');
+        console.error(err);
+      }
+    });
+  };
+
+  const onPickRoutine = () => routineFileRef.current?.click();
+
+  const onRoutineFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    const text = await file.text();
+    const result = parseRoutineImport(text);
+    if (!result.ok) {
+      error(result.error);
+      return;
+    }
+    const totalExercises = result.routines.reduce((n, r) => n + r.exercises.length, 0);
+    const ok = await confirm({
+      title: 'Importar rutina',
+      message: `Se agregarán ${result.routines.length} rutina(s) (${result.routines
+        .map((r) => r.name)
+        .join(', ')}) con ${totalExercises} ejercicios. Los ejercicios que ya existan se reutilizan; tus datos actuales no se borran.`,
+      confirmLabel: 'Importar',
+      cancelLabel: 'Cancelar',
+    });
+    if (!ok) return;
+    await routineBusy.run(async () => {
+      try {
+        const summary = await applyRoutineImport(result.routines);
+        success(
+          `Importado: ${summary.routinesCreated} rutina(s) y ${summary.exercisesCreated} ejercicio(s) nuevo(s).`,
+        );
+      } catch (err) {
+        error('No se pudo importar la rutina. Revisa el archivo e inténtalo de nuevo.');
         console.error(err);
       }
     });
@@ -229,6 +271,31 @@ export function SettingsScreen() {
         <button className="btn-danger w-full" onClick={onClearAll} disabled={clearBusy.busy}>
           <Trash2 className="h-4 w-4" /> {clearBusy.busy ? 'Borrando...' : 'Borrar todos los datos'}
         </button>
+      </Section>
+
+      <Section title="Importar rutina" icon={<Dumbbell className="h-4 w-4 text-brand-600" />}>
+        <p className="text-sm text-zinc-500">
+          Sube un archivo JSON con tus rutinas. Se crean los ejercicios que falten (como si los
+          metieras a mano) y se arman las rutinas por día. No borra nada de lo que ya tienes.
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          <button className="btn-secondary" onClick={downloadRoutineTemplate}>
+            <FileDown className="h-4 w-4" /> Plantilla
+          </button>
+          <button className="btn-primary" onClick={onPickRoutine} disabled={routineBusy.busy}>
+            <Upload className="h-4 w-4" /> {routineBusy.busy ? 'Importando...' : 'Importar rutina'}
+          </button>
+        </div>
+        <input
+          ref={routineFileRef}
+          type="file"
+          accept="application/json,.json"
+          className="hidden"
+          onChange={onRoutineFile}
+        />
+        <p className="text-xs text-zinc-400">
+          Descarga la plantilla para ver el formato exacto (rutinas, días y ejercicios).
+        </p>
       </Section>
 
       <Section title="Privacidad" icon={<ShieldCheck className="h-4 w-4 text-emerald-600" />}>

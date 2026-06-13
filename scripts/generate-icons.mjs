@@ -1,6 +1,6 @@
 // Genera los íconos PNG de la PWA sin dependencias nativas.
-// Dibuja el emblema de Ascend sobre fondo oscuro.
-// y codifica PNG (RGBA, 8 bits) usando el módulo `zlib` integrado de Node.
+// Dibuja el emblema de Ascend: barras blancas en ascenso sobre un degradado
+// índigo→violeta, y codifica PNG (RGBA, 8 bits) usando el módulo `zlib` de Node.
 //
 // Uso: node scripts/generate-icons.mjs
 import { deflateSync } from 'node:zlib';
@@ -11,54 +11,43 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = resolve(__dirname, '../public/icons');
 
-// ── Emblema "A" en coordenadas normalizadas 0..1 ─────────────────────────────
-const MARK = [
-  [0.5, 0.18],
-  [0.76, 0.78],
-  [0.62, 0.78],
-  [0.57, 0.66],
-  [0.43, 0.66],
-  [0.38, 0.78],
-  [0.25, 0.78],
+// ── Barras en ascenso, en coordenadas normalizadas 0..1 ──────────────────────
+// (mismas proporciones que el SVG de la marca: 4 barras subiendo a la derecha)
+const BARS = [
+  { x: 0.15, top: 0.5625 },
+  { x: 0.34167, top: 0.41667 },
+  { x: 0.53333, top: 0.27083 },
+  { x: 0.725, top: 0.125 },
 ];
+const BAR_W = 0.125;
+const BASE = 0.8125;
 
-const BG = [23, 23, 19]; // #171713
-const TEAL = [45, 212, 191]; // #2dd4bf
+const BG_A = [79, 70, 229]; // #4f46e5 índigo
+const BG_B = [139, 92, 246]; // #8b5cf6 violeta
 const WHITE = [255, 255, 255];
 
 function lerp(a, b, t) {
   return Math.round(a + (b - a) * t);
 }
 
-function pointInPolygon(px, py, poly) {
-  let inside = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const xi = poly[i][0];
-    const yi = poly[i][1];
-    const xj = poly[j][0];
-    const yj = poly[j][1];
-    const intersect =
-      yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi;
-    if (intersect) inside = !inside;
-  }
-  return inside;
-}
-
 function renderRGBA(size, markScale) {
   const data = Buffer.alloc(size * size * 4);
-  const scaled = MARK.map(([nx, ny]) => [
-    ((nx - 0.5) * markScale + 0.5) * size,
-    ((ny - 0.5) * markScale + 0.5) * size,
-  ]);
+  const s = (v) => (v - 0.5) * markScale + 0.5; // escala alrededor del centro
+  const bars = BARS.map((b) => ({
+    x0: s(b.x),
+    x1: s(b.x + BAR_W),
+    y0: s(b.top),
+    y1: s(BASE),
+  }));
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const idx = (y * size + x) * 4;
       const nx = x / Math.max(1, size - 1);
       const ny = y / Math.max(1, size - 1);
-      const inMark = pointInPolygon(x + 0.5, y + 0.5, scaled);
-      const inRibbon = ny > 0.16 && ny < 0.31 && nx > 0.15 && nx < 0.85;
-      const color = inMark ? WHITE : inRibbon ? TEAL : BG;
+      const inBar = bars.some((b) => nx >= b.x0 && nx <= b.x1 && ny >= b.y0 && ny <= b.y1);
+      const t = (nx + ny) / 2; // degradado diagonal índigo→violeta
+      const color = inBar ? WHITE : [lerp(BG_A[0], BG_B[0], t), lerp(BG_A[1], BG_B[1], t), lerp(BG_A[2], BG_B[2], t)];
       data[idx] = color[0];
       data[idx + 1] = color[1];
       data[idx + 2] = color[2];

@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { SimpleLineChart } from '@/components/ui/SimpleLineChart';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ProgressCalendar } from './ProgressCalendar';
 import { useSettings } from '@/app/providers/settings';
 import { getRepositories } from '@/lib/repositories';
 import { bodyWeightStats, withMovingAverage } from '@/lib/domain';
@@ -20,20 +21,23 @@ interface RoutineStat {
 }
 
 export function ProgressScreen() {
-  const [tab, setTab] = useState<'entreno' | 'peso'>('entreno');
+  const [tab, setTab] = useState<'entreno' | 'peso' | 'dias'>('entreno');
   return (
     <div className="space-y-4">
-      <PageHeader title="Progreso" subtitle="Tu evolución, rutina por rutina." />
+      <PageHeader title="Progreso" subtitle="Tu evolución y tus hábitos diarios." />
       <SegmentedControl
         className="w-full"
         value={tab}
         onChange={setTab}
         options={[
-          { value: 'entreno', label: 'Entrenamiento' },
-          { value: 'peso', label: 'Peso corporal' },
+          { value: 'entreno', label: 'Entreno' },
+          { value: 'peso', label: 'Peso' },
+          { value: 'dias', label: 'Calendario' },
         ]}
       />
-      {tab === 'entreno' ? <TrainingProgress /> : <BodyWeightProgress />}
+      {tab === 'entreno' && <TrainingProgress />}
+      {tab === 'peso' && <BodyWeightProgress />}
+      {tab === 'dias' && <ProgressCalendar />}
     </div>
   );
 }
