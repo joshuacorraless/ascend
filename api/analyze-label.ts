@@ -37,17 +37,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  const body = (typeof req.body === 'string' ? safeParse(req.body) : req.body) ?? {};
-  const result = await analyzeLabelCore({
-    base64: body.base64,
-    mimeType: body.mimeType,
-    productName: typeof body.productName === 'string' ? body.productName : undefined,
-  });
+  try {
+    const body = (typeof req.body === 'string' ? safeParse(req.body) : req.body) ?? {};
+    const result = await analyzeLabelCore({
+      base64: body.base64,
+      mimeType: body.mimeType,
+      productName: typeof body.productName === 'string' ? body.productName : undefined,
+    });
 
-  if (result.ok) {
-    res.status(200).json({ analysis: result.analysis });
-  } else {
-    res.status(result.status).json({ error: result.error });
+    if (result.ok) {
+      res.status(200).json({ analysis: result.analysis });
+    } else {
+      res.status(result.status).json({ error: result.error });
+    }
+  } catch (e) {
+    // Red de seguridad: nunca dejar caer la función (evita FUNCTION_INVOCATION_FAILED).
+    res.status(500).json({
+      error: 'Error interno al analizar la etiqueta.',
+      detail: e instanceof Error ? e.message : String(e),
+    });
   }
 }
 

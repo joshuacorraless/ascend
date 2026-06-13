@@ -1,6 +1,10 @@
-import Anthropic from '@anthropic-ai/sdk';
+import type AnthropicNS from '@anthropic-ai/sdk';
 import { labelAnalysisSchema } from '../src/lib/ai/labelSchema';
 import type { AnalyzeInput, AnalyzeResult } from '../src/lib/ai/types';
+
+// Los SDK de IA se cargan de forma DIFERIDA (dynamic import) dentro de cada
+// proveedor. Así, importar este módulo (p. ej. para la verificación GET) no
+// carga ningún SDK pesado y la función serverless no se cae al arrancar.
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 const MAX_BASE64_BYTES = 6 * 1024 * 1024; // ~6 MB de imagen decodificada
@@ -130,6 +134,7 @@ const ANTHROPIC_TOOL_SCHEMA = {
 
 async function analyzeWithAnthropic(input: AnalyzeInput): Promise<AnalyzeResult> {
   const model = process.env.ANTHROPIC_MODEL || 'claude-opus-4-8';
+  const { default: Anthropic } = await import('@anthropic-ai/sdk');
   try {
     const client = new Anthropic(); // lee ANTHROPIC_API_KEY del entorno
     const message = await client.messages.create({
@@ -139,7 +144,7 @@ async function analyzeWithAnthropic(input: AnalyzeInput): Promise<AnalyzeResult>
         {
           name: 'registrar_etiqueta',
           description: 'Registra los datos nutricionales por porción extraídos de la etiqueta.',
-          input_schema: ANTHROPIC_TOOL_SCHEMA as unknown as Anthropic.Tool.InputSchema,
+          input_schema: ANTHROPIC_TOOL_SCHEMA as unknown as AnthropicNS.Tool.InputSchema,
         },
       ],
       tool_choice: { type: 'tool', name: 'registrar_etiqueta' },
