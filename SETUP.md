@@ -25,22 +25,37 @@ npm run check        # typecheck + lint + test + build (todo junto)
 Copia `.env.example` a `.env.local` (ignorado por git). **Todo es opcional**: la app funciona
 para registro manual sin ninguna clave.
 
+El análisis de etiquetas admite dos proveedores; elige uno con `AI_PROVIDER` (o deja vacío y se
+usa el que tenga clave). **Recomendado: Google Gemini, que tiene nivel gratuito.**
+
 | Variable | Para qué | ¿Cliente? |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | Análisis de etiquetas por IA (Claude). Solo en el servidor. | **No** |
-| `ANTHROPIC_MODEL` | Modelo de visión a usar (tiene valor por defecto). | No |
-| `AI_PROVIDER` | Proveedor activo (`anthropic`). | No |
+| `AI_PROVIDER` | `google` (gratis) o `anthropic` (de pago). | **No** |
+| `GEMINI_API_KEY` | Clave **gratis** de Google AI Studio. | **No** |
+| `GEMINI_MODEL` | Modelo de visión (por defecto `gemini-2.5-flash`). | No |
+| `ANTHROPIC_API_KEY` | Alternativa de pago (Claude). | **No** |
+| `ANTHROPIC_MODEL` | Modelo (por defecto `claude-opus-4-8`). | No |
 | `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | Futuro (Supabase). | Sí (anon key es pública por diseño) |
 
 > ⚠️ La clave de IA **nunca** se expone al frontend: solo la usa la función serverless
 > `api/analyze-label`. No la pongas en variables `VITE_*`.
 
+### Conseguir una clave GRATIS de Gemini
+1. Entra a **https://aistudio.google.com/app/apikey** e inicia sesión con tu cuenta de Google.
+2. **Create API key** → cópiala (no requiere tarjeta para el nivel gratuito).
+3. Pégala en `.env.local` como `GEMINI_API_KEY=...` (deja `AI_PROVIDER=google`).
+
 ### Probar el endpoint de IA en local
-`vite dev` sirve solo el frontend. Para ejecutar también `/api`:
-```bash
-npm i -g vercel        # una vez
-vercel dev             # levanta frontend + funciones /api con tus env de .env.local
-```
+`npm run dev` ya monta el endpoint `/api/analyze-label` mediante un middleware de desarrollo y
+lee las variables de `.env.local`. Basta con:
+1. Copiar `.env.example` a `.env.local` y poner tu `GEMINI_API_KEY` (o `ANTHROPIC_API_KEY`).
+2. Ejecutar `npm run dev` (reinícialo si ya estaba corriendo).
+3. En la app: **Alimentación → Biblioteca → Escanear** (o al agregar una comida → **Escanear**).
+
+Comprobación rápida: `GET http://localhost:5173/api/analyze-label` debe devolver
+`{"available":true}` cuando la clave está configurada.
+
+Alternativa con el runtime real de Vercel: `npm i -g vercel` y `vercel dev`.
 
 ## Despliegue en Vercel
 1. Sube el repo a GitHub.

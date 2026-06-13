@@ -1,4 +1,5 @@
 import { defineConfig, type Plugin } from 'vitest/config';
+import { loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'node:path';
@@ -48,7 +49,24 @@ function devApiPlugin(): Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // Expone las variables del endpoint de IA (de `.env.local`) en process.env
+  // para que el middleware de desarrollo (`npm run dev`) pueda leer la clave.
+  // Estas variables NUNCA se envían al cliente (no llevan prefijo VITE_).
+  const env = loadEnv(mode, process.cwd(), '');
+  const aiKeys = [
+    'AI_PROVIDER',
+    'GEMINI_API_KEY',
+    'GOOGLE_API_KEY',
+    'GEMINI_MODEL',
+    'ANTHROPIC_API_KEY',
+    'ANTHROPIC_MODEL',
+  ];
+  for (const key of aiKeys) {
+    if (env[key] && !process.env[key]) process.env[key] = env[key];
+  }
+
+  return {
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -124,4 +142,5 @@ export default defineConfig({
       exclude: ['src/**/*.{test,spec}.{ts,tsx}', 'src/**/*.d.ts'],
     },
   },
+  };
 });
