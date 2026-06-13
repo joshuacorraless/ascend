@@ -1,10 +1,10 @@
 import type AnthropicNS from '@anthropic-ai/sdk';
-import { labelAnalysisSchema } from '../src/lib/ai/labelSchema';
-import type { AnalyzeInput, AnalyzeResult } from '../src/lib/ai/types';
+import { labelAnalysisSchema, type AnalyzeInput, type AnalyzeResult } from './_labelSchema';
 
+// IMPORTANTE: esta función serverless es AUTOCONTENIDA. No importa nada de
+// `../src` porque Vercel no incluye esos archivos en el bundle de la función.
 // Los SDK de IA se cargan de forma DIFERIDA (dynamic import) dentro de cada
-// proveedor. Así, importar este módulo (p. ej. para la verificación GET) no
-// carga ningún SDK pesado y la función serverless no se cae al arrancar.
+// proveedor, para no cargar SDK pesados al arrancar (p. ej. en la verificación GET).
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 const MAX_BASE64_BYTES = 6 * 1024 * 1024; // ~6 MB de imagen decodificada
