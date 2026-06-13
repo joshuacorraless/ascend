@@ -20,6 +20,7 @@ import { getRepositories } from '@/lib/repositories';
 import { recipeMacrosPerServing, scaleMacros } from '@/lib/domain';
 import { PORTION_UNIT_LABELS } from '@/lib/units';
 import { cn } from '@/lib/cn';
+import { parseDecimalInput } from '@/lib/numberInput';
 import type { DateKey } from '@/lib/datetime';
 import type { Food, MealEntry, MealType, Recipe } from '@/lib/schema';
 
@@ -90,7 +91,7 @@ export function AddEntryModal({
 
   const addFood = async () => {
     if (!selFood) return;
-    const amt = Number(amount.replace(',', '.'));
+    const amt = parseDecimalInput(amount);
     if (!Number.isFinite(amt) || amt <= 0) return;
     await repos.meals.put(buildEntryFromFood(selFood, mealType, dateKey, amt));
     success(`Añadido a ${MEAL_TYPE_LABELS[mealType]}`);
@@ -99,7 +100,7 @@ export function AddEntryModal({
 
   const addRecipe = async () => {
     if (!selRecipe) return;
-    const servings = Number(amount.replace(',', '.'));
+    const servings = parseDecimalInput(amount);
     if (!Number.isFinite(servings) || servings <= 0) return;
     await repos.meals.put(buildEntryFromRecipe(selRecipe, foodsById, mealType, dateKey, servings));
     success(`Añadido a ${MEAL_TYPE_LABELS[mealType]}`);
@@ -108,7 +109,7 @@ export function AddEntryModal({
 
   // ── Vista: editor de cantidad de un alimento ───────────────────────────────
   if (selFood) {
-    const amt = Number(amount.replace(',', '.')) || 0;
+    const amt = parseDecimalInput(amount) || 0;
     const unit = PORTION_UNIT_LABELS[selFood.portionUnit] ?? selFood.portionUnit;
     return (
       <Modal
@@ -132,9 +133,8 @@ export function AddEntryModal({
           </label>
           <input
             id="amt"
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="any"
             autoFocus
             className="input text-lg"
             value={amount}
@@ -151,7 +151,7 @@ export function AddEntryModal({
 
   // ── Vista: editor de porciones de una receta ───────────────────────────────
   if (selRecipe) {
-    const servings = Number(amount.replace(',', '.')) || 0;
+    const servings = parseDecimalInput(amount) || 0;
     const preview = scaleMacros(recipeMacrosPerServing(selRecipe, foodsById), servings);
     return (
       <Modal
@@ -175,9 +175,8 @@ export function AddEntryModal({
           </label>
           <input
             id="serv"
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="any"
             autoFocus
             className="input text-lg"
             value={amount}

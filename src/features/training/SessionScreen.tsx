@@ -30,6 +30,7 @@ import { totalVolume } from '@/lib/domain';
 import { formatDuration } from '@/lib/datetime';
 import { round, weightToDisplay, weightToKg } from '@/lib/units';
 import { cn } from '@/lib/cn';
+import { parseDecimalInput } from '@/lib/numberInput';
 import type { Exercise, ExerciseLog, SetLog, SetType } from '@/lib/schema';
 
 const SET_TYPE_CYCLE: SetType[] = ['efectiva', 'calentamiento', 'dropset', 'fallo'];
@@ -292,7 +293,7 @@ function SetRow({ set, readOnly }: { set: SetLog; readOnly: boolean }) {
   const persist = (patch: Partial<SetLog>) => repos.workout.putSetLog(touch({ ...set, ...patch }));
 
   const persistWeight = () => {
-    const v = Number(weight.replace(',', '.'));
+    const v = parseDecimalInput(weight);
     persist({ weightKg: Number.isFinite(v) && v > 0 ? weightToKg(v, settings.weightUnit) : 0 });
   };
   const persistReps = () => {
@@ -300,7 +301,7 @@ function SetRow({ set, readOnly }: { set: SetLog; readOnly: boolean }) {
     persist({ reps: Number.isFinite(v) && v > 0 ? Math.round(v) : 0 });
   };
   const persistRpe = () => {
-    const v = Number(rpe.replace(',', '.'));
+    const v = parseDecimalInput(rpe);
     persist({ rpe: rpe.trim() !== '' && Number.isFinite(v) ? Math.min(10, Math.max(0, v)) : undefined });
   };
 
@@ -326,9 +327,8 @@ function SetRow({ set, readOnly }: { set: SetLog; readOnly: boolean }) {
         {typeBadge}
       </button>
       <input
-        type="number"
+        type="text"
         inputMode="decimal"
-        step="any"
         disabled={readOnly}
         className="input !px-2 !py-1.5 text-center"
         value={weight}
@@ -347,9 +347,8 @@ function SetRow({ set, readOnly }: { set: SetLog; readOnly: boolean }) {
         placeholder="0"
       />
       <input
-        type="number"
+        type="text"
         inputMode="decimal"
-        step="any"
         disabled={readOnly}
         className="input !px-1 !py-1.5 text-center"
         value={rpe}

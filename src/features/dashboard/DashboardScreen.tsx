@@ -23,7 +23,6 @@ import { WaterQuickAddModal } from '@/features/water/WaterQuickAddModal';
 import { WeightQuickAddModal } from '@/features/bodyweight/WeightQuickAddModal';
 import { setSupplementCompleted } from '@/features/supplements/logActions';
 import type { SupplementStatus } from './useDashboard';
-import { AscendMark } from '@/components/brand/AscendMark';
 
 function QuickAction({
   icon: Icon,
@@ -126,14 +125,11 @@ export function DashboardScreen() {
     <div className="space-y-4 pb-2">
       <header className="pt-4">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <AscendMark className="h-12 w-12 shrink-0" />
-            <div>
-              <p className="text-sm font-bold text-teal-700 dark:text-teal-300">
-                {formatKeyRelative(dateKey, settings.timeZone)}
-              </p>
-              <h1 className="text-2xl font-black capitalize">{formatKeyHuman(dateKey)}</h1>
-            </div>
+          <div>
+            <p className="text-sm font-bold text-teal-700 dark:text-teal-300">
+              {formatKeyRelative(dateKey, settings.timeZone)}
+            </p>
+            <h1 className="text-2xl font-black capitalize">{formatKeyHuman(dateKey)}</h1>
           </div>
           <div className="hidden rounded-2xl border border-white/70 bg-white/70 px-3 py-2 text-right shadow-sm backdrop-blur sm:block dark:border-white/10 dark:bg-zinc-900/70">
             <p className="text-[11px] font-bold uppercase text-zinc-400">Ritmo</p>

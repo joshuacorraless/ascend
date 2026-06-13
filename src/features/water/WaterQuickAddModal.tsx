@@ -10,6 +10,7 @@ import { newEntity } from '@/lib/factories';
 import { nowIso } from '@/lib/ids';
 import { sumWater } from '@/lib/domain';
 import { formatVolume, round, volumeToMl } from '@/lib/units';
+import { parseDecimalInput } from '@/lib/numberInput';
 import type { DateKey } from '@/lib/datetime';
 import type { WaterEntry } from '@/lib/schema';
 
@@ -45,7 +46,7 @@ export function WaterQuickAddModal({
   };
 
   const addCustom = async () => {
-    const value = Number(custom.replace(',', '.'));
+    const value = parseDecimalInput(custom);
     if (!Number.isFinite(value) || value <= 0) return;
     await add(volumeToMl(value, settings.volumeUnit));
     setCustom('');
@@ -85,9 +86,8 @@ export function WaterQuickAddModal({
             </label>
             <input
               id="water-custom"
-              type="number"
+              type="text"
               inputMode="decimal"
-              step="any"
               className="input"
               value={custom}
               onChange={(e) => setCustom(e.target.value)}

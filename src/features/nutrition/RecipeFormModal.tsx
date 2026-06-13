@@ -8,6 +8,7 @@ import { useToast } from '@/app/providers/toast';
 import { getRepositories } from '@/lib/repositories';
 import { newEntity, touch } from '@/lib/factories';
 import { recipeMacros, recipeMacrosPerServing } from '@/lib/domain';
+import { parseDecimalInput } from '@/lib/numberInput';
 import type { Food, Recipe, RecipeIngredient } from '@/lib/schema';
 
 export function RecipeFormModal({
@@ -34,7 +35,7 @@ export function RecipeFormModal({
   const draft: Recipe = {
     id: initial?.id ?? 'draft',
     name,
-    servings: Number(servings) || 1,
+    servings: parseDecimalInput(servings) || 1,
     ingredients,
     favorite: initial?.favorite ?? false,
     archived: initial?.archived ?? false,
@@ -73,7 +74,7 @@ export function RecipeFormModal({
     const repos = getRepositories();
     const values = {
       name: name.trim(),
-      servings: Number(servings) || 1,
+      servings: parseDecimalInput(servings) || 1,
       ingredients,
     };
     const saved: Recipe = initial
@@ -104,9 +105,8 @@ export function RecipeFormModal({
         <Field label="Porciones que rinde" htmlFor="r-serv" hint="Los macros se dividen entre estas porciones.">
           <input
             id="r-serv"
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="any"
             className="input"
             value={servings}
             onChange={(e) => setServings(e.target.value)}
@@ -139,12 +139,11 @@ export function RecipeFormModal({
                     ))}
                   </select>
                   <input
-                    type="number"
+                    type="text"
                     inputMode="decimal"
-                    step="any"
                     className="input w-20"
                     value={ing.quantity}
-                    onChange={(e) => updateIngredient(i, { quantity: Number(e.target.value) || 0 })}
+                    onChange={(e) => updateIngredient(i, { quantity: parseDecimalInput(e.target.value) || 0 })}
                     aria-label="Porciones"
                   />
                   <button

@@ -13,6 +13,7 @@ import { dailyWaterTotals, sumWater, weeklyWaterAverage } from '@/lib/domain';
 import { addDaysToKey, formatKeyShort, localTime } from '@/lib/datetime';
 import { formatVolume, round, volumeToMl } from '@/lib/units';
 import { cn } from '@/lib/cn';
+import { parseDecimalInput } from '@/lib/numberInput';
 import type { WaterEntry } from '@/lib/schema';
 
 const PRESETS_ML = [250, 500, 750];
@@ -42,7 +43,7 @@ export function WaterScreen() {
     success(`+${formatVolume(ml, settings.volumeUnit)}`);
   };
   const addCustom = async () => {
-    const v = Number(custom.replace(',', '.'));
+    const v = parseDecimalInput(custom);
     if (!Number.isFinite(v) || v <= 0) return;
     await add(volumeToMl(v, settings.volumeUnit));
     setCustom('');
@@ -74,9 +75,8 @@ export function WaterScreen() {
         </div>
         <div className="mt-2 flex items-end gap-2">
           <input
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="any"
             className="input flex-1"
             placeholder={`Personalizado (${settings.volumeUnit === 'l' ? 'L' : 'ml'})`}
             value={custom}

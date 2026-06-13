@@ -10,6 +10,7 @@ import { getRepositories } from '@/lib/repositories';
 import { touch } from '@/lib/factories';
 import { macrosOf, macrosOfEntry, scaleMacros } from '@/lib/domain';
 import { PORTION_UNIT_LABELS } from '@/lib/units';
+import { parseDecimalInput } from '@/lib/numberInput';
 import type { MealEntry, MealType } from '@/lib/schema';
 
 export function EditEntryModal({
@@ -44,7 +45,7 @@ export function EditEntryModal({
     setMealType(entry.mealType);
   }, [food, entry]);
 
-  const num = Number(value.replace(',', '.')) || 0;
+  const num = parseDecimalInput(value) || 0;
   const hasFood = !!food;
 
   const preview = food
@@ -112,9 +113,8 @@ export function EditEntryModal({
         <Field label={`Cantidad (${unitLabel})`} htmlFor="edit-amt">
           <input
             id="edit-amt"
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="any"
             className="input text-lg"
             value={value}
             onChange={(e) => setValue(e.target.value)}

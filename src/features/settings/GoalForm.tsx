@@ -3,14 +3,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Field, fieldInputClass } from '@/components/ui/Field';
 import { volumeToDisplay, volumeToMl } from '@/lib/units';
+import { parseDecimalInput } from '@/lib/numberInput';
 import type { VolumeUnit } from '@/lib/schema';
 
 const schema = z.object({
-  calories: z.coerce.number().min(0, 'No puede ser negativo').max(20000),
-  protein: z.coerce.number().min(0).max(2000),
-  carbs: z.coerce.number().min(0).max(2000),
-  fat: z.coerce.number().min(0).max(2000),
-  water: z.coerce.number().min(0).max(20000),
+  calories: z.preprocess(parseDecimalInput, z.number().min(0, 'No puede ser negativo').max(20000)),
+  protein: z.preprocess(parseDecimalInput, z.number().min(0).max(2000)),
+  carbs: z.preprocess(parseDecimalInput, z.number().min(0).max(2000)),
+  fat: z.preprocess(parseDecimalInput, z.number().min(0).max(2000)),
+  water: z.preprocess(parseDecimalInput, z.number().min(0).max(20000)),
 });
 
 type GoalFormValues = z.infer<typeof schema>;
@@ -61,9 +62,8 @@ export function GoalForm({ volumeUnit, initial, submitLabel, onSubmit }: GoalFor
       <Field label="Calorías diarias (kcal)" htmlFor="calories" error={errors.calories?.message}>
         <input
           id="calories"
-          type="number"
+          type="text"
           inputMode="numeric"
-          step="any"
           className={fieldInputClass(!!errors.calories)}
           {...register('calories')}
         />
@@ -73,9 +73,8 @@ export function GoalForm({ volumeUnit, initial, submitLabel, onSubmit }: GoalFor
         <Field label="Proteína (g)" htmlFor="protein" error={errors.protein?.message}>
           <input
             id="protein"
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="any"
             className={fieldInputClass(!!errors.protein)}
             {...register('protein')}
           />
@@ -83,9 +82,8 @@ export function GoalForm({ volumeUnit, initial, submitLabel, onSubmit }: GoalFor
         <Field label="Carbos (g)" htmlFor="carbs" error={errors.carbs?.message}>
           <input
             id="carbs"
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="any"
             className={fieldInputClass(!!errors.carbs)}
             {...register('carbs')}
           />
@@ -93,9 +91,8 @@ export function GoalForm({ volumeUnit, initial, submitLabel, onSubmit }: GoalFor
         <Field label="Grasas (g)" htmlFor="fat" error={errors.fat?.message}>
           <input
             id="fat"
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="any"
             className={fieldInputClass(!!errors.fat)}
             {...register('fat')}
           />
@@ -109,9 +106,8 @@ export function GoalForm({ volumeUnit, initial, submitLabel, onSubmit }: GoalFor
       >
         <input
           id="water"
-          type="number"
+          type="text"
           inputMode="decimal"
-          step="any"
           className={fieldInputClass(!!errors.water)}
           {...register('water')}
         />

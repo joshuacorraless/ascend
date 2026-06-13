@@ -7,6 +7,7 @@ import { newEntity } from '@/lib/factories';
 import { nowIso } from '@/lib/ids';
 import { localTime } from '@/lib/datetime';
 import { formatWeight, weightToKg } from '@/lib/units';
+import { parseDecimalInput } from '@/lib/numberInput';
 import type { DateKey } from '@/lib/datetime';
 import type { BodyWeightEntry } from '@/lib/schema';
 
@@ -27,7 +28,7 @@ export function WeightQuickAddModal({
   const [notes, setNotes] = useState('');
 
   const save = async () => {
-    const num = Number(value.replace(',', '.'));
+    const num = parseDecimalInput(value);
     if (!Number.isFinite(num) || num <= 0) return;
     const repos = getRepositories();
     await repos.bodyWeight.put(
@@ -63,9 +64,8 @@ export function WeightQuickAddModal({
           </label>
           <input
             id="bw-value"
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="any"
             autoFocus
             className="input text-lg"
             value={value}
