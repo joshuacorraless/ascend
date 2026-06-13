@@ -1,39 +1,144 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Scale } from 'lucide-react';
+import { ChevronRight, Dumbbell } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { SimpleLineChart } from '@/components/ui/SimpleLineChart';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { ExerciseProgress } from './ExerciseProgress';
 import { useSettings } from '@/app/providers/settings';
 import { getRepositories } from '@/lib/repositories';
 import { bodyWeightStats, withMovingAverage } from '@/lib/domain';
-import { formatKeyShort } from '@/lib/datetime';
+import { WEEKDAY_LABELS, formatKeyRelative, formatKeyShort } from '@/lib/datetime';
 import { round, weightToDisplay } from '@/lib/units';
+import { cn } from '@/lib/cn';
 import type { BodyWeightEntry } from '@/lib/schema';
 
-export function ProgressScreen() {
-  const [tab, setTab] = useState<'fuerza' | 'peso'>('fuerza');
+interface RoutineStat {
+  count: number;
+  last?: string;
+}
 
+export function ProgressScreen() {
+  const [tab, setTab] = useState<'entreno' | 'peso'>('entreno');
   return (
     <div className="space-y-4">
-      <PageHeader title="Progreso" />
+      <PageHeader title="Progreso" subtitle="Tu evolución, rutina por rutina." />
       <SegmentedControl
         className="w-full"
         value={tab}
         onChange={setTab}
         options={[
-          { value: 'fuerza', label: 'Fuerza' },
+          { value: 'entreno', label: 'Entrenamiento' },
           { value: 'peso', label: 'Peso corporal' },
         ]}
       />
-      {tab === 'fuerza' ? <ExerciseProgress /> : <BodyWeightProgress />}
+      {tab === 'entreno' ? <TrainingProgress /> : <BodyWeightProgress />}
     </div>
   );
 }
 
+// ── Entrenamiento: rutinas organizadas por día ───────────────────────────────
+function TrainingProgress() {
+  const { settings } = useSettings();
+  const navigate = useNavigate();
+  const [day, setDay] = useState<number | 'all'>('all');
+
+  const data = useLiveQuery(async () => {
+    const repos = getRepositories();
+    const routines = await repos.routines.list();
+    const sessions = await repos.workout.listSessions();
+    const byRoutine = new Map<string, RoutineStat>();
+    for (const s of sessions) {
+      if (!s.routineId) continue;
+      const cur = byRoutine.get(s.routineId) ?? { count: 0 };
+      cur.count += 1;
+      if (!cur.last) cur.last = s.localDate; // sessions vienen descendentes
+      byRoutine.set(s.routineId, cur);
+    }
+    return { routines, byRoutine };
+  }, []);
+
+  const routines = data?.routines ?? [];
+  const filtered =
+    day === 'all' ? routines : routines.filter((r) => r.daysOfWeek.includes(day as number));
+
+  if (data && routines.length === 0) {
+    return (
+      <EmptyState
+        icon={Dumbbell}
+        title="Sin rutinas todavía"
+        description="Crea una rutina y entrena para ver tu progreso aquí."
+        action={
+          <Link to="/entrenamiento" className="btn-primary">
+            Ir a entrenamiento
+          </Link>
+        }
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Filtro por día */}
+      <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+        <button
+          className={cn('chip shrink-0', day === 'all' && 'chip-active')}
+          onClick={() => setDay('all')}
+        >
+          Todas
+        </button>
+        {WEEKDAY_LABELS.map((label, idx) => (
+          <button
+            key={idx}
+            className={cn('chip shrink-0', day === idx && 'chip-active')}
+            onClick={() => setDay(idx)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {filtered.length === 0 ? (
+        <p className="py-8 text-center text-sm text-zinc-500">
+          No hay rutinas asignadas a este día. Asígnalas al editar la rutina.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {filtered.map((r) => {
+            const stat = data?.byRoutine.get(r.id);
+            return (
+              <li key={r.id}>
+                <button
+                  onClick={() => navigate(`/progreso/rutina/${r.id}`)}
+                  className="card flex w-full items-center gap-3 text-left transition hover:-translate-y-0.5"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-bold">{r.name}</p>
+                    <p className="mt-0.5 text-xs text-zinc-500">
+                      {r.exercises.length} ejercicios
+                      {r.daysOfWeek.length > 0
+                        ? ` · ${r.daysOfWeek.map((d) => WEEKDAY_LABELS[d]).join(' ')}`
+                        : ''}
+                    </p>
+                    <p className="mt-1 text-xs text-zinc-400">
+                      {stat
+                        ? `${stat.count} sesión${stat.count === 1 ? '' : 'es'} · última ${formatKeyRelative(stat.last ?? '', settings.timeZone)}`
+                        : 'Aún sin sesiones'}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-5 w-5 shrink-0 text-zinc-300" />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+// ── Peso corporal ────────────────────────────────────────────────────────────
 function BodyWeightProgress() {
   const { settings } = useSettings();
   const entries = useLiveQuery(() => getRepositories().bodyWeight.list(), [], [] as BodyWeightEntry[]);
@@ -41,7 +146,7 @@ function BodyWeightProgress() {
   const unit = settings.weightUnit;
 
   const stats = useMemo(() => bodyWeightStats(list), [list]);
-  const data = useMemo(
+  const dataPoints = useMemo(
     () =>
       withMovingAverage(list).map((p) => ({
         date: p.date,
@@ -54,7 +159,7 @@ function BodyWeightProgress() {
   if (list.length === 0) {
     return (
       <EmptyState
-        icon={Scale}
+        icon={Dumbbell}
         title="Sin registros de peso"
         description="Registra tu peso para ver tu tendencia."
         action={
@@ -73,7 +178,9 @@ function BodyWeightProgress() {
       <section className="card grid grid-cols-3 gap-2 text-center">
         <div>
           <p className="text-xs text-zinc-500">Actual</p>
-          <p className="font-bold">{stats.current !== undefined ? `${round(weightToDisplay(stats.current, unit), 1)} ${unit}` : '—'}</p>
+          <p className="font-bold">
+            {stats.current !== undefined ? `${round(weightToDisplay(stats.current, unit), 1)} ${unit}` : '—'}
+          </p>
         </div>
         <div>
           <p className="text-xs text-zinc-500">7 días</p>
@@ -85,10 +192,10 @@ function BodyWeightProgress() {
         </div>
       </section>
 
-      {data.length >= 2 && (
+      {dataPoints.length >= 2 && (
         <section className="card">
           <SimpleLineChart
-            data={data}
+            data={dataPoints}
             xKey="date"
             xFormatter={formatKeyShort}
             unit={` ${unit}`}

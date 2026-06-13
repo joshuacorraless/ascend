@@ -5,6 +5,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Field } from '@/components/ui/Field';
 import { MUSCLE_LABELS } from './constants';
 import { useToast } from '@/app/providers/toast';
+import { useBusy } from '@/app/hooks/useBusy';
 import { getRepositories } from '@/lib/repositories';
 import { newEntity, touch } from '@/lib/factories';
 import { WEEKDAY_LABELS } from '@/lib/datetime';
@@ -21,6 +22,7 @@ export function RoutineEditorModal({
   initial?: WorkoutRoutine;
 }) {
   const { success, error } = useToast();
+  const { busy, run } = useBusy();
   const exercises = useLiveQuery(() => getRepositories().exercises.list(), [], [] as Exercise[]);
   const exById = useMemo(() => new Map((exercises ?? []).map((e) => [e.id, e])), [exercises]);
 
@@ -96,8 +98,8 @@ export function RoutineEditorModal({
       title={initial ? 'Editar rutina' : 'Nueva rutina'}
       size="lg"
       footer={
-        <button className="btn-primary w-full" onClick={save}>
-          {initial ? 'Guardar rutina' : 'Crear rutina'}
+        <button className="btn-primary w-full" onClick={() => run(save)} disabled={busy}>
+          {busy ? 'Guardando…' : initial ? 'Guardar rutina' : 'Crear rutina'}
         </button>
       }
     >

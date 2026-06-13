@@ -8,9 +8,7 @@ import {
   Pill,
   Plus,
   Scale,
-  UtensilsCrossed,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import { useSettings } from '@/app/providers/settings';
 import { useToday } from '@/app/hooks/useToday';
 import { formatKeyHuman, formatKeyRelative } from '@/lib/datetime';
@@ -25,25 +23,26 @@ import { setSupplementCompleted } from '@/features/supplements/logActions';
 import type { SupplementStatus } from './useDashboard';
 
 function QuickAction({
-  icon: Icon,
   label,
+  detail,
   tone,
   onClick,
 }: {
-  icon: LucideIcon;
   label: string;
+  detail: string;
   tone: string;
   onClick: () => void;
 }) {
   return (
     <button
       onClick={onClick}
-      className="group flex min-h-[86px] flex-col items-center justify-center gap-2 rounded-[1.25rem] border border-white/70 bg-white/75 px-2 py-3 text-xs font-bold text-stone-700 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-white active:scale-95 dark:border-white/10 dark:bg-zinc-900/80 dark:text-zinc-200 dark:hover:bg-zinc-900"
+      className="group flex min-h-[86px] flex-col justify-between rounded-[1.25rem] border border-white/70 bg-white/75 p-3 text-left shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-white active:scale-95 dark:border-white/10 dark:bg-zinc-900/80 dark:hover:bg-zinc-900"
     >
-      <span className={cn('grid h-10 w-10 place-items-center rounded-2xl transition group-hover:scale-105', tone)}>
-        <Icon className="h-5 w-5" />
+      <span className={cn('h-1.5 w-9 rounded-full', tone)} />
+      <span>
+        <span className="block text-sm font-black text-stone-900 dark:text-zinc-50">{label}</span>
+        <span className="mt-0.5 block text-[11px] font-semibold text-zinc-400">{detail}</span>
       </span>
-      {label}
     </button>
   );
 }
@@ -139,10 +138,10 @@ export function DashboardScreen() {
       </header>
 
       <div className="grid grid-cols-4 gap-2">
-        <QuickAction icon={UtensilsCrossed} label="Comida" tone="bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-300" onClick={() => navigate('/alimentacion')} />
-        <QuickAction icon={Droplet} label="Agua" tone="bg-sky-50 text-sky-600 dark:bg-sky-950 dark:text-sky-300" onClick={() => setWaterOpen(true)} />
-        <QuickAction icon={Scale} label="Peso" tone="bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300" onClick={() => setWeightOpen(true)} />
-        <QuickAction icon={Dumbbell} label="Gym" tone="bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300" onClick={() => navigate('/entrenamiento')} />
+        <QuickAction label="Comida" detail="registrar" tone="bg-rose-500" onClick={() => navigate('/alimentacion')} />
+        <QuickAction label="Agua" detail="sumar" tone="bg-sky-500" onClick={() => setWaterOpen(true)} />
+        <QuickAction label="Peso" detail="medir" tone="bg-amber-500" onClick={() => setWeightOpen(true)} />
+        <QuickAction label="Gym" detail="entrenar" tone="bg-teal-500" onClick={() => navigate('/entrenamiento')} />
       </div>
 
       {data.goal ? (

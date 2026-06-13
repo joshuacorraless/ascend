@@ -5,6 +5,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Field } from '@/components/ui/Field';
 import { MacroChips } from './MacroChips';
 import { useToast } from '@/app/providers/toast';
+import { useBusy } from '@/app/hooks/useBusy';
 import { getRepositories } from '@/lib/repositories';
 import { newEntity, touch } from '@/lib/factories';
 import { recipeMacros, recipeMacrosPerServing } from '@/lib/domain';
@@ -23,6 +24,7 @@ export function RecipeFormModal({
   onSaved?: (recipe: Recipe) => void;
 }) {
   const { success, error } = useToast();
+  const { busy, run } = useBusy();
   const foods = useLiveQuery(() => getRepositories().foods.list(), [], [] as Food[]);
   const foodsById = useMemo(() => new Map((foods ?? []).map((f) => [f.id, f])), [foods]);
 
@@ -93,8 +95,8 @@ export function RecipeFormModal({
       title={initial ? 'Editar receta' : 'Nueva receta'}
       size="lg"
       footer={
-        <button className="btn-primary w-full" onClick={save}>
-          {initial ? 'Guardar receta' : 'Crear receta'}
+        <button className="btn-primary w-full" onClick={() => run(save)} disabled={busy}>
+          {busy ? 'Guardando…' : initial ? 'Guardar receta' : 'Crear receta'}
         </button>
       }
     >

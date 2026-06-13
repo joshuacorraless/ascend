@@ -17,6 +17,12 @@ const SessionScreen = lazy(() =>
 const ProgressScreen = lazy(() =>
   import('@/features/progress/ProgressScreen').then((m) => ({ default: m.ProgressScreen })),
 );
+const RoutineProgressScreen = lazy(() =>
+  import('@/features/progress/RoutineProgressScreen').then((m) => ({ default: m.RoutineProgressScreen })),
+);
+const ExerciseDetailScreen = lazy(() =>
+  import('@/features/progress/ExerciseDetailScreen').then((m) => ({ default: m.ExerciseDetailScreen })),
+);
 const WaterScreen = lazy(() =>
   import('@/features/water/WaterScreen').then((m) => ({ default: m.WaterScreen })),
 );
@@ -40,6 +46,8 @@ export const router = createBrowserRouter([
       { path: 'entrenamiento', element: <TrainingScreen /> },
       { path: 'entrenamiento/sesion/:sessionId', element: <SessionScreen /> },
       { path: 'progreso', element: <ProgressScreen /> },
+      { path: 'progreso/rutina/:routineId', element: <RoutineProgressScreen /> },
+      { path: 'progreso/ejercicio/:exerciseId', element: <ExerciseDetailScreen /> },
       { path: 'agua', element: <WaterScreen /> },
       { path: 'suplementos', element: <SupplementsScreen /> },
       { path: 'peso', element: <BodyWeightScreen /> },

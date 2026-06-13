@@ -177,3 +177,57 @@ export function sessionDurationSeconds(session: WorkoutSession): number {
   }
   return 0;
 }
+
+// ── Resumen por sesión de UN ejercicio (historial + comparación) ─────────────
+
+export interface ExerciseSessionSummary {
+  sessionId: string;
+  date: string; // localDate
+  /** Series de trabajo completadas en esa sesión. */
+  sets: SetLog[];
+  maxWeightKg: number;
+  totalReps: number;
+  workingSets: number;
+  /** Volumen = Σ peso × reps de series de trabajo completadas. */
+  volume: number;
+  estOneRm: number;
+}
+
+/**
+ * Agrupa las series de un ejercicio por sesión y devuelve un resumen por sesión,
+ * ordenado por fecha DESCENDENTE (la más reciente primero). Solo datos reales.
+ */
+export function exerciseSessionSummaries(
+  sets: SetLog[],
+  sessionDates: Map<string, string>,
+  formula: OneRmFormula = 'epley',
+): ExerciseSessionSummary[] {
+  const grouped = new Map<string, SetLog[]>();
+  for (const s of sets) {
+    if (!s.completed || !isWorkingSet(s)) continue;
+    const arr = grouped.get(s.sessionId);
+    if (arr) arr.push(s);
+    else grouped.set(s.sessionId, [s]);
+  }
+
+  const summaries: ExerciseSessionSummary[] = [];
+  for (const [sessionId, group] of grouped) {
+    if (group.length === 0) continue;
+    const ordered = [...group].sort((a, b) => a.setNumber - b.setNumber);
+    summaries.push({
+      sessionId,
+      date: sessionDates.get(sessionId) ?? '',
+      sets: ordered,
+      maxWeightKg: round(Math.max(...group.map((s) => s.weightKg)), 1),
+      totalReps: group.reduce((sum, s) => sum + s.reps, 0),
+      workingSets: group.length,
+      volume: round(
+        group.reduce((sum, s) => sum + s.weightKg * s.reps, 0),
+        1,
+      ),
+      estOneRm: round(Math.max(...group.map((s) => estimateOneRm(s.weightKg, s.reps, formula))), 1),
+    });
+  }
+
+  return summaries.sort((a, b) => b.date.localeCompare(a.date));
+}

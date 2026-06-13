@@ -8,6 +8,7 @@ import { nowIso } from '@/lib/ids';
 import { localTime } from '@/lib/datetime';
 import { formatWeight, weightToKg } from '@/lib/units';
 import { parseDecimalInput } from '@/lib/numberInput';
+import { useBusy } from '@/app/hooks/useBusy';
 import type { DateKey } from '@/lib/datetime';
 import type { BodyWeightEntry } from '@/lib/schema';
 
@@ -24,6 +25,7 @@ export function WeightQuickAddModal({
 }) {
   const { settings } = useSettings();
   const { success } = useToast();
+  const { busy, run } = useBusy();
   const [value, setValue] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -52,8 +54,8 @@ export function WeightQuickAddModal({
       onClose={onClose}
       title="Registrar peso"
       footer={
-        <button className="btn-primary w-full" onClick={save} disabled={!value}>
-          Guardar
+        <button className="btn-primary w-full" onClick={() => run(save)} disabled={!value || busy}>
+          {busy ? 'Guardando…' : 'Guardar'}
         </button>
       }
     >

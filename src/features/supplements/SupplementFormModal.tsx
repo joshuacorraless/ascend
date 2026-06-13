@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Field } from '@/components/ui/Field';
 import { SUPPLEMENT_TIME_LABELS, SUPPLEMENT_TIME_ORDER } from './constants';
+import { useBusy } from '@/app/hooks/useBusy';
 import { useToast } from '@/app/providers/toast';
 import { getRepositories } from '@/lib/repositories';
 import { newEntity, touch } from '@/lib/factories';
@@ -19,6 +20,7 @@ export function SupplementFormModal({
   initial?: Supplement;
 }) {
   const { success, error } = useToast();
+  const { busy, run } = useBusy();
   const [name, setName] = useState(initial?.name ?? '');
   const [dose, setDose] = useState(initial?.dose ?? '');
   const [time, setTime] = useState<SupplementTime>(initial?.time ?? 'mañana');
@@ -55,8 +57,8 @@ export function SupplementFormModal({
       onClose={onClose}
       title={initial ? 'Editar suplemento' : 'Nuevo suplemento'}
       footer={
-        <button className="btn-primary w-full" onClick={save}>
-          {initial ? 'Guardar' : 'Crear'}
+        <button className="btn-primary w-full" onClick={() => run(save)} disabled={busy}>
+          {busy ? 'Guardando…' : initial ? 'Guardar' : 'Crear'}
         </button>
       }
     >

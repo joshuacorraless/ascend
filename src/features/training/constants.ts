@@ -26,15 +26,15 @@ export const MUSCLE_LABELS: Record<MuscleGroup, string> = {
 export const MUSCLE_ORDER = Object.keys(MUSCLE_LABELS) as MuscleGroup[];
 
 export const EQUIPMENT_LABELS: Record<Equipment, string> = {
-  barra: 'Barra',
-  mancuerna: 'Mancuerna',
+  barra: 'Barra libre',
+  mancuerna: 'Mancuernas',
   maquina: 'Máquina',
   polea: 'Polea',
   peso_corporal: 'Peso corporal',
-  kettlebell: 'Kettlebell',
-  banda: 'Banda',
-  otro: 'Otro',
+  smith: 'Máquina Smith',
 };
+
+export const EQUIPMENT_ORDER = Object.keys(EQUIPMENT_LABELS) as Equipment[];
 
 export const EXERCISE_TYPE_LABELS: Record<ExerciseType, string> = {
   compuesto: 'Compuesto',

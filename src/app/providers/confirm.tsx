@@ -38,7 +38,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
         onClose={() => close(false)}
         title={opts?.title ?? ''}
         footer={
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <button className="btn-secondary flex-1" onClick={() => close(false)}>
               {opts?.cancelLabel ?? 'Cancelar'}
             </button>
@@ -51,7 +51,11 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           </div>
         }
       >
-        {opts?.message && <p className="text-sm text-zinc-600 dark:text-zinc-300">{opts.message}</p>}
+        {opts?.message && (
+          <p className="rounded-2xl bg-stone-100/80 p-3 text-sm font-medium text-zinc-600 dark:bg-zinc-800/70 dark:text-zinc-300">
+            {opts.message}
+          </p>
+        )}
       </Modal>
     </ConfirmContext.Provider>
   );

@@ -6,6 +6,8 @@ import { MacroChips } from './MacroChips';
 import { MEAL_TYPE_LABELS, MEAL_TYPE_ORDER } from './mealTypes';
 import { amountToPortions, describeAmount, previewFoodMacros } from './entryBuilders';
 import { useToast } from '@/app/providers/toast';
+import { useConfirm } from '@/app/providers/confirm';
+import { useBusy } from '@/app/hooks/useBusy';
 import { getRepositories } from '@/lib/repositories';
 import { touch } from '@/lib/factories';
 import { macrosOf, macrosOfEntry, scaleMacros } from '@/lib/domain';
@@ -23,6 +25,8 @@ export function EditEntryModal({
   entry: MealEntry;
 }) {
   const { success } = useToast();
+  const confirm = useConfirm();
+  const { busy, run } = useBusy();
   const food = useLiveQuery(
     () => (entry.foodId ? getRepositories().foods.get(entry.foodId) : Promise.resolve(undefined)),
     [entry.foodId],
@@ -82,6 +86,13 @@ export function EditEntryModal({
   };
 
   const remove = async () => {
+    const ok = await confirm({
+      title: 'Eliminar entrada',
+      message: `¿Quitar "${entry.name}" de tu registro del día?`,
+      danger: true,
+      confirmLabel: 'Eliminar',
+    });
+    if (!ok) return;
     await getRepositories().meals.remove(entry.id);
     success('Entrada eliminada.');
     onClose();
@@ -100,11 +111,11 @@ export function EditEntryModal({
       title={entry.name}
       footer={
         <div className="flex gap-2">
-          <button className="btn-danger" onClick={remove}>
+          <button className="btn-danger" onClick={() => run(remove)} disabled={busy}>
             Eliminar
           </button>
-          <button className="btn-primary flex-1" onClick={save} disabled={num <= 0}>
-            Guardar
+          <button className="btn-primary flex-1" onClick={() => run(save)} disabled={num <= 0 || busy}>
+            {busy ? 'Guardando…' : 'Guardar'}
           </button>
         </div>
       }

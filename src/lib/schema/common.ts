@@ -98,9 +98,7 @@ export const equipmentSchema = z.enum([
   'maquina',
   'polea',
   'peso_corporal',
-  'kettlebell',
-  'banda',
-  'otro',
+  'smith',
 ]);
 export type Equipment = z.infer<typeof equipmentSchema>;
 

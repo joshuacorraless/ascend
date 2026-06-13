@@ -9,6 +9,7 @@ import {
   TRACKING_TYPE_LABELS,
 } from './constants';
 import { useToast } from '@/app/providers/toast';
+import { useBusy } from '@/app/hooks/useBusy';
 import { getRepositories } from '@/lib/repositories';
 import { newEntity, touch } from '@/lib/factories';
 import { cn } from '@/lib/cn';
@@ -32,6 +33,7 @@ export function ExerciseFormModal({
   onSaved?: (exercise: Exercise) => void;
 }) {
   const { success, error } = useToast();
+  const { busy, run } = useBusy();
   const [name, setName] = useState(initial?.name ?? '');
   const [primaryMuscle, setPrimary] = useState<MuscleGroup>(initial?.primaryMuscle ?? 'pecho');
   const [secondary, setSecondary] = useState<MuscleGroup[]>(initial?.secondaryMuscles ?? []);
@@ -75,8 +77,8 @@ export function ExerciseFormModal({
       onClose={onClose}
       title={initial ? 'Editar ejercicio' : 'Nuevo ejercicio'}
       footer={
-        <button className="btn-primary w-full" onClick={save}>
-          {initial ? 'Guardar' : 'Crear ejercicio'}
+        <button className="btn-primary w-full" onClick={() => run(save)} disabled={busy}>
+          {busy ? 'Guardando…' : initial ? 'Guardar' : 'Crear ejercicio'}
         </button>
       }
     >
