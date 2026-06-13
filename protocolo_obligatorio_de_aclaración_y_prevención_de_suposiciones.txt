@@ -1,0 +1,175 @@
+## Protocolo obligatorio de aclaración y prevención de suposiciones
+
+Antes de implementar, revisa todos los requisitos y crea una sección titulada `Decisiones pendientes`.
+
+Clasifica cada posible duda en una de estas categorías:
+
+### A. Decisión bloqueante
+
+Una decisión es bloqueante cuando puede cambiar significativamente:
+
+* La arquitectura.
+* El modelo de datos.
+* La persistencia.
+* La seguridad.
+* El costo operativo.
+* La experiencia principal.
+* La compatibilidad con iPhone.
+* El alcance del MVP.
+
+Cuando exista una decisión bloqueante:
+
+1. Formula una pregunta concreta.
+2. Explica brevemente por qué afecta el proyecto.
+3. Presenta entre dos y cuatro alternativas.
+4. Recomienda una alternativa.
+5. No inventes la respuesta.
+6. No implementes de forma irreversible esa parte hasta recibir respuesta.
+
+Agrupa todas las preguntas bloqueantes en un único mensaje. No preguntes una por una.
+
+### B. Decisión no bloqueante
+
+Cuando la decisión sea visual, reversible o secundaria:
+
+1. Utiliza el valor predeterminado definido en este documento.
+2. Registra la decisión en `DECISIONS.md`.
+3. Continúa la implementación.
+4. No detengas el proyecto innecesariamente.
+
+### C. Funcionalidad futura
+
+Cuando una solicitud no sea necesaria para cumplir el MVP:
+
+1. No la implementes prematuramente.
+2. Regístrala en `ROADMAP.md`.
+3. Explica sus dependencias.
+4. No simules que está terminada.
+
+## Regla contra alucinaciones
+
+No inventes:
+
+* Requisitos no solicitados.
+* Datos nutricionales.
+* Capacidades de una API.
+* Compatibilidad de una PWA.
+* Funcionalidades de iOS.
+* Resultados de pruebas.
+* Configuraciones de despliegue.
+* Credenciales.
+* Claves de API.
+* Variables de entorno.
+* URLs.
+* Esquemas existentes.
+* Datos del usuario.
+* Reglas médicas.
+* Cálculos nutricionales que no estén definidos.
+* Comportamientos de Supabase, OpenAI u otro proveedor sin verificarlos en su documentación oficial.
+
+Cuando una capacidad dependa de una tecnología externa:
+
+1. Consulta la documentación oficial.
+2. Verifica la versión utilizada.
+3. Documenta cualquier limitación.
+4. Implementa degradación funcional.
+5. No hagas que la aplicación dependa completamente de esa capacidad.
+
+Por ejemplo, si las notificaciones de una PWA no son confiables en todos los dispositivos, la aplicación debe continuar funcionando mediante recordatorios internos.
+
+## Valores predeterminados autorizados
+
+Salvo que el usuario indique lo contrario, utiliza estas decisiones:
+
+* Aplicación para un solo usuario.
+* Sin autenticación en el MVP.
+* Idioma principal: español.
+* Zona horaria: `America/Costa_Rica`.
+* Peso corporal y pesos del gimnasio: kilogramos.
+* Alimentos: gramos, mililitros, unidades y porciones.
+* Agua almacenada internamente en mililitros.
+* Aplicación mobile-first.
+* Dispositivo principal: iPhone.
+* Navegador principal: Safari.
+* Compatible también con escritorio.
+* PWA instalable.
+* Modo claro y oscuro.
+* Almacenamiento local mediante IndexedDB.
+* Arquitectura preparada para Supabase.
+* Exportación e importación JSON.
+* Sin analytics.
+* Sin funcionalidades sociales.
+* Sin recomendaciones médicas.
+* Sin creación automática de dietas.
+* Sin almacenamiento permanente de fotografías nutricionales.
+* Sin guardado automático de resultados generados por IA.
+* Confirmación humana obligatoria para alimentos extraídos de imágenes.
+* Todos los registros históricos conservan una copia de los valores utilizados en ese momento.
+* Los alimentos, ejercicios y rutinas con historial se archivan en lugar de eliminarse físicamente.
+* Autoguardado de las sesiones de entrenamiento.
+* Una sola sesión de entrenamiento abierta a la vez.
+* Fórmula de Epley como estimación predeterminada de 1RM.
+* Series de calentamiento excluidas de récords personales.
+* Gráficos por ejercicio, sin comparar ejercicios diferentes.
+* Registro manual funcional aunque no exista una clave de IA.
+* Funciones principales disponibles sin conexión.
+* Integraciones de IA y sincronización requieren conexión.
+
+## Preguntas que debes hacer antes de iniciar únicamente si no están resueltas
+
+Pregunta en un solo mensaje:
+
+1. ¿Cuál será el nombre de la aplicación?
+2. ¿Cuál será el color principal o estilo visual deseado?
+3. ¿El MVP debe sincronizar datos entre iPhone y computadora, o puede comenzar únicamente con almacenamiento local?
+4. ¿Se implementará Supabase desde la primera versión o solo se dejará preparada la arquitectura?
+5. ¿Se desea configurar una API de inteligencia artificial desde el inicio?
+6. ¿Qué proveedor de IA se utilizará, si ya existe una preferencia?
+7. ¿Qué objetivos nutricionales iniciales se usarán como datos reales o deben dejarse vacíos?
+8. ¿Cuáles son las comidas predeterminadas que desea el usuario?
+9. ¿Se necesitan objetivos diferentes en días de entrenamiento y descanso?
+10. ¿Se deben implementar notificaciones del sistema en el MVP o únicamente recordatorios internos?
+11. ¿Se necesitan superseries en la primera versión?
+12. ¿Se necesitan medidas corporales o fotografías de progreso?
+13. ¿Existe ya un repositorio o debe crearse desde cero?
+14. ¿Existe una preferencia obligatoria entre Next.js y Vite?
+15. ¿Dónde se desplegará la aplicación?
+16. ¿La aplicación debe usar datos de demostración al abrirse por primera vez?
+
+Si el usuario no responde una pregunta no bloqueante, utiliza la recomendación incluida en el prompt y continúa.
+
+## Registro de decisiones
+
+Crea y mantén estos documentos:
+
+* `REQUIREMENTS.md`: requisitos funcionales y no funcionales.
+* `DECISIONS.md`: decisiones arquitectónicas y valores asumidos.
+* `ROADMAP.md`: funcionalidades futuras.
+* `DATA_MODEL.md`: entidades, relaciones y reglas históricas.
+* `LIMITATIONS.md`: limitaciones reales del MVP.
+* `SETUP.md`: instalación, variables de entorno y despliegue.
+
+Cada decisión importante debe incluir:
+
+* Decisión tomada.
+* Motivo.
+* Alternativas consideradas.
+* Consecuencias.
+* Posibilidad de cambiarla posteriormente.
+
+## Confirmación previa a la implementación
+
+Antes de comenzar a escribir código, presenta:
+
+1. Resumen de lo entendido.
+2. Alcance exacto del MVP.
+3. Funciones que quedan fuera.
+4. Decisiones bloqueantes pendientes.
+5. Arquitectura propuesta.
+6. Modelo de persistencia.
+7. Modelo de datos inicial.
+8. Fases de implementación.
+9. Riesgos técnicos.
+10. Criterios de aceptación.
+
+Después de recibir respuestas a las decisiones bloqueantes, inicia la implementación y no solicites aprobación en cada fase.

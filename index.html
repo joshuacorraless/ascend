@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="mask-icon" href="/favicon.svg" color="#4f46e5" />
+
+    <!-- viewport-fit=cover habilita las "safe areas" del iPhone (notch). -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>Ascend</title>
+    <meta
+      name="description"
+      content="Registro personal rápido de nutrición, hidratación, suplementos, peso y entrenamiento."
+    />
+
+    <!-- Color de la barra de estado según el tema. -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0b14" media="(prefers-color-scheme: dark)" />
+
+    <!-- iOS: instalación en pantalla de inicio y modo standalone. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Ascend" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png" />
+
+    <!-- Evita el "flash" de tema incorrecto: aplica la clase antes de pintar. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('ascend.theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var dark = stored ? stored === 'dark' : prefersDark;
+          if (dark) document.documentElement.classList.add('dark');
+        } catch (e) {
+          /* sin acceso a storage: usamos el tema del sistema vía CSS */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>Esta aplicación necesita JavaScript para funcionar.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

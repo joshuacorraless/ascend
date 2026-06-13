@@ -1,0 +1,93 @@
+import { useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { Modal } from '@/components/ui/Modal';
+import { DateNav } from '@/components/ui/DateNav';
+import { MacroChips } from './MacroChips';
+import { MEAL_TYPE_LABELS, MEAL_TYPE_ORDER } from './mealTypes';
+import { cloneEntryToDate } from './entryBuilders';
+import { useSettings } from '@/app/providers/settings';
+import { useToast } from '@/app/providers/toast';
+import { getRepositories } from '@/lib/repositories';
+import { totalsForEntries } from '@/lib/domain';
+import { addDaysToKey, type DateKey } from '@/lib/datetime';
+import type { MealEntry, MealType } from '@/lib/schema';
+
+export function CopyDayModal({
+  open,
+  onClose,
+  targetDate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  targetDate: DateKey;
+}) {
+  const { settings } = useSettings();
+  const { success, error } = useToast();
+  const [source, setSource] = useState<DateKey>(addDaysToKey(targetDate, -1));
+
+  const entries = useLiveQuery(
+    () => getRepositories().meals.listByDate(source),
+    [source],
+    [] as MealEntry[],
+  );
+  const list = entries ?? [];
+
+  const copyAll = async () => {
+    if (list.length === 0) {
+      error('Ese día no tiene comidas.');
+      return;
+    }
+    const repos = getRepositories();
+    await Promise.all(list.map((e) => repos.meals.put(cloneEntryToDate(e, targetDate))));
+    success(`Copiadas ${list.length} entradas.`);
+    onClose();
+  };
+
+  const copyMeal = async (meal: MealType) => {
+    const repos = getRepositories();
+    const subset = list.filter((e) => e.mealType === meal);
+    if (subset.length === 0) return;
+    await Promise.all(subset.map((e) => repos.meals.put(cloneEntryToDate(e, targetDate))));
+    success(`Copiado ${MEAL_TYPE_LABELS[meal]}.`);
+  };
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Copiar de otro día"
+      footer={
+        <button className="btn-primary w-full" onClick={copyAll} disabled={list.length === 0}>
+          Copiar todo el día
+        </button>
+      }
+    >
+      <div className="space-y-4">
+        <DateNav dateKey={source} onChange={setSource} timeZone={settings.timeZone} max={targetDate} />
+
+        {list.length === 0 ? (
+          <p className="py-6 text-center text-sm text-zinc-500">Sin comidas ese día.</p>
+        ) : (
+          <div className="space-y-2">
+            <MacroChips macros={totalsForEntries(list)} />
+            {MEAL_TYPE_ORDER.map((meal) => {
+              const subset = list.filter((e) => e.mealType === meal);
+              if (subset.length === 0) return null;
+              return (
+                <div key={meal} className="flex items-center justify-between rounded-xl bg-zinc-50 px-3 py-2 dark:bg-zinc-800/50">
+                  <div>
+                    <p className="text-sm font-medium">{MEAL_TYPE_LABELS[meal]}</p>
+                    <p className="text-xs text-zinc-400">{subset.map((e) => e.name).join(', ')}</p>
+                  </div>
+                  <button className="btn-ghost !min-h-0 !px-2 !py-1 text-xs text-brand-600" onClick={() => copyMeal(meal)}>
+                    Copiar
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+}
