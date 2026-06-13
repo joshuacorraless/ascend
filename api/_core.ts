@@ -1,5 +1,5 @@
 import type AnthropicNS from '@anthropic-ai/sdk';
-import { labelAnalysisSchema, type AnalyzeInput, type AnalyzeResult } from './_labelSchema';
+import { validateLabel, type AnalyzeInput, type AnalyzeResult } from './_labelSchema';
 
 // IMPORTANTE: esta función serverless es AUTOCONTENIDA. No importa nada de
 // `../src` porque Vercel no incluye esos archivos en el bundle de la función.
@@ -88,12 +88,9 @@ async function analyzeWithGoogle(input: AnalyzeInput): Promise<AnalyzeResult> {
       config: { responseMimeType: 'application/json' },
     });
     const json = extractJson(response.text ?? '');
-    if (json == null) return { ok: false, status: 502, error: 'La IA no devolvió un JSON válido.' };
-    const parsed = labelAnalysisSchema.safeParse(json);
-    if (!parsed.success) {
-      return { ok: false, status: 502, error: 'La respuesta de la IA no superó la validación.' };
-    }
-    return { ok: true, analysis: parsed.data };
+    const analysis = validateLabel(json);
+    if (!analysis) return { ok: false, status: 502, error: 'La IA no devolvió un JSON válido.' };
+    return { ok: true, analysis };
   } catch (e) {
     const msg = e instanceof Error ? e.message : '';
     if (/quota|rate|429|RESOURCE_EXHAUSTED/i.test(msg)) {
@@ -169,11 +166,11 @@ async function analyzeWithAnthropic(input: AnalyzeInput): Promise<AnalyzeResult>
     if (!toolBlock || toolBlock.type !== 'tool_use') {
       return { ok: false, status: 502, error: 'La IA no devolvió datos estructurados.' };
     }
-    const parsed = labelAnalysisSchema.safeParse(toolBlock.input);
-    if (!parsed.success) {
+    const analysis = validateLabel(toolBlock.input);
+    if (!analysis) {
       return { ok: false, status: 502, error: 'La respuesta de la IA no superó la validación.' };
     }
-    return { ok: true, analysis: parsed.data };
+    return { ok: true, analysis };
   } catch (e) {
     if (e instanceof Anthropic.AuthenticationError) {
       return { ok: false, status: 500, error: 'La clave de Anthropic del servidor es inválida.' };
