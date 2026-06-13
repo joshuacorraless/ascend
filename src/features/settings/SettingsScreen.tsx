@@ -30,7 +30,7 @@ const TIME_ZONES = [
 function Section({ title, children, icon }: { title: string; children: React.ReactNode; icon?: React.ReactNode }) {
   return (
     <section className="card space-y-4">
-      <h2 className="flex items-center gap-2 font-semibold">
+      <h2 className="flex items-center gap-2 font-black">
         {icon}
         {title}
       </h2>
@@ -144,7 +144,7 @@ export function SettingsScreen() {
 
   return (
     <div className="space-y-4 pb-4">
-      <PageHeader title="Ajustes" subtitle="Tu app, tus reglas." />
+      <PageHeader title="Ajustes" subtitle="Metas, unidades y datos." />
 
       <Section title="Objetivos diarios">
         {latestGoal ? (
@@ -161,8 +161,7 @@ export function SettingsScreen() {
           Editar objetivos
         </button>
         <p className="text-xs text-zinc-400">
-          Al cambiarlos se guarda la fecha de vigencia; las semanas anteriores conservan sus
-          objetivos.
+          Los cambios empiezan hoy. El historial conserva sus metas.
         </p>
       </Section>
 
@@ -246,8 +245,7 @@ export function SettingsScreen() {
 
       <Section title="Datos de demostración" icon={<FlaskConical className="h-4 w-4 text-brand-600" />}>
         <p className="text-sm text-zinc-500">
-          Carga un conjunto de ejemplo para explorar la app. Se marca como demo y puedes eliminarlo
-          sin afectar tus datos reales.
+          Agrega datos de prueba para ver gráficos y rutinas sin tocar tus registros.
         </p>
         {demoLoaded ? (
           <button className="btn-secondary w-full" onClick={onRemoveDemo}>
@@ -262,9 +260,8 @@ export function SettingsScreen() {
 
       <Section title="Privacidad" icon={<ShieldCheck className="h-4 w-4 text-emerald-600" />}>
         <p className="text-sm text-zinc-500">
-          Ascend es local-first: no hay cuentas, ni analíticas, ni rastreadores. La única vez que se
-          envía algo a internet es si usas el análisis de etiquetas por IA (opcional), enviando solo
-          esa imagen al proveedor configurado.
+          Ascend no usa cuentas, analíticas ni rastreadores. El escaneo de etiquetas es opcional y
+          solo envía la imagen que eliges analizar.
         </p>
       </Section>
 
@@ -295,9 +292,9 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-zinc-50 px-3 py-2 dark:bg-zinc-800/50">
+    <div className="rounded-2xl bg-stone-100/75 px-3 py-2 dark:bg-zinc-800/50">
       <p className="text-xs text-zinc-500">{label}</p>
-      <p className="font-semibold">{value}</p>
+      <p className="font-black">{value}</p>
     </div>
   );
 }

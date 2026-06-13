@@ -8,7 +8,7 @@ function MacroRow({ label, p, unit }: { label: string; p: MacroProgress; unit: s
   return (
     <div>
       <div className="mb-1 flex items-baseline justify-between text-sm">
-        <span className="font-medium text-zinc-700 dark:text-zinc-300">{label}</span>
+        <span className="font-bold text-stone-700 dark:text-zinc-300">{label}</span>
         <span className="tabular-nums text-zinc-500">
           <span className="font-semibold text-zinc-800 dark:text-zinc-100">{round(p.consumed)}</span>
           {' / '}
@@ -16,7 +16,7 @@ function MacroRow({ label, p, unit }: { label: string; p: MacroProgress; unit: s
           {p.over > 0 ? (
             <span className="ml-1 text-amber-600 dark:text-amber-400">(+{p.over})</span>
           ) : (
-            <span className="ml-1 text-zinc-400">· faltan {p.remaining}</span>
+            <span className="ml-1 text-zinc-400">quedan {p.remaining}</span>
           )}
         </span>
       </div>
@@ -32,22 +32,22 @@ export function MacrosOverview({ goal, consumed }: { goal: NutritionGoal; consum
   const fat = macroProgress(consumed.fat, goal.fat);
 
   return (
-    <div className="card">
+    <div className="card overflow-hidden">
       <div className="flex items-center gap-4">
         <ProgressRing percent={cal.percent} over={cal.over > 0} size={104} strokeWidth={11}>
           <div className="text-center leading-tight">
-            <p className="text-xl font-bold tabular-nums">{round(cal.consumed)}</p>
-            <p className="text-[10px] uppercase tracking-wide text-zinc-400">de {round(cal.target)}</p>
+            <p className="text-xl font-black tabular-nums">{round(cal.consumed)}</p>
+            <p className="text-[10px] font-bold uppercase text-zinc-400">de {round(cal.target)}</p>
           </div>
         </ProgressRing>
         <div className="flex-1">
-          <p className="text-sm text-zinc-500">Calorías</p>
+          <p className="text-sm font-bold text-zinc-500">Calorías</p>
           {cal.over > 0 ? (
-            <p className="text-lg font-bold text-amber-600 dark:text-amber-400">
+            <p className="text-lg font-black text-amber-600 dark:text-amber-400">
               {cal.over} kcal de más
             </p>
           ) : (
-            <p className="text-lg font-bold">
+            <p className="text-lg font-black">
               {cal.remaining} <span className="text-sm font-medium text-zinc-500">kcal restantes</span>
             </p>
           )}

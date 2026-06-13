@@ -23,7 +23,7 @@ export function SegmentedControl<T extends string>({
   return (
     <div
       className={cn(
-        'inline-flex rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800',
+        'inline-flex rounded-2xl border border-stone-200/80 bg-white/50 p-1 shadow-inner shadow-white/70 dark:border-white/10 dark:bg-zinc-900/80 dark:shadow-none',
         className,
       )}
       role="tablist"
@@ -37,11 +37,11 @@ export function SegmentedControl<T extends string>({
             aria-selected={active}
             onClick={() => onChange(opt.value)}
             className={cn(
-              'rounded-lg font-medium transition',
-              size === 'sm' ? 'px-3 py-1 text-xs' : 'px-3.5 py-1.5 text-sm',
+              'rounded-xl font-semibold transition',
+              size === 'sm' ? 'px-3 py-1 text-xs' : 'px-3.5 py-2 text-sm',
               active
-                ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-950 dark:text-white'
-                : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300',
+                ? 'bg-stone-950 text-white shadow-sm dark:bg-white dark:text-zinc-950'
+                : 'text-zinc-500 hover:bg-white/70 hover:text-stone-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-200',
             )}
           >
             {opt.label}

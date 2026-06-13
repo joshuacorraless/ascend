@@ -21,10 +21,10 @@ const ITEMS: NavItem[] = [
 export function BottomNav() {
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/90 pb-safe backdrop-blur-lg dark:border-zinc-800 dark:bg-zinc-950/90"
+      className="fixed inset-x-0 bottom-0 z-40 pb-safe"
       aria-label="Navegación principal"
     >
-      <ul className="mx-auto flex max-w-2xl items-stretch justify-around">
+      <ul className="mx-auto mb-3 flex max-w-[34rem] items-stretch justify-around gap-1 rounded-[1.35rem] border border-white/70 bg-white/88 p-1.5 shadow-[0_18px_60px_-30px_rgba(15,23,42,0.8)] ring-1 ring-black/[0.04] backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/88 dark:ring-white/[0.04]">
         {ITEMS.map(({ to, label, icon: Icon, end }) => (
           <li key={to} className="flex-1">
             <NavLink
@@ -32,10 +32,10 @@ export function BottomNav() {
               end={end}
               className={({ isActive }) =>
                 cn(
-                  'flex min-h-[56px] flex-col items-center justify-center gap-0.5 py-1.5 text-[11px] font-medium transition',
+                  'flex min-h-[52px] flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 text-[11px] font-semibold transition',
                   isActive
-                    ? 'text-brand-600 dark:text-brand-400'
-                    : 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200',
+                    ? 'bg-stone-950 text-white shadow-sm dark:bg-white dark:text-zinc-950'
+                    : 'text-zinc-500 hover:bg-stone-100 hover:text-stone-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100',
                 )
               }
             >

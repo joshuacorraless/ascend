@@ -56,7 +56,7 @@ export function ProgressRing({
           strokeDashoffset={offset}
           className={cn(
             'transition-[stroke-dashoffset] duration-500',
-            over ? 'stroke-amber-500' : 'stroke-brand-500',
+            over ? 'stroke-amber-500' : 'stroke-teal-500',
           )}
         />
       </svg>

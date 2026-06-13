@@ -1,5 +1,5 @@
 // Genera los íconos PNG de la PWA sin dependencias nativas.
-// Dibuja el emblema de Ascend (flecha ascendente) sobre un degradado de marca
+// Dibuja el emblema de Ascend sobre fondo oscuro.
 // y codifica PNG (RGBA, 8 bits) usando el módulo `zlib` integrado de Node.
 //
 // Uso: node scripts/generate-icons.mjs
@@ -11,19 +11,19 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = resolve(__dirname, '../public/icons');
 
-// ── Emblema (flecha ascendente) en coordenadas normalizadas 0..1 ──────────────
-const ARROW = [
-  [0.5, 0.2578],
-  [0.7266, 0.5859],
-  [0.5859, 0.5859],
-  [0.5859, 0.7422],
-  [0.4141, 0.7422],
-  [0.4141, 0.5859],
-  [0.2734, 0.5859],
+// ── Emblema "A" en coordenadas normalizadas 0..1 ─────────────────────────────
+const MARK = [
+  [0.5, 0.18],
+  [0.76, 0.78],
+  [0.62, 0.78],
+  [0.57, 0.66],
+  [0.43, 0.66],
+  [0.38, 0.78],
+  [0.25, 0.78],
 ];
 
-const TOP = [99, 102, 241]; // #6366f1
-const BOTTOM = [67, 57, 202]; // #4338ca
+const BG = [23, 23, 19]; // #171713
+const TEAL = [45, 212, 191]; // #2dd4bf
 const WHITE = [255, 255, 255];
 
 function lerp(a, b, t) {
@@ -44,20 +44,21 @@ function pointInPolygon(px, py, poly) {
   return inside;
 }
 
-function renderRGBA(size, arrowScale) {
+function renderRGBA(size, markScale) {
   const data = Buffer.alloc(size * size * 4);
-  // Escalamos el emblema alrededor del centro del lienzo.
-  const scaled = ARROW.map(([nx, ny]) => [
-    ((nx - 0.5) * arrowScale + 0.5) * size,
-    ((ny - 0.5) * arrowScale + 0.5) * size,
+  const scaled = MARK.map(([nx, ny]) => [
+    ((nx - 0.5) * markScale + 0.5) * size,
+    ((ny - 0.5) * markScale + 0.5) * size,
   ]);
 
   for (let y = 0; y < size; y++) {
-    const t = y / (size - 1);
-    const bg = [lerp(TOP[0], BOTTOM[0], t), lerp(TOP[1], BOTTOM[1], t), lerp(TOP[2], BOTTOM[2], t)];
     for (let x = 0; x < size; x++) {
       const idx = (y * size + x) * 4;
-      const color = pointInPolygon(x + 0.5, y + 0.5, scaled) ? WHITE : bg;
+      const nx = x / Math.max(1, size - 1);
+      const ny = y / Math.max(1, size - 1);
+      const inMark = pointInPolygon(x + 0.5, y + 0.5, scaled);
+      const inRibbon = ny > 0.16 && ny < 0.31 && nx > 0.15 && nx < 0.85;
+      const color = inMark ? WHITE : inRibbon ? TEAL : BG;
       data[idx] = color[0];
       data[idx + 1] = color[1];
       data[idx + 2] = color[2];

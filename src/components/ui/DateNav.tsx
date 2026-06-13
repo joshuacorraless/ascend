@@ -12,10 +12,10 @@ interface DateNavProps {
 export function DateNav({ dateKey, onChange, timeZone, max }: DateNavProps) {
   const atMax = max ? diffDaysKeys(dateKey, max) >= 0 : false;
   return (
-    <div className="flex items-center justify-between rounded-xl bg-white p-1 shadow-sm dark:bg-zinc-900">
+    <div className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/80 p-1 shadow-sm backdrop-blur dark:border-white/10 dark:bg-zinc-900/80">
       <button
         onClick={() => onChange(addDaysToKey(dateKey, -1))}
-        className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+        className="rounded-xl p-2 text-zinc-500 hover:bg-stone-100 dark:hover:bg-zinc-800"
         aria-label="Día anterior"
       >
         <ChevronLeft className="h-5 w-5" />
@@ -30,7 +30,7 @@ export function DateNav({ dateKey, onChange, timeZone, max }: DateNavProps) {
       <button
         onClick={() => !atMax && onChange(addDaysToKey(dateKey, 1))}
         disabled={atMax}
-        className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 disabled:opacity-30 dark:hover:bg-zinc-800"
+        className="rounded-xl p-2 text-zinc-500 hover:bg-stone-100 disabled:opacity-30 dark:hover:bg-zinc-800"
         aria-label="Día siguiente"
       >
         <ChevronRight className="h-5 w-5" />

@@ -13,8 +13,8 @@ function RouteFallback() {
 
 export function AppShell() {
   return (
-    <div className="min-h-dvh bg-zinc-50 dark:bg-zinc-950">
-      <main className="mx-auto w-full max-w-2xl px-4 pb-28 pt-safe">
+    <div className="app-canvas min-h-dvh">
+      <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-safe sm:px-6">
         <Suspense fallback={<RouteFallback />}>
           <Outlet />
         </Suspense>
