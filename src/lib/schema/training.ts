@@ -19,6 +19,8 @@ import {
 export const exerciseSchema = z.object({
   ...baseEntityShape,
   name: z.string().min(1, 'nombre requerido'),
+  /** Detalle breve mostrado bajo el nombre (variante, agarre, ángulo…). */
+  description: z.string().optional(),
   primaryMuscle: muscleGroupSchema,
   secondaryMuscles: z.array(muscleGroupSchema),
   type: exerciseTypeSchema,
@@ -38,6 +40,8 @@ export const routineExerciseSchema = z.object({
   repRangeMin: z.number().int().min(1).max(100),
   repRangeMax: z.number().int().min(1).max(100),
   restSeconds: z.number().int().min(0).max(3600).optional(),
+  /** Series llevadas al fallo: se registran las reps reales alcanzadas. */
+  toFailure: z.boolean().optional(),
   notes: z.string().optional(),
 });
 export type RoutineExercise = z.infer<typeof routineExerciseSchema>;

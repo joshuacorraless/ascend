@@ -6,6 +6,7 @@ import type {
   Exercise,
   ExerciseLog,
   SetLog,
+  SetType,
   WorkoutRoutine,
   WorkoutSession,
 } from '@/lib/schema';
@@ -15,7 +16,7 @@ function blankSet(
   exerciseLogId: string,
   exerciseId: string,
   setNumber: number,
-  defaults?: { weightKg?: number; reps?: number },
+  defaults?: { weightKg?: number; reps?: number; setType?: SetType },
 ): SetLog {
   return newEntity<SetLog>({
     sessionId,
@@ -24,7 +25,7 @@ function blankSet(
     setNumber,
     weightKg: defaults?.weightKg ?? 0,
     reps: defaults?.reps ?? 0,
-    setType: 'efectiva',
+    setType: defaults?.setType ?? 'efectiva',
     completed: false,
   });
 }
@@ -56,8 +57,11 @@ export async function startSessionFromRoutine(
       order: i,
     });
     await repos.workout.putExerciseLog(log);
+    const setType: SetType | undefined = rex.toFailure ? 'fallo' : undefined;
     for (let n = 1; n <= rex.targetSets; n++) {
-      await repos.workout.putSetLog(blankSet(session.id, log.id, rex.exerciseId, n));
+      await repos.workout.putSetLog(
+        blankSet(session.id, log.id, rex.exerciseId, n, setType ? { setType } : undefined),
+      );
     }
   }
   return session.id;
@@ -94,7 +98,10 @@ export async function addExerciseToSession(
   await repos.workout.putSetLog(blankSet(sessionId, log.id, exercise.id, 1));
 }
 
-/** Añade una serie copiando peso/reps de la última serie del ejercicio. */
+/**
+ * Añade una serie heredando el peso y el tipo de la última (las reps quedan en
+ * blanco para registrarlas de nuevo, útil al entrenar al fallo).
+ */
 export async function addSet(log: ExerciseLog, existing: SetLog[]): Promise<void> {
   const repos = getRepositories();
   const sets = existing.filter((s) => s.exerciseLogId === log.id).sort((a, b) => a.setNumber - b.setNumber);
@@ -102,7 +109,7 @@ export async function addSet(log: ExerciseLog, existing: SetLog[]): Promise<void
   await repos.workout.putSetLog(
     blankSet(log.sessionId, log.id, log.exerciseId, (last?.setNumber ?? 0) + 1, {
       weightKg: last?.weightKg ?? 0,
-      reps: last?.reps ?? 0,
+      ...(last ? { setType: last.setType } : {}),
     }),
   );
 }

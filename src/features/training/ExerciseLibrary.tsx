@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ActionButton } from '@/components/ui/ActionButton';
 import { ExerciseFormModal } from './ExerciseFormModal';
 import { EQUIPMENT_LABELS, MUSCLE_LABELS } from './constants';
 import { buildSeedExercises } from './exerciseSeed';
@@ -73,24 +74,19 @@ export function ExerciseLibrary() {
         <ul className="space-y-2.5">
           {filtered.map((e) => (
             <li key={e.id} className={cn('card !p-4', e.archived && 'opacity-60')}>
-              <p className="truncate font-medium text-ink">{e.name}</p>
-              <p className="text-xs text-ink-muted">
+              <p className="font-semibold leading-snug text-ink">{e.name}</p>
+              {e.description && (
+                <p className="mt-0.5 text-sm leading-snug text-ink-soft">{e.description}</p>
+              )}
+              <p className="mt-1 text-xs text-ink-muted">
                 {MUSCLE_LABELS[e.primaryMuscle]} · {EQUIPMENT_LABELS[e.equipment]}
                 {e.unilateral ? ' · unilateral' : ''}
               </p>
-              <div className="mt-3 flex justify-end gap-1 border-t border-line pt-2.5">
-                <button
-                  className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-muted transition hover:bg-canvas hover:text-ink"
-                  onClick={() => setEdit(e)}
-                >
-                  Editar
-                </button>
-                <button
-                  className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-muted transition hover:bg-canvas hover:text-ink"
-                  onClick={() => repos.exercises.setArchived(e.id, !e.archived)}
-                >
+              <div className="mt-3 flex justify-end gap-2 border-t border-line pt-3">
+                <ActionButton onClick={() => setEdit(e)}>Editar</ActionButton>
+                <ActionButton onClick={() => repos.exercises.setArchived(e.id, !e.archived)}>
                   {e.archived ? 'Restaurar' : 'Archivar'}
-                </button>
+                </ActionButton>
               </div>
             </li>
           ))}

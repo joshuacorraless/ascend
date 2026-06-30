@@ -41,7 +41,7 @@ export function RoutineEditorModal({
     if (!picker) return;
     setItems((prev) => [
       ...prev,
-      { exerciseId: picker, order: prev.length, targetSets: 3, repRangeMin: 8, repRangeMax: 12, restSeconds: 90 },
+      { exerciseId: picker, order: prev.length, targetSets: 3, repRangeMin: 8, repRangeMax: 12, restSeconds: 90, toFailure: false },
     ]);
     setPicker('');
   };
@@ -144,25 +144,43 @@ export function RoutineEditorModal({
               {items.map((it, i) => {
                 const ex = exById.get(it.exerciseId);
                 return (
-                  <li key={i} className="rounded-xl border border-line bg-canvas p-3.5">
-                    <div className="mb-2.5 flex items-center gap-1.5">
-                      <span className="flex-1 truncate font-medium text-ink">{ex?.name ?? 'Ejercicio'}</span>
-                      <button className="grid h-7 w-7 place-items-center rounded-lg text-ink-muted transition hover:text-ink disabled:opacity-25" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Subir">
+                  <li key={i} className="rounded-xl border border-line bg-inset p-3.5">
+                    <div className="mb-2.5 flex items-start gap-1.5">
+                      <span className="flex-1 font-semibold leading-snug text-ink">{ex?.name ?? 'Ejercicio'}</span>
+                      <button className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-muted transition hover:text-ink disabled:opacity-25" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Subir">
                         <Caret dir="up" />
                       </button>
-                      <button className="grid h-7 w-7 place-items-center rounded-lg text-ink-muted transition hover:text-ink disabled:opacity-25" onClick={() => move(i, 1)} disabled={i === items.length - 1} aria-label="Bajar">
+                      <button className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-muted transition hover:text-ink disabled:opacity-25" onClick={() => move(i, 1)} disabled={i === items.length - 1} aria-label="Bajar">
                         <Caret dir="down" />
                       </button>
-                      <button className="rounded-lg px-2 py-1 text-xs font-medium text-ink-muted transition hover:text-danger-600" onClick={() => remove(i)}>
+                      <button className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-ink-muted transition hover:text-danger-600" onClick={() => remove(i)}>
                         Quitar
                       </button>
                     </div>
-                    <div className="grid grid-cols-4 gap-2">
+
+                    <button
+                      onClick={() => update(i, { toFailure: !it.toFailure })}
+                      aria-pressed={!!it.toFailure}
+                      className={cn('chip mb-2.5', it.toFailure && 'chip-active')}
+                    >
+                      Al fallo
+                    </button>
+
+                    <div className={cn('grid gap-2', it.toFailure ? 'grid-cols-2' : 'grid-cols-4')}>
                       <NumField label="Series" value={it.targetSets} onChange={(v) => update(i, { targetSets: v })} />
-                      <NumField label="Rep min" value={it.repRangeMin} onChange={(v) => update(i, { repRangeMin: v })} />
-                      <NumField label="Rep max" value={it.repRangeMax} onChange={(v) => update(i, { repRangeMax: v })} />
+                      {!it.toFailure && (
+                        <>
+                          <NumField label="Rep min" value={it.repRangeMin} onChange={(v) => update(i, { repRangeMin: v })} />
+                          <NumField label="Rep max" value={it.repRangeMax} onChange={(v) => update(i, { repRangeMax: v })} />
+                        </>
+                      )}
                       <NumField label="Desc (s)" value={it.restSeconds ?? 0} onChange={(v) => update(i, { restSeconds: v })} />
                     </div>
+                    {it.toFailure && (
+                      <p className="mt-2 text-xs text-ink-muted">
+                        Registrarás las repeticiones reales alcanzadas en cada serie.
+                      </p>
+                    )}
                     {ex && <p className="mt-1.5 text-xs text-ink-muted">{MUSCLE_LABELS[ex.primaryMuscle]}</p>}
                   </li>
                 );

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ActionButton } from '@/components/ui/ActionButton';
 import { RoutineEditorModal } from './RoutineEditorModal';
 import { startSessionFromRoutine } from './sessionActions';
 import { useToday } from '@/app/hooks/useToday';
@@ -104,11 +105,11 @@ export function RoutineList() {
             <li key={r.id} className={cn('card space-y-3', r.archived && 'opacity-60')}>
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-2">
                     {r.active && !r.archived && (
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600" aria-hidden />
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" aria-hidden />
                     )}
-                    <p className="truncate font-semibold text-ink">{r.name}</p>
+                    <p className="font-semibold leading-snug text-ink">{r.name}</p>
                   </div>
                   <p className="nums mt-0.5 text-xs text-ink-muted">
                     {r.exercises.length} ejercicios
@@ -121,19 +122,20 @@ export function RoutineList() {
                   </button>
                 )}
               </div>
-              <div className="flex items-center gap-1 border-t border-line pt-2.5">
-                <ActionBtn label="Editar" onClick={() => setEdit(r)} />
-                <ActionBtn label="Duplicar" onClick={() => duplicate(r)} />
+              <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
+                <ActionButton onClick={() => setEdit(r)}>Editar</ActionButton>
+                <ActionButton onClick={() => duplicate(r)}>Duplicar</ActionButton>
                 {!r.archived && (
-                  <ActionBtn
-                    label={r.active ? 'Quitar activa' : 'Marcar activa'}
+                  <ActionButton
+                    aria-pressed={r.active}
                     onClick={() => repos.routines.put({ ...r, active: !r.active, updatedAt: new Date().toISOString() })}
-                  />
+                  >
+                    {r.active ? 'Activa' : 'Activar'}
+                  </ActionButton>
                 )}
-                <ActionBtn
-                  label={r.archived ? 'Restaurar' : 'Archivar'}
-                  onClick={() => repos.routines.setArchived(r.id, !r.archived)}
-                />
+                <ActionButton onClick={() => repos.routines.setArchived(r.id, !r.archived)}>
+                  {r.archived ? 'Restaurar' : 'Archivar'}
+                </ActionButton>
               </div>
             </li>
           ))}
@@ -143,16 +145,5 @@ export function RoutineList() {
       <RoutineEditorModal open={creating} onClose={() => setCreating(false)} />
       {edit && <RoutineEditorModal open onClose={() => setEdit(null)} initial={edit} />}
     </div>
-  );
-}
-
-function ActionBtn({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex-1 rounded-lg py-1.5 text-xs font-medium text-ink-muted transition hover:bg-canvas hover:text-ink"
-    >
-      {label}
-    </button>
   );
 }

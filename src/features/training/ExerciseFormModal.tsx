@@ -35,6 +35,7 @@ export function ExerciseFormModal({
   const { success, error } = useToast();
   const { busy, run } = useBusy();
   const [name, setName] = useState(initial?.name ?? '');
+  const [description, setDescription] = useState(initial?.description ?? '');
   const [primaryMuscle, setPrimary] = useState<MuscleGroup>(initial?.primaryMuscle ?? 'pecho');
   const [secondary, setSecondary] = useState<MuscleGroup[]>(initial?.secondaryMuscles ?? []);
   const [type, setType] = useState<ExerciseType>(initial?.type ?? 'compuesto');
@@ -54,6 +55,7 @@ export function ExerciseFormModal({
     const repos = getRepositories();
     const values = {
       name: name.trim(),
+      ...(description.trim() ? { description: description.trim() } : {}),
       primaryMuscle,
       secondaryMuscles: secondary.filter((m) => m !== primaryMuscle),
       type,
@@ -63,7 +65,12 @@ export function ExerciseFormModal({
       ...(notes.trim() ? { notes: notes.trim() } : {}),
     };
     const saved: Exercise = initial
-      ? touch({ ...initial, ...values, notes: notes.trim() || undefined })
+      ? touch({
+          ...initial,
+          ...values,
+          description: description.trim() || undefined,
+          notes: notes.trim() || undefined,
+        })
       : newEntity<Exercise>({ ...values, archived: false });
     await repos.exercises.put(saved);
     success(initial ? 'Ejercicio actualizado.' : 'Ejercicio creado.');
@@ -85,6 +92,19 @@ export function ExerciseFormModal({
       <div className="space-y-4">
         <Field label="Nombre" htmlFor="e-name">
           <input id="e-name" className="input" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+        </Field>
+        <Field
+          label="Descripción (opcional)"
+          htmlFor="e-desc"
+          hint="Se muestra bajo el nombre (variante, agarre, ángulo…)."
+        >
+          <input
+            id="e-desc"
+            className="input"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="p. ej. agarre cerrado, banco a 30°"
+          />
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Músculo principal" htmlFor="e-prim">

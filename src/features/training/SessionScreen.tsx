@@ -194,8 +194,20 @@ function ExerciseCard({
   const unit = log.weightUnit ?? settings.weightUnit;
   const ordered = [...sets].sort((a, b) => a.setNumber - b.setNumber);
   const prev = useLiveQuery(() => previousExerciseSets(log.exerciseId, log.sessionId), [log.exerciseId, log.sessionId], [] as SetLog[]);
+  const exercise = useLiveQuery(() => repos.exercises.get(log.exerciseId), [log.exerciseId]);
 
   const setUnit = (u: WeightUnit) => repos.workout.putExerciseLog(touch({ ...log, weightUnit: u }));
+
+  // Al fijar el peso de la primera serie, lo replica en las series vacías
+  // siguientes (sin pisar las ya editadas ni completadas). Siguen siendo editables.
+  const propagateWeight = async (weightKg: number) => {
+    if (weightKg <= 0) return;
+    await Promise.all(
+      ordered
+        .filter((s) => s.weightKg === 0 && !s.completed)
+        .map((s) => repos.workout.putSetLog(touch({ ...s, weightKg }))),
+    );
+  };
 
   const copyPrevious = async () => {
     const previous = prev ?? [];
@@ -215,8 +227,13 @@ function ExerciseCard({
 
   return (
     <section className="card">
-      <div className="mb-3 flex items-center gap-1.5">
-        <h3 className="flex-1 truncate font-semibold text-ink">{log.exerciseName}</h3>
+      <div className="mb-3 flex items-start gap-1.5">
+        <div className="min-w-0 flex-1">
+          <h3 className="font-semibold leading-snug text-ink">{log.exerciseName}</h3>
+          {exercise?.description && (
+            <p className="mt-0.5 text-xs text-ink-muted">{exercise.description}</p>
+          )}
+        </div>
         {!readOnly && (
           <>
             <UnitToggle unit={unit} onChange={setUnit} />
@@ -259,17 +276,22 @@ function ExerciseCard({
         </div>
       )}
 
-      <div className="grid grid-cols-[2rem_1fr_1fr_2.5rem_2rem] items-center gap-2 px-1 pb-1.5 text-2xs font-medium text-ink-faint">
+      <div className="grid grid-cols-[2rem_1fr_1fr_2rem] items-center gap-2 px-1 pb-1.5 text-2xs font-medium text-ink-faint">
         <span>#</span>
         <span>{unit}</span>
         <span>Reps</span>
-        <span>RPE</span>
         <span></span>
       </div>
 
       <div className="space-y-1.5">
-        {ordered.map((s) => (
-          <SetRow key={s.id} set={s} unit={unit} readOnly={readOnly} />
+        {ordered.map((s, idx) => (
+          <SetRow
+            key={s.id}
+            set={s}
+            unit={unit}
+            readOnly={readOnly}
+            onWeightCommit={idx === 0 ? propagateWeight : undefined}
+          />
         ))}
       </div>
 
@@ -286,32 +308,40 @@ function ExerciseCard({
 }
 
 // ── Fila de una serie (autoguardado) ─────────────────────────────────────────
-function SetRow({ set, unit, readOnly }: { set: SetLog; unit: WeightUnit; readOnly: boolean }) {
+function SetRow({
+  set,
+  unit,
+  readOnly,
+  onWeightCommit,
+}: {
+  set: SetLog;
+  unit: WeightUnit;
+  readOnly: boolean;
+  /** Notifica el peso confirmado (la primera serie lo replica en las demás). */
+  onWeightCommit?: (weightKg: number) => void;
+}) {
   const repos = getRepositories();
   const [weight, setWeight] = useState(() => (set.weightKg ? String(round(weightToDisplay(set.weightKg, unit), 2)) : ''));
   const [reps, setReps] = useState(() => (set.reps ? String(set.reps) : ''));
-  const [rpe, setRpe] = useState(() => (set.rpe != null ? String(set.rpe) : ''));
 
-  // Resincroniza si el set o la unidad cambian desde fuera (p. ej. "Copiar anterior" o cambiar kg/lb).
+  // Resincroniza si el set o la unidad cambian desde fuera (p. ej. "Copiar anterior",
+  // autocarga del peso, o cambiar kg/lb).
   useEffect(() => {
     setWeight(set.weightKg ? String(round(weightToDisplay(set.weightKg, unit), 2)) : '');
     setReps(set.reps ? String(set.reps) : '');
-    setRpe(set.rpe != null ? String(set.rpe) : '');
-  }, [set.weightKg, set.reps, set.rpe, unit]);
+  }, [set.weightKg, set.reps, unit]);
 
   const persist = (patch: Partial<SetLog>) => repos.workout.putSetLog(touch({ ...set, ...patch }));
 
   const persistWeight = () => {
     const v = parseDecimalInput(weight);
-    persist({ weightKg: Number.isFinite(v) && v > 0 ? weightToKg(v, unit) : 0 });
+    const kg = Number.isFinite(v) && v > 0 ? weightToKg(v, unit) : 0;
+    persist({ weightKg: kg });
+    if (kg > 0) onWeightCommit?.(kg);
   };
   const persistReps = () => {
     const v = Number(reps);
     persist({ reps: Number.isFinite(v) && v > 0 ? Math.round(v) : 0 });
-  };
-  const persistRpe = () => {
-    const v = parseDecimalInput(rpe);
-    persist({ rpe: rpe.trim() !== '' && Number.isFinite(v) ? Math.min(10, Math.max(0, v)) : undefined });
   };
 
   const cycleType = () => {
@@ -324,7 +354,7 @@ function SetRow({ set, unit, readOnly }: { set: SetLog; unit: WeightUnit; readOn
   const special = set.setType !== 'efectiva';
 
   return (
-    <div className={cn('grid grid-cols-[2rem_1fr_1fr_2.5rem_2rem] items-center gap-2', set.completed && 'opacity-70')}>
+    <div className={cn('grid grid-cols-[2rem_1fr_1fr_2rem] items-center gap-2', set.completed && 'opacity-70')}>
       <button
         onClick={cycleType}
         disabled={readOnly}
@@ -355,16 +385,6 @@ function SetRow({ set, unit, readOnly }: { set: SetLog; unit: WeightUnit; readOn
         onChange={(e) => setReps(e.target.value)}
         onBlur={persistReps}
         placeholder="0"
-      />
-      <input
-        type="text"
-        inputMode="decimal"
-        disabled={readOnly}
-        className="input nums !px-1 !py-1.5 text-center"
-        value={rpe}
-        onChange={(e) => setRpe(e.target.value)}
-        onBlur={persistRpe}
-        placeholder="–"
       />
       <button
         onClick={() => persist({ completed: !set.completed })}
