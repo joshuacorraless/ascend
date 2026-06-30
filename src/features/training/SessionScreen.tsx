@@ -373,10 +373,10 @@ function SetRow({ set, unit, readOnly }: { set: SetLog; unit: WeightUnit; readOn
         aria-pressed={set.completed}
         className={cn(
           'grid h-8 w-8 place-items-center rounded-lg border transition duration-200 ease-ascend',
-          set.completed ? 'border-ink bg-ink' : 'border-line',
+          set.completed ? 'border-brand-500 bg-brand-500' : 'border-line',
         )}
       >
-        {set.completed && <span className="h-2 w-2 rounded-full bg-paper" />}
+        {set.completed && <span className="h-2 w-2 rounded-full bg-canvas" />}
       </button>
     </div>
   );
@@ -427,7 +427,7 @@ function UnitToggle({ unit, onChange }: { unit: WeightUnit; onChange: (u: Weight
           aria-pressed={unit === u}
           className={cn(
             'px-2 py-1 transition',
-            unit === u ? 'bg-ink text-paper' : 'text-ink-muted hover:bg-canvas',
+            unit === u ? 'bg-ink text-canvas' : 'text-ink-muted hover:bg-inset',
           )}
         >
           {u}

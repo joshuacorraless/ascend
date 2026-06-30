@@ -1,7 +1,8 @@
 import {
+  Area,
   CartesianGrid,
+  ComposedChart,
   Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -26,7 +27,7 @@ interface SimpleLineChartProps {
   unit?: string;
 }
 
-const AXIS_TICK = { fontSize: 11, fill: '#8A857C' };
+const AXIS_TICK = { fontSize: 11, fill: '#B5B5B5' };
 
 export function SimpleLineChart({
   data,
@@ -36,10 +37,19 @@ export function SimpleLineChart({
   xFormatter,
   unit,
 }: SimpleLineChartProps) {
+  const primary = lines[0];
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
-        <CartesianGrid strokeDasharray="2 4" stroke="#1A1916" strokeOpacity={0.08} vertical={false} />
+      <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
+        <defs>
+          {primary && (
+            <linearGradient id={`area-${primary.key}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={primary.color} stopOpacity={0.35} />
+              <stop offset="100%" stopColor={primary.color} stopOpacity={0} />
+            </linearGradient>
+          )}
+        </defs>
+        <CartesianGrid strokeDasharray="2 5" stroke="#FFFFFF" strokeOpacity={0.08} vertical={false} />
         <XAxis
           dataKey={xKey}
           tick={AXIS_TICK}
@@ -57,17 +67,28 @@ export function SimpleLineChart({
           unit={unit}
         />
         <Tooltip
-          cursor={{ stroke: '#1A1916', strokeOpacity: 0.15 }}
+          cursor={{ stroke: '#FFFFFF', strokeOpacity: 0.2 }}
           contentStyle={{
             borderRadius: 12,
-            border: '1px solid #E8E5DD',
-            background: '#FFFFFF',
-            color: '#1A1916',
+            border: '1px solid #565656',
+            background: '#474747',
+            color: '#F5F5F5',
             fontSize: 12,
-            boxShadow: '0 18px 48px -24px rgba(26,25,22,0.30)',
+            boxShadow: '0 24px 60px -24px rgba(0,0,0,0.7)',
           }}
+          labelStyle={{ color: '#B5B5B5' }}
           labelFormatter={(v) => (xFormatter ? xFormatter(String(v)) : String(v))}
         />
+        {primary && (
+          <Area
+            type="monotone"
+            dataKey={primary.key}
+            stroke="none"
+            fill={`url(#area-${primary.key})`}
+            isAnimationActive={false}
+            connectNulls
+          />
+        )}
         {lines.map((l) => (
           <Line
             key={l.key}
@@ -75,14 +96,15 @@ export function SimpleLineChart({
             dataKey={l.key}
             name={l.name}
             stroke={l.color}
-            strokeWidth={l.width ?? 2}
+            strokeWidth={l.width ?? 2.5}
             strokeDasharray={l.dashed ? '5 4' : undefined}
             dot={false}
+            activeDot={{ r: 4, fill: l.color, stroke: '#3C3C3C', strokeWidth: 2 }}
             connectNulls
             isAnimationActive={false}
           />
         ))}
-      </LineChart>
+      </ComposedChart>
     </ResponsiveContainer>
   );
 }

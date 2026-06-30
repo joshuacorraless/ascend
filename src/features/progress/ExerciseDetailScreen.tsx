@@ -118,7 +118,7 @@ export function ExerciseDetailScreen() {
                 xKey="date"
                 xFormatter={formatKeyShort}
                 unit={metricDef.weighted ? ` ${unit}` : ''}
-                lines={[{ key: 'valor', name: metricDef.label, color: '#1A1916', width: 2.5 }]}
+                lines={[{ key: 'valor', name: metricDef.label, color: '#51CF66', width: 2.5 }]}
               />
             )}
             {metric === 'estimatedOneRm' && (

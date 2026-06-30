@@ -22,6 +22,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
     "@fontsource-variable/inter": "^5.2.8",
+    "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
     "@google/genai": "^2.8.0",
     "clsx": "^2.1.1",
     "dexie": "^4.0.10",

@@ -18,19 +18,22 @@ import type { SupplementStatus } from './useDashboard';
 function QuickAction({
   label,
   detail,
+  color,
   onClick,
 }: {
   label: string;
   detail: string;
+  color: string;
   onClick: () => void;
 }) {
   return (
     <button
       onClick={onClick}
-      className="group flex min-h-[84px] flex-col justify-between rounded-2xl border border-line bg-paper p-3.5 text-left shadow-card transition duration-200 ease-ascend hover:bg-canvas active:scale-[0.97]"
+      className="group flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border border-line bg-paper p-3 text-center shadow-card transition duration-200 ease-ascend hover:bg-inset active:scale-[0.96]"
     >
+      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} aria-hidden />
+      <span className="text-sm font-bold text-ink">{label}</span>
       <span className="eyebrow">{detail}</span>
-      <span className="text-sm font-semibold text-ink">{label}</span>
     </button>
   );
 }
@@ -78,11 +81,11 @@ function SupplementItem({ status, dateKey }: { status: SupplementStatus; dateKey
       <span
         className={cn(
           'grid h-6 w-6 shrink-0 place-items-center rounded-full border transition duration-200 ease-ascend',
-          completed ? 'border-ink bg-ink' : 'border-line',
+          completed ? 'border-brand-500 bg-brand-500' : 'border-line',
         )}
         aria-hidden
       >
-        {completed && <span className="h-2 w-2 rounded-full bg-paper" />}
+        {completed && <span className="h-2 w-2 rounded-full bg-canvas" />}
       </span>
       <span className="flex-1">
         <span className={cn('text-sm font-medium', completed ? 'text-ink-faint line-through' : 'text-ink')}>
@@ -114,14 +117,16 @@ export function DashboardScreen() {
     <div className="space-y-5 pb-2">
       <header className="pt-6">
         <p className="eyebrow">{formatKeyRelative(dateKey, settings.timeZone)}</p>
-        <h1 className="mt-1.5 text-3xl font-semibold capitalize text-ink">{formatKeyHuman(dateKey)}</h1>
+        <h1 className="mt-1.5 text-3xl font-extrabold lowercase text-ink first-letter:uppercase">
+          {formatKeyHuman(dateKey)}
+        </h1>
       </header>
 
       <div className="grid grid-cols-4 gap-2.5">
-        <QuickAction label="Comida" detail="registrar" onClick={() => navigate('/alimentacion')} />
-        <QuickAction label="Agua" detail="sumar" onClick={() => setWaterOpen(true)} />
-        <QuickAction label="Peso" detail="medir" onClick={() => setWeightOpen(true)} />
-        <QuickAction label="Gym" detail="entrenar" onClick={() => navigate('/entrenamiento')} />
+        <QuickAction label="Comida" detail="registrar" color="#51CF66" onClick={() => navigate('/alimentacion')} />
+        <QuickAction label="Agua" detail="sumar" color="#4DABF7" onClick={() => setWaterOpen(true)} />
+        <QuickAction label="Peso" detail="medir" color="#FFD43B" onClick={() => setWeightOpen(true)} />
+        <QuickAction label="Gym" detail="entrenar" color="#FF8787" onClick={() => navigate('/entrenamiento')} />
       </div>
 
       {data.goal ? (
@@ -155,7 +160,7 @@ export function DashboardScreen() {
           </p>
           <span className="nums eyebrow">{Math.min(100, Math.round(waterPct))}%</span>
         </div>
-        <ProgressBar percent={waterPct} className="mt-3" />
+        <ProgressBar percent={waterPct} color="#4DABF7" className="mt-3" />
       </Card>
 
       <Card

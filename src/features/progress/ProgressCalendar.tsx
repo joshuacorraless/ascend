@@ -74,11 +74,11 @@ function useHabitsCalendar(monthAnchor: DateKey, timeZone: string): DayStatusMap
   }, [monthAnchor, timeZone]);
 }
 
-// Mapa de hábitos en rampa de tinta (sin color): lleno = todo cumplido.
+// Mapa de hábitos en rampa de verde: lleno = todo cumplido.
 const LEVEL_CELL: Record<HabitLevel, string> = {
-  complete: 'bg-ink text-paper',
-  partial: 'bg-ink/30 text-ink',
-  none: 'bg-line text-ink-muted',
+  complete: 'bg-brand-500 text-[#10271b]',
+  partial: 'bg-brand-500/30 text-ink',
+  none: 'bg-inset text-ink-muted',
   empty: 'text-ink-faint',
 };
 
@@ -162,9 +162,9 @@ export function ProgressCalendar() {
 
         {/* Leyenda */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-2xs text-ink-muted">
-          <Legend className="bg-ink" label="Todo cumplido" />
-          <Legend className="bg-ink/30" label="Parcial" />
-          <Legend className="bg-line" label="Sin cumplir" />
+          <Legend className="bg-brand-500" label="Todo cumplido" />
+          <Legend className="bg-brand-500/30" label="Parcial" />
+          <Legend className="bg-inset" label="Sin cumplir" />
         </div>
       </section>
 
@@ -202,11 +202,11 @@ function Criterion({ ok, label }: { ok: boolean; label: string }) {
       <span
         className={cn(
           'grid h-5 w-5 place-items-center rounded-full border transition',
-          ok ? 'border-ink bg-ink' : 'border-line',
+          ok ? 'border-brand-500 bg-brand-500' : 'border-line',
         )}
         aria-hidden
       >
-        {ok && <span className="h-1.5 w-1.5 rounded-full bg-paper" />}
+        {ok && <span className="h-1.5 w-1.5 rounded-full bg-canvas" />}
       </span>
       <span className={cn(ok ? 'font-medium text-ink' : 'text-ink-muted')}>{label}</span>
     </div>

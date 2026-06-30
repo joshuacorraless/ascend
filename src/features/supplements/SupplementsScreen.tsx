@@ -78,11 +78,11 @@ export function SupplementsScreen() {
                   <span
                     className={cn(
                       'grid h-6 w-6 shrink-0 place-items-center rounded-full border transition duration-200 ease-ascend',
-                      completed ? 'border-ink bg-ink' : 'border-line',
+                      completed ? 'border-brand-500 bg-brand-500' : 'border-line',
                     )}
                     aria-hidden
                   >
-                    {completed && <span className="h-2 w-2 rounded-full bg-paper" />}
+                    {completed && <span className="h-2 w-2 rounded-full bg-canvas" />}
                   </span>
                   <span className="flex-1">
                     <span className={cn('text-sm font-medium', completed ? 'text-ink-faint line-through' : 'text-ink')}>
@@ -111,14 +111,14 @@ export function SupplementsScreen() {
                 <div key={d.date} className="flex flex-1 flex-col items-center gap-2">
                   <div
                     className={cn(
-                      'nums grid h-9 w-9 place-items-center rounded-full text-xs font-semibold',
+                      'nums grid h-9 w-9 place-items-center rounded-full text-xs font-bold',
                       d.scheduled === 0
                         ? 'border border-line text-ink-faint'
                         : ratio >= 1
-                          ? 'bg-ink text-paper'
+                          ? 'bg-brand-500 text-[#10271b]'
                           : ratio > 0
-                            ? 'bg-ink/25 text-ink'
-                            : 'bg-line text-ink-muted',
+                            ? 'bg-brand-500/30 text-ink'
+                            : 'bg-inset text-ink-muted',
                     )}
                   >
                     {d.scheduled > 0 ? `${d.completed}/${d.scheduled}` : '–'}

@@ -40,7 +40,7 @@ export function SegmentedControl<T extends string>({
               'rounded-lg font-medium transition duration-200 ease-ascend',
               stretch && 'flex-1',
               size === 'sm' ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm',
-              active ? 'bg-ink text-paper shadow-sm' : 'text-ink-muted hover:text-ink',
+              active ? 'bg-ink text-canvas shadow-sm' : 'text-ink-muted hover:text-ink',
             )}
           >
             {opt.label}

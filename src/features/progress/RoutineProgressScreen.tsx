@@ -79,7 +79,7 @@ export function RoutineProgressScreen() {
             xKey="date"
             xFormatter={formatKeyShort}
             unit={` ${unit}`}
-            lines={[{ key: 'volumen', name: 'Volumen', color: '#1A1916', width: 2.5 }]}
+            lines={[{ key: 'volumen', name: 'Volumen', color: '#51CF66', width: 2.5 }]}
           />
         </section>
       )}

@@ -1,6 +1,6 @@
 // Genera los íconos PNG de la PWA sin dependencias nativas.
-// Dibuja el emblema de Ascend: barras blancas en ascenso sobre un degradado
-// índigo→violeta, y codifica PNG (RGBA, 8 bits) usando el módulo `zlib` de Node.
+// Dibuja el emblema de Ascend: barras en ascenso (rojo→amarillo→azul→verde)
+// sobre el gris de la app, y codifica PNG (RGBA, 8 bits) con el módulo `zlib`.
 //
 // Uso: node scripts/generate-icons.mjs
 import { deflateSync } from 'node:zlib';
@@ -14,21 +14,15 @@ const OUT_DIR = resolve(__dirname, '../public/icons');
 // ── Barras en ascenso, en coordenadas normalizadas 0..1 ──────────────────────
 // (mismas proporciones que el SVG de la marca: 4 barras subiendo a la derecha)
 const BARS = [
-  { x: 0.15, top: 0.5625 },
-  { x: 0.34167, top: 0.41667 },
-  { x: 0.53333, top: 0.27083 },
-  { x: 0.725, top: 0.125 },
+  { x: 0.15, top: 0.5625, color: [255, 135, 135] }, // rojo
+  { x: 0.34167, top: 0.41667, color: [255, 212, 59] }, // amarillo
+  { x: 0.53333, top: 0.27083, color: [77, 171, 247] }, // azul
+  { x: 0.725, top: 0.125, color: [81, 207, 102] }, // verde
 ];
 const BAR_W = 0.125;
 const BASE = 0.8125;
 
-const BG_A = [79, 70, 229]; // #4f46e5 índigo
-const BG_B = [139, 92, 246]; // #8b5cf6 violeta
-const WHITE = [255, 255, 255];
-
-function lerp(a, b, t) {
-  return Math.round(a + (b - a) * t);
-}
+const BG = [60, 60, 60]; // #3c3c3c gris de la app
 
 function renderRGBA(size, markScale) {
   const data = Buffer.alloc(size * size * 4);
@@ -38,6 +32,7 @@ function renderRGBA(size, markScale) {
     x1: s(b.x + BAR_W),
     y0: s(b.top),
     y1: s(BASE),
+    color: b.color,
   }));
 
   for (let y = 0; y < size; y++) {
@@ -45,9 +40,8 @@ function renderRGBA(size, markScale) {
       const idx = (y * size + x) * 4;
       const nx = x / Math.max(1, size - 1);
       const ny = y / Math.max(1, size - 1);
-      const inBar = bars.some((b) => nx >= b.x0 && nx <= b.x1 && ny >= b.y0 && ny <= b.y1);
-      const t = (nx + ny) / 2; // degradado diagonal índigo→violeta
-      const color = inBar ? WHITE : [lerp(BG_A[0], BG_B[0], t), lerp(BG_A[1], BG_B[1], t), lerp(BG_A[2], BG_B[2], t)];
+      const bar = bars.find((b) => nx >= b.x0 && nx <= b.x1 && ny >= b.y0 && ny <= b.y1);
+      const color = bar ? bar.color : BG;
       data[idx] = color[0];
       data[idx + 1] = color[1];
       data[idx + 2] = color[2];

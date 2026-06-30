@@ -109,7 +109,7 @@ export function BodyWeightScreen() {
                 <h2 className="text-base font-semibold text-ink">Evolución</h2>
                 <div className="flex items-center gap-3 text-xs text-ink-muted">
                   <span className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-ink" /> Peso
+                    <span className="h-2 w-2 rounded-full bg-macro-fat" /> Peso
                   </span>
                   <span className="flex items-center gap-1.5">
                     <span className="h-px w-3 bg-ink-faint" /> Media 7d
@@ -122,8 +122,8 @@ export function BodyWeightScreen() {
                 xFormatter={formatKeyShort}
                 unit={` ${unit}`}
                 lines={[
-                  { key: 'peso', name: 'Peso', color: '#1A1916' },
-                  { key: 'media', name: 'Media 7d', color: '#B7B2A8', dashed: true },
+                  { key: 'peso', name: 'Peso', color: '#4DABF7' },
+                  { key: 'media', name: 'Media 7d', color: '#8C8C8C', dashed: true },
                 ]}
               />
             </section>

@@ -202,8 +202,8 @@ function BodyWeightProgress() {
             xFormatter={formatKeyShort}
             unit={` ${unit}`}
             lines={[
-              { key: 'peso', name: 'Peso', color: '#1A1916' },
-              { key: 'media', name: 'Media 7d', color: '#B7B2A8', dashed: true },
+              { key: 'peso', name: 'Peso', color: '#4DABF7' },
+              { key: 'media', name: 'Media 7d', color: '#8C8C8C', dashed: true },
             ]}
           />
         </section>

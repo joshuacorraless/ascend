@@ -58,7 +58,7 @@ export function WaterScreen() {
       <PageHeader eyebrow="Hidratación" title="Agua" />
 
       <section className="card flex flex-col items-center text-center">
-        <ProgressRing percent={percent} size={148} strokeWidth={12}>
+        <ProgressRing percent={percent} size={148} strokeWidth={12} color="#4DABF7">
           <div className="leading-none">
             <p className="nums text-2xl font-semibold text-ink">{formatVolume(total, settings.volumeUnit)}</p>
             <p className="eyebrow mt-1.5">
@@ -106,7 +106,7 @@ export function WaterScreen() {
               <div key={d.date} className="flex flex-1 flex-col items-center gap-2">
                 <div className="flex w-full flex-1 items-end">
                   <div
-                    className={cn('w-full rounded-t-md transition-all duration-500', met ? 'bg-ink' : 'bg-ink/20')}
+                    className={cn('w-full rounded-t-md transition-all duration-500', met ? 'bg-macro-fat' : 'bg-white/12')}
                     style={{ height: `${h}%` }}
                     title={formatVolume(d.ml, settings.volumeUnit)}
                   />

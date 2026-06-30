@@ -96,8 +96,8 @@ export default defineConfig(({ mode }) => {
         scope: '/',
         display: 'standalone',
         orientation: 'portrait',
-        theme_color: '#4f46e5',
-        background_color: '#0b0b14',
+        theme_color: '#3C3C3C',
+        background_color: '#3C3C3C',
         categories: ['health', 'fitness', 'lifestyle'],
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },

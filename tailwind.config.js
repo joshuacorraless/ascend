@@ -1,54 +1,62 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  // Tema único (claro). El modo oscuro se eliminó a propósito para pulir una
-  // sola colorimetría: "tinta sobre lino" con índigo como acento de intención.
+  // Tema único: gris carbón con datos en colores vivos (rojo/amarillo/azul/verde).
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        // — Superficies —
-        canvas: '#F7F6F2', // lino cálido (fondo de la app)
-        paper: '#FFFFFF', // tarjetas / superficies elevadas
-        line: '#E8E5DD', // hairline cálida (bordes, separadores)
+        // — Superficies (gris carbón) —
+        canvas: '#3C3C3C', // fondo de la app
+        paper: '#474747', // tarjetas / superficies elevadas
+        inset: '#343434', // rieles / cajas hundidas
+        line: '#565656', // bordes / separadores
 
-        // — Tinta (texto y trazos): neutro cálido casi negro —
+        // — Texto: blanco + gris #b5b5b5 —
         ink: {
-          DEFAULT: '#1A1916', // texto principal
-          soft: '#57534E', // texto secundario
-          muted: '#8A857C', // texto terciario / metadatos
-          faint: '#B7B2A8', // deshabilitado / marca de agua
+          DEFAULT: '#F5F5F5', // principal (blanco)
+          soft: '#D2D2D2',
+          muted: '#B5B5B5', // secundario (gris pedido)
+          faint: '#8C8C8C', // terciario / metadatos
         },
 
-        // — Acento único: índigo. Solo intención interactiva, nunca decorativo. —
+        // — Acento de marca / interacción: verde vivo (reemplaza al índigo). —
         brand: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
+          50: '#e9fbf0',
+          100: '#cdf5dd',
+          200: '#a3ecc1',
+          300: '#72e0a0',
+          400: '#4dd488',
+          500: '#37c97e',
+          600: '#46d488', // texto de enlaces / fondo de botón (brillante sobre gris)
+          700: '#33c178',
+          800: '#28a566',
+          900: '#218a55',
+          950: '#0f4d2e',
         },
 
-        // — Color funcional (solo acciones destructivas / exceso). No decorativo. —
+        // — Paleta de datos viva (macros, gráficos, categorías) —
+        macro: {
+          cal: '#51CF66', // verde
+          protein: '#FF8787', // rojo
+          carbs: '#FFD43B', // amarillo
+          fat: '#4DABF7', // azul
+        },
+
+        // — Color funcional (destructivo) —
         danger: {
-          50: '#fdf3f2',
-          200: '#f3c7c1',
-          500: '#c0473a',
-          600: '#a8392d',
-          700: '#8a2e24',
+          50: '#fff5f5',
+          200: '#ffc9c9',
+          400: '#ff8787',
+          500: '#fa5252',
+          600: '#f03e3e',
+          700: '#e03131',
         },
       },
 
       fontFamily: {
-        // Inter Variable autohospedada (offline). Numerales tabulares de serie.
+        // Plus Jakarta Sans Variable autohospedada (offline). Cálida y geométrica.
         sans: [
-          '"Inter Variable"',
-          'Inter',
+          '"Plus Jakarta Sans Variable"',
           'system-ui',
           '-apple-system',
           'Segoe UI',
@@ -57,29 +65,27 @@ export default {
       },
 
       fontSize: {
-        // Escala editorial medida (con interlineado y tracking afinados).
-        '2xs': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.04em' }],
+        '2xs': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.06em' }],
         xs: ['0.75rem', { lineHeight: '1.1rem' }],
         sm: ['0.875rem', { lineHeight: '1.35rem' }],
         base: ['1rem', { lineHeight: '1.55rem' }],
         lg: ['1.125rem', { lineHeight: '1.6rem', letterSpacing: '-0.01em' }],
-        xl: ['1.375rem', { lineHeight: '1.7rem', letterSpacing: '-0.018em' }],
-        '2xl': ['1.75rem', { lineHeight: '2rem', letterSpacing: '-0.022em' }],
-        '3xl': ['2.25rem', { lineHeight: '2.4rem', letterSpacing: '-0.026em' }],
-        '4xl': ['3rem', { lineHeight: '3.1rem', letterSpacing: '-0.03em' }],
+        xl: ['1.375rem', { lineHeight: '1.7rem', letterSpacing: '-0.015em' }],
+        '2xl': ['1.75rem', { lineHeight: '2rem', letterSpacing: '-0.02em' }],
+        '3xl': ['2.125rem', { lineHeight: '2.35rem', letterSpacing: '-0.022em' }],
+        '4xl': ['2.75rem', { lineHeight: '2.9rem', letterSpacing: '-0.025em' }],
       },
 
       borderRadius: {
-        xl: '0.875rem', // 14px — inputs, botones
-        '2xl': '1.125rem', // 18px — tarjetas
-        '3xl': '1.5rem', // 24px — hojas / modales
+        xl: '0.875rem',
+        '2xl': '1.125rem',
+        '3xl': '1.5rem',
       },
 
       boxShadow: {
-        // Elevación por tinte, no por nubes difusas. Sobria.
-        card: '0 1px 2px 0 rgb(26 25 22 / 0.04), 0 1px 3px -1px rgb(26 25 22 / 0.05)',
-        lift: '0 18px 48px -24px rgb(26 25 22 / 0.30)',
-        sheet: '0 -10px 40px -24px rgb(26 25 22 / 0.28)',
+        // Elevación visible sobre fondo oscuro.
+        card: '0 1px 0 0 rgb(255 255 255 / 0.03) inset, 0 10px 24px -16px rgb(0 0 0 / 0.55)',
+        lift: '0 24px 60px -24px rgb(0 0 0 / 0.7)',
       },
 
       letterSpacing: {
@@ -92,20 +98,16 @@ export default {
       },
 
       transitionTimingFunction: {
-        // Curva única para toda la app: salida suave, entrada decidida.
         ascend: 'cubic-bezier(0.22, 1, 0.36, 1)',
       },
 
       keyframes: {
-        'fade-in': {
-          from: { opacity: '0' },
-          to: { opacity: '1' },
-        },
+        'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },
         'sheet-up': {
           from: { transform: 'translateY(8%)', opacity: '0' },
           to: { transform: 'translateY(0)', opacity: '1' },
         },
-        'rise': {
+        rise: {
           from: { transform: 'translateY(6px)', opacity: '0' },
           to: { transform: 'translateY(0)', opacity: '1' },
         },

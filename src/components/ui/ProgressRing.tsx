@@ -6,8 +6,10 @@ interface ProgressRingProps {
   percent: number;
   size?: number;
   strokeWidth?: number;
-  /** true si se excedió la meta (cambia el color a ámbar). */
+  /** true si se excedió la meta (el arco pasa a color de aviso). */
   over?: boolean;
+  /** Color del arco (CSS). Por defecto blanco. */
+  color?: string;
   className?: string;
   trackClassName?: string;
   children?: ReactNode;
@@ -19,6 +21,7 @@ export function ProgressRing({
   size = 72,
   strokeWidth = 8,
   over = false,
+  color = '#F5F5F5',
   className,
   trackClassName,
   children,
@@ -54,10 +57,8 @@ export function ProgressRing({
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          className={cn(
-            'transition-[stroke-dashoffset] duration-700 ease-ascend',
-            over ? 'stroke-danger-500' : 'stroke-ink',
-          )}
+          stroke={over ? '#FA5252' : color}
+          className="transition-[stroke-dashoffset] duration-700 ease-ascend"
         />
       </svg>
       <div className="absolute inset-0 grid place-items-center text-center">{children}</div>

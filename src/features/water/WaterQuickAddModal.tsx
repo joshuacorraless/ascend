@@ -66,7 +66,7 @@ export function WaterQuickAddModal({
           <p className="eyebrow mt-1.5">
             de {formatVolume(target, settings.volumeUnit)} · {Math.round(percent)}%
           </p>
-          <ProgressBar percent={percent} className="mt-4" />
+          <ProgressBar percent={percent} color="#4DABF7" className="mt-4" />
         </div>
 
         <div className="grid grid-cols-3 gap-2">
