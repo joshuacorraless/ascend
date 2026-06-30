@@ -3,15 +3,18 @@ import type { ReactNode } from 'react';
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
+  /** Micro-rótulo editorial sobre el título. */
+  eyebrow?: string;
   right?: ReactNode;
 }
 
-export function PageHeader({ title, subtitle, right }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, eyebrow, right }: PageHeaderProps) {
   return (
-    <header className="flex items-start justify-between gap-3 pt-4">
-      <div>
-        <h1 className="text-2xl font-black">{title}</h1>
-        {subtitle && <p className="mt-0.5 text-sm font-medium text-zinc-500">{subtitle}</p>}
+    <header className="flex items-end justify-between gap-4 pt-5">
+      <div className="min-w-0">
+        {eyebrow && <p className="eyebrow mb-1.5">{eyebrow}</p>}
+        <h1 className="text-2xl font-semibold text-ink">{title}</h1>
+        {subtitle && <p className="mt-1 text-sm text-ink-muted">{subtitle}</p>}
       </div>
       {right && <div className="flex shrink-0 items-center gap-2">{right}</div>}
     </header>

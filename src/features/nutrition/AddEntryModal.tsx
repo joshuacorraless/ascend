@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { ArrowLeft, BookOpen, Plus, ScanLine, Search, Star } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { Caret } from '@/components/ui/Caret';
 import { MacroChips } from './MacroChips';
 import { FoodFormModal } from './FoodFormModal';
 import { LabelScanModal } from './LabelScanModal';
@@ -19,7 +19,6 @@ import { useToast } from '@/app/providers/toast';
 import { getRepositories } from '@/lib/repositories';
 import { recipeMacrosPerServing, scaleMacros } from '@/lib/domain';
 import { PORTION_UNIT_LABELS } from '@/lib/units';
-import { cn } from '@/lib/cn';
 import { parseDecimalInput } from '@/lib/numberInput';
 import type { DateKey } from '@/lib/datetime';
 import type { Food, MealEntry, MealType, Recipe } from '@/lib/schema';
@@ -119,7 +118,7 @@ export function AddEntryModal({
         footer={
           <div className="flex gap-2">
             <button className="btn-secondary" onClick={reset}>
-              <ArrowLeft className="h-4 w-4" /> Volver
+              <Caret dir="left" /> Volver
             </button>
             <button className="btn-primary flex-1" onClick={addFood} disabled={amt <= 0}>
               Agregar
@@ -140,8 +139,8 @@ export function AddEntryModal({
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
-          <div className="rounded-xl bg-zinc-50 p-3 dark:bg-zinc-800/50">
-            <p className="mb-1 text-xs text-zinc-500">{describeAmount(selFood, amt)} aportan</p>
+          <div className="rounded-xl border border-line bg-canvas p-3.5">
+            <p className="mb-2 text-xs text-ink-muted">{describeAmount(selFood, amt)} aportan</p>
             <MacroChips macros={previewFoodMacros(selFood, amt)} />
           </div>
         </div>
@@ -161,7 +160,7 @@ export function AddEntryModal({
         footer={
           <div className="flex gap-2">
             <button className="btn-secondary" onClick={reset}>
-              <ArrowLeft className="h-4 w-4" /> Volver
+              <Caret dir="left" /> Volver
             </button>
             <button className="btn-primary flex-1" onClick={addRecipe} disabled={servings <= 0}>
               Agregar
@@ -182,7 +181,7 @@ export function AddEntryModal({
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
-          <div className="rounded-xl bg-zinc-50 p-3 dark:bg-zinc-800/50">
+          <div className="rounded-xl border border-line bg-canvas p-3.5">
             <MacroChips macros={preview} />
           </div>
         </div>
@@ -194,9 +193,9 @@ export function AddEntryModal({
   return (
     <>
       <Modal open={open && !newFood && !newRecipe && !scanOpen} onClose={onClose} title={`Agregar a ${MEAL_TYPE_LABELS[mealType]}`}>
-        <div className="space-y-3">
+        <div className="space-y-3.5">
           <SegmentedControl
-            className="w-full"
+            stretch
             value={tab}
             onChange={setTab}
             options={[
@@ -205,33 +204,30 @@ export function AddEntryModal({
             ]}
           />
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-            <input
-              className="input pl-9"
-              placeholder="Buscar…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+          <input
+            className="input"
+            placeholder="Buscar…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
 
           {tab === 'alimentos' ? (
             <>
               <div className="flex gap-2">
                 <button className="btn-secondary flex-1" onClick={() => setNewFood(true)}>
-                  <Plus className="h-4 w-4" /> Nuevo
+                  Nuevo
                 </button>
                 <button className="btn-secondary flex-1" onClick={() => setScanOpen(true)}>
-                  <ScanLine className="h-4 w-4" /> Escanear
+                  Escanear
                 </button>
               </div>
 
               {recentFoods.length > 0 && !term && (
                 <div>
-                  <p className="mb-1 text-xs font-medium text-zinc-500">Recientes</p>
+                  <p className="eyebrow mb-2">Recientes</p>
                   <div className="flex flex-wrap gap-1.5">
                     {recentFoods.map((f) => (
-                      <button key={f.id} className="chip" onClick={() => pickFood(f)}>
+                      <button key={f.id} className="chip transition hover:border-ink-faint" onClick={() => pickFood(f)}>
                         {f.name}
                       </button>
                     ))}
@@ -239,9 +235,9 @@ export function AddEntryModal({
                 </div>
               )}
 
-              <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+              <div className="divide-y divide-line">
                 {filteredFoods.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-zinc-500">
+                  <p className="py-8 text-center text-sm text-ink-muted">
                     {term ? 'Sin resultados.' : 'Aún no tienes alimentos. Crea el primero.'}
                   </p>
                 ) : (
@@ -254,11 +250,11 @@ export function AddEntryModal({
           ) : (
             <>
               <button className="btn-secondary w-full" onClick={() => setNewRecipe(true)}>
-                <Plus className="h-4 w-4" /> Nueva receta
+                Nueva receta
               </button>
-              <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+              <div className="divide-y divide-line">
                 {filteredRecipes.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-zinc-500">
+                  <p className="py-8 text-center text-sm text-ink-muted">
                     {term ? 'Sin resultados.' : 'Aún no tienes recetas.'}
                   </p>
                 ) : (
@@ -268,9 +264,9 @@ export function AddEntryModal({
                       onClick={() => pickRecipe(r)}
                       className="flex w-full items-center gap-3 py-3 text-left"
                     >
-                      <BookOpen className="h-5 w-5 shrink-0 text-brand-500" />
-                      <span className="flex-1 font-medium">{r.name}</span>
-                      <span className="text-xs text-zinc-400">{r.servings} porc.</span>
+                      <span className="flex-1 font-medium text-ink">{r.name}</span>
+                      <span className="nums text-xs text-ink-muted">{r.servings} porc.</span>
+                      <Caret dir="right" className="text-ink-faint" />
                     </button>
                   ))
                 )}
@@ -306,16 +302,16 @@ function FoodRow({ food, onClick }: { food: Food; onClick: () => void }) {
     <button onClick={onClick} className="flex w-full items-center gap-3 py-3 text-left">
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5">
-          <span className={cn('truncate font-medium')}>{food.name}</span>
-          {food.favorite && <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />}
+          {food.favorite && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-ink" aria-hidden />}
+          <span className="truncate font-medium text-ink">{food.name}</span>
         </span>
-        <span className="text-xs text-zinc-400">
+        <span className="nums text-xs text-ink-muted">
           {food.brand ? `${food.brand} · ` : ''}
           {food.calories} kcal / {food.portionSize}
           {food.portionUnit === 'g' || food.portionUnit === 'ml' ? food.portionUnit : ` ${food.portionUnit}`}
         </span>
       </span>
-      <Plus className="h-5 w-5 shrink-0 text-brand-500" />
+      <Caret dir="right" className="shrink-0 text-ink-faint" />
     </button>
   );
 }

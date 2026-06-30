@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Plus, Trash2 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Field } from '@/components/ui/Field';
 import { MacroChips } from './MacroChips';
@@ -116,14 +115,17 @@ export function RecipeFormModal({
         </Field>
 
         <div>
-          <div className="mb-2 flex items-center justify-between">
+          <div className="mb-2.5 flex items-center justify-between">
             <span className="label mb-0">Ingredientes</span>
-            <button className="btn-ghost !min-h-0 !px-2 !py-1 text-xs text-brand-600" onClick={addIngredient}>
-              <Plus className="h-4 w-4" /> Añadir
+            <button
+              className="rounded-lg px-2 py-1 text-sm font-medium text-brand-600 transition hover:text-brand-700"
+              onClick={addIngredient}
+            >
+              Añadir
             </button>
           </div>
           {ingredients.length === 0 ? (
-            <p className="text-sm text-zinc-500">Sin ingredientes todavía.</p>
+            <p className="text-sm text-ink-muted">Sin ingredientes todavía.</p>
           ) : (
             <div className="space-y-2">
               {ingredients.map((ing, i) => (
@@ -149,11 +151,10 @@ export function RecipeFormModal({
                     aria-label="Porciones"
                   />
                   <button
-                    className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-red-600 dark:hover:bg-zinc-800"
+                    className="shrink-0 rounded-lg px-2.5 py-2 text-xs font-medium text-ink-muted transition hover:text-danger-600"
                     onClick={() => removeIngredient(i)}
-                    aria-label="Quitar ingrediente"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    Quitar
                   </button>
                 </div>
               ))}
@@ -161,10 +162,10 @@ export function RecipeFormModal({
           )}
         </div>
 
-        <div className="rounded-xl bg-zinc-50 p-3 dark:bg-zinc-800/50">
-          <p className="mb-1 text-xs font-medium text-zinc-500">Total receta</p>
+        <div className="rounded-xl border border-line bg-canvas p-3.5">
+          <p className="eyebrow mb-2">Total receta</p>
           <MacroChips macros={total} />
-          <p className="mb-1 mt-2 text-xs font-medium text-zinc-500">Por porción</p>
+          <p className="eyebrow mb-2 mt-3">Por porción</p>
           <MacroChips macros={perServing} />
         </div>
       </div>

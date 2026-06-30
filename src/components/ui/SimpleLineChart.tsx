@@ -26,7 +26,7 @@ interface SimpleLineChartProps {
   unit?: string;
 }
 
-const AXIS_TICK = { fontSize: 11, fill: '#9ca3af' };
+const AXIS_TICK = { fontSize: 11, fill: '#8A857C' };
 
 export function SimpleLineChart({
   data,
@@ -39,7 +39,7 @@ export function SimpleLineChart({
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#9ca3af" strokeOpacity={0.18} vertical={false} />
+        <CartesianGrid strokeDasharray="2 4" stroke="#1A1916" strokeOpacity={0.08} vertical={false} />
         <XAxis
           dataKey={xKey}
           tick={AXIS_TICK}
@@ -57,12 +57,14 @@ export function SimpleLineChart({
           unit={unit}
         />
         <Tooltip
+          cursor={{ stroke: '#1A1916', strokeOpacity: 0.15 }}
           contentStyle={{
             borderRadius: 12,
-            border: '1px solid #3f3f46',
-            background: '#18181b',
-            color: '#fafafa',
+            border: '1px solid #E8E5DD',
+            background: '#FFFFFF',
+            color: '#1A1916',
             fontSize: 12,
+            boxShadow: '0 18px 48px -24px rgba(26,25,22,0.30)',
           }}
           labelFormatter={(v) => (xFormatter ? xFormatter(String(v)) : String(v))}
         />

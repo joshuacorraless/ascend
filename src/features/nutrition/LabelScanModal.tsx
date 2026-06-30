@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, Camera, Loader2, PencilLine, Sparkles } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Field } from '@/components/ui/Field';
 import { FoodFormModal } from './FoodFormModal';
@@ -89,20 +88,18 @@ export function LabelScanModal({ open, onClose }: { open: boolean; onClose: () =
     };
     const confidence = round(analysis.confidence * 100);
     const banner = (
-      <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-800 dark:bg-amber-950/40">
-        <p className="flex items-center gap-2 font-medium text-amber-700 dark:text-amber-300">
-          <Sparkles className="h-4 w-4" /> Datos extraídos por IA · confianza {confidence}%
+      <div className="rounded-xl border border-line bg-canvas p-3.5 text-sm">
+        <p className="eyebrow">
+          IA · confianza <span className="nums">{confidence}%</span>
         </p>
-        <p className="mt-1 text-amber-700/90 dark:text-amber-200/80">
-          Revisa y corrige cada valor antes de guardar.
-        </p>
+        <p className="mt-1.5 font-medium text-ink">Revisa y corrige cada valor antes de guardar.</p>
         {analysis.servingsPerContainer != null && (
-          <p className="mt-1 text-xs text-amber-700/80 dark:text-amber-200/70">
+          <p className="nums mt-1.5 text-xs text-ink-muted">
             Porciones por envase detectadas: {round(analysis.servingsPerContainer)}.
           </p>
         )}
         {analysis.warnings.length > 0 && (
-          <ul className="mt-2 list-inside list-disc text-xs text-amber-700/90 dark:text-amber-200/80">
+          <ul className="mt-2 list-inside list-disc text-xs text-ink-muted">
             {analysis.warnings.map((w, i) => (
               <li key={i}>{w}</li>
             ))}
@@ -124,7 +121,7 @@ export function LabelScanModal({ open, onClose }: { open: boolean; onClose: () =
     <Modal open={open} onClose={closeAll} title="Escanear etiqueta">
       <div className="space-y-4">
         {available === false && (
-          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-300">
+          <div className="rounded-xl border border-line bg-canvas p-3.5 text-sm text-ink-soft">
             La IA no está configurada en el servidor. Puedes crear el alimento manualmente.
           </div>
         )}
@@ -140,12 +137,12 @@ export function LabelScanModal({ open, onClose }: { open: boolean; onClose: () =
         </Field>
 
         {preview && (
-          <img src={preview} alt="Etiqueta" className="mx-auto max-h-48 rounded-xl border border-zinc-200 dark:border-zinc-700" />
+          <img src={preview} alt="Etiqueta" className="mx-auto max-h-48 rounded-xl border border-line" />
         )}
 
         {loading ? (
-          <div className="flex flex-col items-center gap-2 py-6 text-zinc-500">
-            <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+          <div className="flex flex-col items-center gap-3 py-6 text-ink-muted">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-line border-t-ink" />
             <p className="text-sm">Analizando la etiqueta…</p>
           </div>
         ) : (
@@ -154,19 +151,18 @@ export function LabelScanModal({ open, onClose }: { open: boolean; onClose: () =
             onClick={() => fileRef.current?.click()}
             disabled={available === false}
           >
-            <Camera className="h-4 w-4" /> {preview ? 'Probar con otra foto' : 'Tomar o subir foto'}
+            {preview ? 'Probar con otra foto' : 'Tomar o subir foto'}
           </button>
         )}
 
         {error && (
-          <div className="flex items-start gap-2 rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{error}</span>
+          <div className="rounded-xl border border-danger-200 bg-danger-50 p-3.5 text-sm text-danger-700">
+            {error}
           </div>
         )}
 
         <button className="btn-secondary w-full" onClick={() => setStage('manual')}>
-          <PencilLine className="h-4 w-4" /> Crear manualmente
+          Crear manualmente
         </button>
 
         <input
@@ -182,7 +178,7 @@ export function LabelScanModal({ open, onClose }: { open: boolean; onClose: () =
           }}
         />
 
-        <p className="text-center text-xs text-zinc-400">
+        <p className="text-center text-xs text-ink-muted">
           La foto se envía al proveedor de IA solo para extraer los datos; no se guarda de forma permanente.
         </p>
       </div>

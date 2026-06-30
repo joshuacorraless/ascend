@@ -1,8 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { getRepositories } from '@/lib/repositories';
 import { ensureInitialized } from '@/lib/bootstrap';
-import type { ThemePreference, UserSettings } from '@/lib/schema';
+import type { UserSettings } from '@/lib/schema';
 
 interface SettingsContextValue {
   settings: UserSettings;
@@ -11,19 +11,8 @@ interface SettingsContextValue {
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
 
-/** Aplica el tema a <html> y sincroniza con la preferencia del sistema. */
-function applyTheme(theme: ThemePreference) {
-  const root = document.documentElement;
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const dark = theme === 'system' ? prefersDark : theme === 'dark';
-  root.classList.toggle('dark', dark);
-  try {
-    if (theme === 'system') localStorage.removeItem('ascend.theme');
-    else localStorage.setItem('ascend.theme', theme);
-  } catch {
-    /* almacenamiento no disponible: el tema se aplica igual en memoria */
-  }
-}
+// Ascend usa una única colorimetría "tinta sobre lino" (tema claro). El campo
+// `theme` se conserva en el esquema por compatibilidad de datos, pero no se aplica.
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const repos = getRepositories();
@@ -43,20 +32,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Aplica el tema cuando cambia el ajuste o la preferencia del sistema.
-  const theme = settings?.theme ?? 'system';
-  const mqlRef = useRef<MediaQueryList | null>(null);
-  useEffect(() => {
-    applyTheme(theme);
-    const mql = window.matchMedia('(prefers-color-scheme: dark)');
-    mqlRef.current = mql;
-    const onChange = () => {
-      if (theme === 'system') applyTheme('system');
-    };
-    mql.addEventListener('change', onChange);
-    return () => mql.removeEventListener('change', onChange);
-  }, [theme]);
-
   const value = useMemo<SettingsContextValue | null>(() => {
     if (!settings) return null;
     return {
@@ -70,10 +45,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   if (!ready || !value) {
     return (
-      <div className="grid min-h-dvh place-items-center bg-zinc-50 dark:bg-zinc-950">
-        <div className="flex flex-col items-center gap-3 text-zinc-500">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
-          <p className="text-sm">Cargando Ascend…</p>
+      <div className="app-canvas grid min-h-dvh place-items-center">
+        <div className="flex flex-col items-center gap-4 text-ink-muted">
+          <div className="h-7 w-7 animate-spin rounded-full border-2 border-line border-t-ink" />
+          <p className="text-sm tracking-wide">Cargando Ascend…</p>
         </div>
       </div>
     );

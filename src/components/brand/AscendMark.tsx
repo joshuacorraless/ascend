@@ -8,7 +8,7 @@ export function AscendMark({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-[1.15rem] shadow-[0_18px_34px_-22px_rgba(79,70,229,0.95)]',
+        'relative overflow-hidden rounded-2xl shadow-[0_14px_30px_-18px_rgba(79,70,229,0.7)]',
         className,
       )}
       aria-hidden

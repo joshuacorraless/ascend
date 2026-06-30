@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { ArrowDown, ArrowLeft, ArrowUp, Award, Minus } from 'lucide-react';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { SimpleLineChart } from '@/components/ui/SimpleLineChart';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Caret } from '@/components/ui/Caret';
 import { useExerciseProgress } from './useExerciseProgress';
 import { useSettings } from '@/app/providers/settings';
 import { useToday } from '@/app/hooks/useToday';
@@ -18,7 +18,6 @@ import {
 } from '@/lib/domain';
 import { addDaysToKey, formatKeyRelative, formatKeyShort } from '@/lib/datetime';
 import { formatWeight, round, weightToDisplay } from '@/lib/units';
-import { cn } from '@/lib/cn';
 
 const METRICS: { value: ProgressMetric; label: string; weighted: boolean }[] = [
   { value: 'estimatedOneRm', label: '1RM est.', weighted: true },
@@ -73,17 +72,17 @@ export function ExerciseDetailScreen() {
   const fmtVol = (kg: number) => `${round(weightToDisplay(kg, unit))} ${unit}`;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-1 text-sm font-semibold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+        className="mt-1 flex items-center gap-1.5 text-sm font-medium text-ink-muted transition hover:text-ink"
       >
-        <ArrowLeft className="h-4 w-4" /> Volver
+        <Caret dir="left" /> Volver
       </button>
 
       <header className="px-1">
-        <h1 className="text-2xl font-black tracking-tight">{exercise?.name ?? 'Ejercicio'}</h1>
-        <p className="mt-0.5 text-sm text-zinc-500">
+        <h1 className="text-2xl font-semibold text-ink">{exercise?.name ?? 'Ejercicio'}</h1>
+        <p className="nums mt-1 text-sm text-ink-muted">
           {progress ? `${progress.sessionCount} sesión${progress.sessionCount === 1 ? '' : 'es'} registradas` : ''}
         </p>
       </header>
@@ -101,7 +100,7 @@ export function ExerciseDetailScreen() {
           )}
 
           {/* Gráfico */}
-          <section className="card space-y-2">
+          <section className="card space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <SegmentedControl
                 size="sm"
@@ -112,18 +111,18 @@ export function ExerciseDetailScreen() {
               <SegmentedControl size="sm" value={range} onChange={setRange} options={RANGES.map((r) => ({ ...r }))} />
             </div>
             {points.length < 1 ? (
-              <p className="py-8 text-center text-sm text-zinc-500">Sin datos en este rango.</p>
+              <p className="py-8 text-center text-sm text-ink-muted">Sin datos en este rango.</p>
             ) : (
               <SimpleLineChart
                 data={points}
                 xKey="date"
                 xFormatter={formatKeyShort}
                 unit={metricDef.weighted ? ` ${unit}` : ''}
-                lines={[{ key: 'valor', name: metricDef.label, color: '#6366f1', width: 2.5 }]}
+                lines={[{ key: 'valor', name: metricDef.label, color: '#1A1916', width: 2.5 }]}
               />
             )}
             {metric === 'estimatedOneRm' && (
-              <p className="text-center text-[11px] text-zinc-400">
+              <p className="text-center text-2xs text-ink-faint">
                 1RM estimado (fórmula de Epley); no es una medición exacta.
               </p>
             )}
@@ -132,10 +131,8 @@ export function ExerciseDetailScreen() {
           {/* Récords */}
           {prs && (
             <section className="card">
-              <h2 className="mb-3 flex items-center gap-2 font-bold">
-                <Award className="h-5 w-5 text-amber-500" /> Récords personales
-              </h2>
-              <div className="grid grid-cols-2 gap-3">
+              <h2 className="mb-4 text-base font-semibold text-ink">Récords personales</h2>
+              <div className="grid grid-cols-2 gap-2.5">
                 <Pr label="Peso máximo" value={fmtW(prs.maxWeightKg)} />
                 <Pr label="Reps máximas" value={`${prs.maxReps}`} />
                 <Pr label="1RM estimado" value={fmtW(prs.bestEstimatedOneRm)} />
@@ -145,16 +142,16 @@ export function ExerciseDetailScreen() {
           )}
 
           {/* Historial real */}
-          <section className="space-y-2">
-            <h2 className="px-1 font-bold">Historial</h2>
-            <ul className="space-y-2">
+          <section className="space-y-2.5">
+            <h2 className="px-1 text-base font-semibold text-ink">Historial</h2>
+            <ul className="space-y-2.5">
               {summaries.map((s) => (
                 <li key={s.sessionId} className="card">
-                  <div className="mb-1.5 flex items-baseline justify-between">
-                    <p className="text-sm font-semibold capitalize">
+                  <div className="mb-2 flex items-baseline justify-between gap-2">
+                    <p className="text-sm font-semibold capitalize text-ink">
                       {formatKeyRelative(s.date, settings.timeZone)}
                     </p>
-                    <p className="text-xs text-zinc-400">
+                    <p className="nums text-xs text-ink-muted">
                       {s.workingSets} series · {s.totalReps} reps · {fmtVol(s.volume)}
                     </p>
                   </div>
@@ -162,7 +159,7 @@ export function ExerciseDetailScreen() {
                     {s.sets.map((set) => (
                       <span
                         key={set.id}
-                        className="rounded-md bg-stone-100 px-1.5 py-0.5 text-xs font-medium text-stone-700 dark:bg-zinc-800 dark:text-zinc-200"
+                        className="nums rounded-md border border-line bg-canvas px-1.5 py-0.5 text-xs font-medium text-ink-soft"
                       >
                         {round(weightToDisplay(set.weightKg, unit), 1)}×{set.reps}
                       </span>
@@ -192,11 +189,11 @@ function Comparison({
 }) {
   return (
     <section className="card">
-      <h2 className="mb-1 font-bold">Última sesión vs anterior</h2>
-      <p className="mb-3 text-xs text-zinc-400">
+      <h2 className="mb-1 text-base font-semibold text-ink">Última sesión vs anterior</h2>
+      <p className="mb-4 text-xs text-ink-muted">
         {prev ? 'Comparado con tu sesión previa de este ejercicio.' : 'Aún no hay una sesión previa para comparar.'}
       </p>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2.5">
         <Metric label="Peso máx" current={fmtW(last.maxWeightKg)} delta={prev ? last.maxWeightKg - prev.maxWeightKg : undefined} display={(d) => fmtW(Math.abs(d))} />
         <Metric label="Volumen" current={fmtVol(last.volume)} delta={prev ? last.volume - prev.volume : undefined} display={(d) => fmtVol(Math.abs(d))} />
         <Metric label="Reps totales" current={`${last.totalReps}`} delta={prev ? last.totalReps - prev.totalReps : undefined} display={(d) => `${Math.abs(d)}`} />
@@ -218,19 +215,15 @@ function Metric({
   display: (d: number) => string;
 }) {
   const dir = delta === undefined || Math.abs(delta) < 1e-6 ? 0 : delta > 0 ? 1 : -1;
-  const Icon = dir > 0 ? ArrowUp : dir < 0 ? ArrowDown : Minus;
   return (
-    <div className="rounded-2xl bg-stone-100/75 px-3 py-2 dark:bg-zinc-800/50">
-      <p className="text-xs text-zinc-500">{label}</p>
-      <p className="text-lg font-black">{current}</p>
+    <div className="rounded-xl border border-line bg-canvas px-3.5 py-2.5">
+      <p className="eyebrow">{label}</p>
+      <p className="nums mt-1 text-lg font-semibold text-ink">{current}</p>
       {delta !== undefined && (
-        <p
-          className={cn(
-            'mt-0.5 flex items-center gap-1 text-xs font-semibold',
-            dir > 0 ? 'text-emerald-600 dark:text-emerald-400' : dir < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-zinc-400',
-          )}
-        >
-          <Icon className="h-3 w-3" /> {dir === 0 ? 'igual' : display(delta)}
+        <p className="nums mt-1 flex items-center gap-1.5 text-xs font-medium text-ink-muted">
+          {dir > 0 && <Caret dir="up" />}
+          {dir < 0 && <Caret dir="down" />}
+          {dir === 0 ? 'igual' : display(delta)}
         </p>
       )}
     </div>
@@ -239,9 +232,9 @@ function Metric({
 
 function Pr({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-stone-100/75 px-3 py-2 dark:bg-zinc-800/50">
-      <p className="text-xs text-zinc-500">{label}</p>
-      <p className="text-lg font-black">{value}</p>
+    <div className="rounded-xl border border-line bg-canvas px-3.5 py-2.5">
+      <p className="eyebrow">{label}</p>
+      <p className="nums mt-1 text-lg font-semibold text-ink">{value}</p>
     </div>
   );
 }

@@ -1,20 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Check,
-  ChevronRight,
-  Droplet,
-  Dumbbell,
-  Pill,
-  Plus,
-  Scale,
-} from 'lucide-react';
 import { useSettings } from '@/app/providers/settings';
 import { useToday } from '@/app/hooks/useToday';
 import { formatKeyHuman, formatKeyRelative } from '@/lib/datetime';
 import { formatVolume, formatWeight, weightToDisplay } from '@/lib/units';
 import { macroProgress } from '@/lib/domain';
 import { cn } from '@/lib/cn';
+import { Caret } from '@/components/ui/Caret';
+import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useDashboard } from './useDashboard';
 import { MacrosOverview } from './MacrosOverview';
 import { WaterQuickAddModal } from '@/features/water/WaterQuickAddModal';
@@ -25,24 +18,19 @@ import type { SupplementStatus } from './useDashboard';
 function QuickAction({
   label,
   detail,
-  tone,
   onClick,
 }: {
   label: string;
   detail: string;
-  tone: string;
   onClick: () => void;
 }) {
   return (
     <button
       onClick={onClick}
-      className="group flex min-h-[86px] flex-col justify-between rounded-[1.25rem] border border-white/70 bg-white/75 p-3 text-left shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-white active:scale-95 dark:border-white/10 dark:bg-zinc-900/80 dark:hover:bg-zinc-900"
+      className="group flex min-h-[84px] flex-col justify-between rounded-2xl border border-line bg-paper p-3.5 text-left shadow-card transition duration-200 ease-ascend hover:bg-canvas active:scale-[0.97]"
     >
-      <span className={cn('h-1.5 w-9 rounded-full', tone)} />
-      <span>
-        <span className="block text-sm font-black text-stone-900 dark:text-zinc-50">{label}</span>
-        <span className="mt-0.5 block text-[11px] font-semibold text-zinc-400">{detail}</span>
-      </span>
+      <span className="eyebrow">{detail}</span>
+      <span className="text-sm font-semibold text-ink">{label}</span>
     </button>
   );
 }
@@ -61,14 +49,17 @@ function Card({
   const navigate = useNavigate();
   return (
     <section className="card">
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between gap-3">
         {to ? (
-          <button onClick={() => navigate(to)} className="flex items-center gap-1 font-black text-stone-900 dark:text-zinc-50">
+          <button
+            onClick={() => navigate(to)}
+            className="group flex items-center gap-1.5 text-base font-semibold text-ink"
+          >
             {title}
-            <ChevronRight className="h-4 w-4 text-zinc-400" />
+            <Caret dir="right" className="text-ink-faint transition group-hover:translate-x-0.5 group-hover:text-ink-muted" />
           </button>
         ) : (
-          <h2 className="font-black text-stone-900 dark:text-zinc-50">{title}</h2>
+          <h2 className="text-base font-semibold text-ink">{title}</h2>
         )}
         {action}
       </div>
@@ -82,23 +73,22 @@ function SupplementItem({ status, dateKey }: { status: SupplementStatus; dateKey
   return (
     <button
       onClick={() => setSupplementCompleted(supplement, dateKey, !completed)}
-      className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
+      className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left transition hover:bg-canvas"
     >
       <span
         className={cn(
-          'grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 transition',
-          completed
-            ? 'border-emerald-500 bg-emerald-500 text-white'
-            : 'border-zinc-300 text-transparent dark:border-zinc-600',
+          'grid h-6 w-6 shrink-0 place-items-center rounded-full border transition duration-200 ease-ascend',
+          completed ? 'border-ink bg-ink' : 'border-line',
         )}
+        aria-hidden
       >
-        <Check className="h-4 w-4" strokeWidth={3} />
+        {completed && <span className="h-2 w-2 rounded-full bg-paper" />}
       </span>
       <span className="flex-1">
-        <span className={cn('font-semibold', completed && 'text-zinc-400 line-through')}>
+        <span className={cn('text-sm font-medium', completed ? 'text-ink-faint line-through' : 'text-ink')}>
           {supplement.name}
         </span>
-        {supplement.dose && <span className="ml-2 text-xs text-zinc-400">{supplement.dose}</span>}
+        {supplement.dose && <span className="ml-2 text-xs text-ink-muted">{supplement.dose}</span>}
       </span>
     </button>
   );
@@ -113,7 +103,7 @@ export function DashboardScreen() {
   const [weightOpen, setWeightOpen] = useState(false);
 
   if (!data) {
-    return <div className="py-20 text-center text-sm font-medium text-zinc-400">Preparando tu día...</div>;
+    return <div className="py-24 text-center text-sm text-ink-muted">Preparando tu día…</div>;
   }
 
   const waterTarget = data.goal?.waterMl ?? 0;
@@ -121,34 +111,24 @@ export function DashboardScreen() {
   const suppDone = data.supplementsToday.filter((s) => s.completed).length;
 
   return (
-    <div className="space-y-4 pb-2">
-      <header className="pt-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-bold text-teal-700 dark:text-teal-300">
-              {formatKeyRelative(dateKey, settings.timeZone)}
-            </p>
-            <h1 className="text-2xl font-black capitalize">{formatKeyHuman(dateKey)}</h1>
-          </div>
-          <div className="hidden rounded-2xl border border-white/70 bg-white/70 px-3 py-2 text-right shadow-sm backdrop-blur sm:block dark:border-white/10 dark:bg-zinc-900/70">
-            <p className="text-[11px] font-bold uppercase text-zinc-400">Ritmo</p>
-            <p className="text-sm font-black text-stone-900 dark:text-white">{Math.min(100, Math.round(waterPct))}% agua</p>
-          </div>
-        </div>
+    <div className="space-y-5 pb-2">
+      <header className="pt-6">
+        <p className="eyebrow">{formatKeyRelative(dateKey, settings.timeZone)}</p>
+        <h1 className="mt-1.5 text-3xl font-semibold capitalize text-ink">{formatKeyHuman(dateKey)}</h1>
       </header>
 
-      <div className="grid grid-cols-4 gap-2">
-        <QuickAction label="Comida" detail="registrar" tone="bg-rose-500" onClick={() => navigate('/alimentacion')} />
-        <QuickAction label="Agua" detail="sumar" tone="bg-sky-500" onClick={() => setWaterOpen(true)} />
-        <QuickAction label="Peso" detail="medir" tone="bg-amber-500" onClick={() => setWeightOpen(true)} />
-        <QuickAction label="Gym" detail="entrenar" tone="bg-teal-500" onClick={() => navigate('/entrenamiento')} />
+      <div className="grid grid-cols-4 gap-2.5">
+        <QuickAction label="Comida" detail="registrar" onClick={() => navigate('/alimentacion')} />
+        <QuickAction label="Agua" detail="sumar" onClick={() => setWaterOpen(true)} />
+        <QuickAction label="Peso" detail="medir" onClick={() => setWeightOpen(true)} />
+        <QuickAction label="Gym" detail="entrenar" onClick={() => navigate('/entrenamiento')} />
       </div>
 
       {data.goal ? (
         <MacrosOverview goal={data.goal} consumed={data.macros} />
       ) : (
         <Card title="Macros">
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-ink-muted">
             Define tus metas en Ajustes y aquí aparece el cierre del día.
           </p>
         </Card>
@@ -158,42 +138,40 @@ export function DashboardScreen() {
         title="Hidratación"
         to="/agua"
         action={
-          <button className="btn-ghost !min-h-0 !px-2 !py-1 text-xs text-brand-600" onClick={() => setWaterOpen(true)}>
-            <Plus className="h-4 w-4" /> Añadir
+          <button
+            className="rounded-lg px-2 py-1 text-sm font-medium text-brand-600 transition hover:text-brand-700"
+            onClick={() => setWaterOpen(true)}
+          >
+            Añadir
           </button>
         }
       >
-        <div className="flex items-center gap-3">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-50 text-sky-600 dark:bg-sky-950 dark:text-sky-300">
-            <Droplet className="h-6 w-6" />
-          </span>
-          <div className="flex-1">
-            <p className="text-lg font-bold">
-              {formatVolume(data.waterMl, settings.volumeUnit)}
-              <span className="ml-1 text-sm font-medium text-zinc-500">
-                / {formatVolume(waterTarget, settings.volumeUnit)}
-              </span>
-            </p>
-            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-stone-200 dark:bg-zinc-800">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-400 transition-all"
-                style={{ width: `${Math.min(100, waterPct)}%` }}
-              />
-            </div>
-          </div>
+        <div className="flex items-baseline justify-between">
+          <p className="nums text-lg font-semibold text-ink">
+            {formatVolume(data.waterMl, settings.volumeUnit)}
+            <span className="ml-1.5 text-sm font-normal text-ink-muted">
+              / {formatVolume(waterTarget, settings.volumeUnit)}
+            </span>
+          </p>
+          <span className="nums eyebrow">{Math.min(100, Math.round(waterPct))}%</span>
         </div>
+        <ProgressBar percent={waterPct} className="mt-3" />
       </Card>
 
-      <Card title="Suplementos" to="/suplementos" action={
-        data.supplementsToday.length > 0 ? (
-          <span className="text-xs text-zinc-500">
-            {suppDone}/{data.supplementsToday.length}
-          </span>
-        ) : undefined
-      }>
+      <Card
+        title="Suplementos"
+        to="/suplementos"
+        action={
+          data.supplementsToday.length > 0 ? (
+            <span className="nums eyebrow">
+              {suppDone}/{data.supplementsToday.length}
+            </span>
+          ) : undefined
+        }
+      >
         {data.supplementsToday.length === 0 ? (
-          <button onClick={() => navigate('/suplementos')} className="flex items-center gap-2 text-sm text-zinc-500">
-            <Pill className="h-4 w-4" /> Sin suplementos programados.
+          <button onClick={() => navigate('/suplementos')} className="text-sm text-ink-muted">
+            Sin suplementos programados.
           </button>
         ) : (
           <div className="-mx-2">
@@ -207,9 +185,9 @@ export function DashboardScreen() {
       <Card title="Entrenamiento">
         {data.activeSession ? (
           <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="font-medium">{data.activeSession.name}</p>
-              <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">En curso</p>
+            <div className="min-w-0">
+              <p className="truncate font-medium text-ink">{data.activeSession.name}</p>
+              <p className="eyebrow mt-1 text-brand-600">En curso</p>
             </div>
             <button
               className="btn-primary"
@@ -220,18 +198,18 @@ export function DashboardScreen() {
           </div>
         ) : data.routinesToday.length > 0 ? (
           <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs text-zinc-500">Plan de hoy</p>
-              <p className="font-medium">{data.routinesToday.map((r) => r.name).join(', ')}</p>
+            <div className="min-w-0">
+              <p className="eyebrow">Plan de hoy</p>
+              <p className="mt-1 truncate font-medium text-ink">
+                {data.routinesToday.map((r) => r.name).join(', ')}
+              </p>
             </div>
             <button className="btn-secondary" onClick={() => navigate('/entrenamiento')}>
               Ver
             </button>
           </div>
         ) : (
-          <p className="flex items-center gap-2 text-sm text-zinc-500">
-            <Dumbbell className="h-4 w-4" /> Día libre.
-          </p>
+          <p className="text-sm text-ink-muted">Día libre.</p>
         )}
       </Card>
 
@@ -239,22 +217,25 @@ export function DashboardScreen() {
         title="Peso corporal"
         to="/peso"
         action={
-          <button className="btn-ghost !min-h-0 !px-2 !py-1 text-xs text-brand-600" onClick={() => setWeightOpen(true)}>
-            <Plus className="h-4 w-4" /> Registrar
+          <button
+            className="rounded-lg px-2 py-1 text-sm font-medium text-brand-600 transition hover:text-brand-700"
+            onClick={() => setWeightOpen(true)}
+          >
+            Registrar
           </button>
         }
       >
         {data.latestWeight ? (
-          <div className="flex items-baseline gap-2">
-            <p className="text-2xl font-bold">
+          <div className="flex items-baseline gap-2.5">
+            <p className="nums text-2xl font-semibold text-ink">
               {formatWeight(data.latestWeight.weightKg, settings.weightUnit)}
             </p>
-            <p className="text-xs text-zinc-500">{formatKeyRelative(data.latestWeight.localDate, settings.timeZone)}</p>
+            <p className="text-xs text-ink-muted">
+              {formatKeyRelative(data.latestWeight.localDate, settings.timeZone)}
+            </p>
           </div>
         ) : (
-          <p className="flex items-center gap-2 text-sm text-zinc-500">
-            <Scale className="h-4 w-4" /> Sin peso registrado.
-          </p>
+          <p className="text-sm text-ink-muted">Sin peso registrado.</p>
         )}
       </Card>
 

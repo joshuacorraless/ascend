@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { CopyPlus, Plus, RotateCcw } from 'lucide-react';
 import { MacrosOverview } from '@/features/dashboard/MacrosOverview';
 import { MacroChips } from './MacroChips';
 import { AddEntryModal } from './AddEntryModal';
@@ -50,18 +49,18 @@ export function DayLog({ dateKey }: { dateKey: DateKey }) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {goal ? (
         <MacrosOverview goal={goal} consumed={totalsForEntries(list)} />
       ) : (
         <div className="card">
-          <p className="mb-2 text-sm text-zinc-500">Total del día</p>
+          <p className="eyebrow mb-2.5">Total del día</p>
           <MacroChips macros={totalsForEntries(list)} />
         </div>
       )}
 
       <button className="btn-secondary w-full" onClick={() => setCopyOpen(true)}>
-        <CopyPlus className="h-4 w-4" /> Copiar de otro día
+        Copiar de otro día
       </button>
 
       {sections.map((meal) => {
@@ -69,36 +68,36 @@ export function DayLog({ dateKey }: { dateKey: DateKey }) {
         const subtotal = totalsForEntries(entries);
         return (
           <section key={meal} className="card">
-            <div className="mb-2 flex items-center justify-between">
-              <div className="flex items-baseline gap-2">
-                <h3 className="font-semibold">{MEAL_TYPE_LABELS[meal]}</h3>
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-baseline gap-2.5">
+                <h3 className="text-base font-semibold text-ink">{MEAL_TYPE_LABELS[meal]}</h3>
                 {entries.length > 0 && (
-                  <span className="text-xs text-zinc-400">{round(subtotal.calories)} kcal</span>
+                  <span className="nums text-xs text-ink-muted">{round(subtotal.calories)} kcal</span>
                 )}
               </div>
               <button
-                className="btn-ghost !min-h-0 !px-2 !py-1 text-xs text-brand-600"
+                className="rounded-lg px-2 py-1 text-sm font-medium text-brand-600 transition hover:text-brand-700"
                 onClick={() => setAddMeal(meal)}
               >
-                <Plus className="h-4 w-4" /> Agregar
+                Agregar
               </button>
             </div>
 
             {entries.length === 0 ? (
               <button
                 onClick={() => repeatLast(meal)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-200 py-2.5 text-xs text-zinc-400 hover:text-brand-600 dark:border-zinc-700"
+                className="w-full rounded-xl border border-dashed border-line py-3 text-xs font-medium text-ink-muted transition hover:border-ink-faint hover:text-ink"
               >
-                <RotateCcw className="h-3.5 w-3.5" /> Repetir última
+                Repetir última
               </button>
             ) : (
-              <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
+              <ul className="divide-y divide-line">
                 {entries.map((e) => (
                   <li key={e.id}>
-                    <button onClick={() => setEditEntry(e)} className="flex w-full items-center gap-3 py-2 text-left">
+                    <button onClick={() => setEditEntry(e)} className="flex w-full items-center gap-3 py-2.5 text-left">
                       <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">{e.name}</p>
-                        <p className="text-xs text-zinc-400">{e.portionLabel}</p>
+                        <p className="truncate font-medium text-ink">{e.name}</p>
+                        <p className="text-xs text-ink-muted">{e.portionLabel}</p>
                       </div>
                       <MacroChips macros={e} />
                     </button>

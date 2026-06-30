@@ -22,13 +22,13 @@ export function OnboardingScreen() {
   };
 
   return (
-    <div className="app-canvas min-h-dvh px-4 pb-12 pt-safe">
-      <div className="mx-auto max-w-md space-y-6 pt-10">
-        <div className="flex flex-col items-center gap-3 text-center">
+    <div className="app-canvas min-h-dvh px-5 pb-12 pt-safe">
+      <div className="mx-auto max-w-md space-y-6 pt-12">
+        <div className="flex flex-col items-center gap-4 text-center">
           <AscendMark className="h-16 w-16" />
           <div>
-            <h1 className="text-2xl font-black">Ascend</h1>
-            <p className="mt-1 text-sm font-medium text-zinc-500">
+            <h1 className="text-3xl font-semibold text-ink">Ascend</h1>
+            <p className="mx-auto mt-1.5 max-w-xs text-sm text-ink-muted">
               Nutrición, agua, peso y entrenamiento en un solo registro privado.
             </p>
           </div>
@@ -68,7 +68,7 @@ export function OnboardingScreen() {
             submitLabel="Entrar"
             onSubmit={finish}
           />
-          <p className="mt-3 text-center text-xs text-zinc-400">
+          <p className="mt-4 text-center text-xs text-ink-muted">
             Todo queda en este dispositivo. Puedes ajustar metas después.
           </p>
         </div>

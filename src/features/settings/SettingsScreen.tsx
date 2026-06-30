@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Download, Upload, Trash2, ShieldCheck, Database, Dumbbell, FileDown } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Modal } from '@/components/ui/Modal';
@@ -19,7 +18,7 @@ import {
   downloadRoutineTemplate,
   parseRoutineImport,
 } from '@/lib/training/routineImport';
-import type { ThemePreference, VolumeUnit, WeightUnit } from '@/lib/schema';
+import type { VolumeUnit, WeightUnit } from '@/lib/schema';
 
 const TIME_ZONES = [
   'America/Costa_Rica',
@@ -31,13 +30,10 @@ const TIME_ZONES = [
   'Europe/Madrid',
 ];
 
-function Section({ title, children, icon }: { title: string; children: React.ReactNode; icon?: React.ReactNode }) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="card space-y-4">
-      <h2 className="flex items-center gap-2 font-black">
-        {icon}
-        {title}
-      </h2>
+      <h2 className="text-base font-semibold text-ink">{title}</h2>
       {children}
     </section>
   );
@@ -173,8 +169,8 @@ export function SettingsScreen() {
   const totalRecords = counts ? Object.values(counts).reduce((a, b) => a + b, 0) : 0;
 
   return (
-    <div className="space-y-4 pb-4">
-      <PageHeader title="Ajustes" subtitle="Metas, unidades y datos." />
+    <div className="space-y-5 pb-4">
+      <PageHeader eyebrow="Configuración" title="Ajustes" subtitle="Metas, unidades y datos." />
 
       <Section title="Objetivos diarios">
         {latestGoal ? (
@@ -185,12 +181,12 @@ export function SettingsScreen() {
             <Stat label="Grasas" value={`${latestGoal.fat} g`} />
           </div>
         ) : (
-          <p className="text-sm text-zinc-500">Aún no has definido objetivos.</p>
+          <p className="text-sm text-ink-muted">Aún no has definido objetivos.</p>
         )}
         <button className="btn-secondary w-full" onClick={() => setGoalOpen(true)}>
           Editar objetivos
         </button>
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-ink-muted">
           Los cambios empiezan hoy. El historial conserva sus metas.
         </p>
       </Section>
@@ -233,32 +229,17 @@ export function SettingsScreen() {
         </Row>
       </Section>
 
-      <Section title="Apariencia">
-        <Row label="Tema">
-          <SegmentedControl<ThemePreference>
-            size="sm"
-            value={settings.theme}
-            onChange={(v) => update({ theme: v })}
-            options={[
-              { value: 'light', label: 'Claro' },
-              { value: 'dark', label: 'Oscuro' },
-              { value: 'system', label: 'Auto' },
-            ]}
-          />
-        </Row>
-      </Section>
-
-      <Section title="Datos y respaldo" icon={<Database className="h-4 w-4 text-brand-600" />}>
-        <p className="text-sm text-zinc-500">
-          {totalRecords} registros en este dispositivo. Tus datos nunca salen de aquí salvo que tú
-          los exportes.
+      <Section title="Datos y respaldo">
+        <p className="text-sm text-ink-muted">
+          <span className="nums">{totalRecords}</span> registros en este dispositivo. Tus datos nunca
+          salen de aquí salvo que tú los exportes.
         </p>
         <div className="grid grid-cols-2 gap-2">
           <button className="btn-secondary" onClick={onExport}>
-            <Download className="h-4 w-4" /> {exportBusy.busy ? 'Exportando...' : 'Exportar'}
+            {exportBusy.busy ? 'Exportando…' : 'Exportar'}
           </button>
           <button className="btn-secondary" onClick={onPickImport}>
-            <Upload className="h-4 w-4" /> {importBusy.busy ? 'Restaurando...' : 'Importar'}
+            {importBusy.busy ? 'Restaurando…' : 'Importar'}
           </button>
         </div>
         <input
@@ -269,21 +250,21 @@ export function SettingsScreen() {
           onChange={onImportFile}
         />
         <button className="btn-danger w-full" onClick={onClearAll} disabled={clearBusy.busy}>
-          <Trash2 className="h-4 w-4" /> {clearBusy.busy ? 'Borrando...' : 'Borrar todos los datos'}
+          {clearBusy.busy ? 'Borrando…' : 'Borrar todos los datos'}
         </button>
       </Section>
 
-      <Section title="Importar rutina" icon={<Dumbbell className="h-4 w-4 text-brand-600" />}>
-        <p className="text-sm text-zinc-500">
+      <Section title="Importar rutina">
+        <p className="text-sm text-ink-muted">
           Sube un archivo JSON con tus rutinas. Se crean los ejercicios que falten (como si los
           metieras a mano) y se arman las rutinas por día. No borra nada de lo que ya tienes.
         </p>
         <div className="grid grid-cols-2 gap-2">
           <button className="btn-secondary" onClick={downloadRoutineTemplate}>
-            <FileDown className="h-4 w-4" /> Plantilla
+            Plantilla
           </button>
           <button className="btn-primary" onClick={onPickRoutine} disabled={routineBusy.busy}>
-            <Upload className="h-4 w-4" /> {routineBusy.busy ? 'Importando...' : 'Importar rutina'}
+            {routineBusy.busy ? 'Importando…' : 'Importar rutina'}
           </button>
         </div>
         <input
@@ -293,13 +274,13 @@ export function SettingsScreen() {
           className="hidden"
           onChange={onRoutineFile}
         />
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-ink-muted">
           Descarga la plantilla para ver el formato exacto (rutinas, días y ejercicios).
         </p>
       </Section>
 
-      <Section title="Privacidad" icon={<ShieldCheck className="h-4 w-4 text-emerald-600" />}>
-        <p className="text-sm text-zinc-500">
+      <Section title="Privacidad">
+        <p className="text-sm text-ink-muted">
           Ascend no usa cuentas, analíticas ni rastreadores. El escaneo de etiquetas es opcional y
           solo envía la imagen que eliges analizar.
         </p>
@@ -320,7 +301,7 @@ export function SettingsScreen() {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{label}</span>
+      <span className="text-sm font-medium text-ink-soft">{label}</span>
       {children}
     </div>
   );
@@ -328,9 +309,9 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-stone-100/75 px-3 py-2 dark:bg-zinc-800/50">
-      <p className="text-xs text-zinc-500">{label}</p>
-      <p className="font-black">{value}</p>
+    <div className="rounded-xl border border-line bg-canvas px-3.5 py-2.5">
+      <p className="eyebrow">{label}</p>
+      <p className="nums mt-1 font-semibold text-ink">{value}</p>
     </div>
   );
 }

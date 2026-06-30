@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { ChevronRight, Dumbbell } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { SimpleLineChart } from '@/components/ui/SimpleLineChart';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Caret } from '@/components/ui/Caret';
 import { ProgressCalendar } from './ProgressCalendar';
 import { useSettings } from '@/app/providers/settings';
 import { getRepositories } from '@/lib/repositories';
@@ -23,10 +23,10 @@ interface RoutineStat {
 export function ProgressScreen() {
   const [tab, setTab] = useState<'entreno' | 'peso' | 'dias'>('entreno');
   return (
-    <div className="space-y-4">
-      <PageHeader title="Progreso" subtitle="Tu evolución y tus hábitos diarios." />
+    <div className="space-y-5">
+      <PageHeader eyebrow="Análisis" title="Progreso" subtitle="Tu evolución y tus hábitos diarios." />
       <SegmentedControl
-        className="w-full"
+        stretch
         value={tab}
         onChange={setTab}
         options={[
@@ -70,7 +70,6 @@ function TrainingProgress() {
   if (data && routines.length === 0) {
     return (
       <EmptyState
-        icon={Dumbbell}
         title="Sin rutinas todavía"
         description="Crea una rutina y entrena para ver tu progreso aquí."
         action={
@@ -85,7 +84,7 @@ function TrainingProgress() {
   return (
     <div className="space-y-3">
       {/* Filtro por día */}
-      <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+      <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
         <button
           className={cn('chip shrink-0', day === 'all' && 'chip-active')}
           onClick={() => setDay('all')}
@@ -104,34 +103,34 @@ function TrainingProgress() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="py-8 text-center text-sm text-zinc-500">
+        <p className="py-8 text-center text-sm text-ink-muted">
           No hay rutinas asignadas a este día. Asígnalas al editar la rutina.
         </p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {filtered.map((r) => {
             const stat = data?.byRoutine.get(r.id);
             return (
               <li key={r.id}>
                 <button
                   onClick={() => navigate(`/progreso/rutina/${r.id}`)}
-                  className="card flex w-full items-center gap-3 text-left transition hover:-translate-y-0.5"
+                  className="card flex w-full items-center gap-3 text-left transition duration-200 ease-ascend hover:-translate-y-0.5"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-bold">{r.name}</p>
-                    <p className="mt-0.5 text-xs text-zinc-500">
+                    <p className="truncate font-semibold text-ink">{r.name}</p>
+                    <p className="nums mt-0.5 text-xs text-ink-muted">
                       {r.exercises.length} ejercicios
                       {r.daysOfWeek.length > 0
                         ? ` · ${r.daysOfWeek.map((d) => WEEKDAY_LABELS[d]).join(' ')}`
                         : ''}
                     </p>
-                    <p className="mt-1 text-xs text-zinc-400">
+                    <p className="nums mt-1 text-xs text-ink-faint">
                       {stat
                         ? `${stat.count} sesión${stat.count === 1 ? '' : 'es'} · última ${formatKeyRelative(stat.last ?? '', settings.timeZone)}`
                         : 'Aún sin sesiones'}
                     </p>
                   </div>
-                  <ChevronRight className="h-5 w-5 shrink-0 text-zinc-300" />
+                  <Caret dir="right" className="shrink-0 text-ink-faint" />
                 </button>
               </li>
             );
@@ -163,7 +162,6 @@ function BodyWeightProgress() {
   if (list.length === 0) {
     return (
       <EmptyState
-        icon={Dumbbell}
         title="Sin registros de peso"
         description="Registra tu peso para ver tu tendencia."
         action={
@@ -181,18 +179,18 @@ function BodyWeightProgress() {
     <div className="space-y-3">
       <section className="card grid grid-cols-3 gap-2 text-center">
         <div>
-          <p className="text-xs text-zinc-500">Actual</p>
-          <p className="font-bold">
+          <p className="eyebrow">Actual</p>
+          <p className="nums mt-1 font-semibold text-ink">
             {stats.current !== undefined ? `${round(weightToDisplay(stats.current, unit), 1)} ${unit}` : '—'}
           </p>
         </div>
         <div>
-          <p className="text-xs text-zinc-500">7 días</p>
-          <p className="font-bold">{fmtDelta(stats.weeklyChange)}</p>
+          <p className="eyebrow">7 días</p>
+          <p className="nums mt-1 font-semibold text-ink">{fmtDelta(stats.weeklyChange)}</p>
         </div>
         <div>
-          <p className="text-xs text-zinc-500">Total</p>
-          <p className="font-bold">{fmtDelta(stats.totalChange)}</p>
+          <p className="eyebrow">Total</p>
+          <p className="nums mt-1 font-semibold text-ink">{fmtDelta(stats.totalChange)}</p>
         </div>
       </section>
 
@@ -204,8 +202,8 @@ function BodyWeightProgress() {
             xFormatter={formatKeyShort}
             unit={` ${unit}`}
             lines={[
-              { key: 'peso', name: 'Peso', color: '#6366f1' },
-              { key: 'media', name: 'Media 7d', color: '#f59e0b', dashed: true },
+              { key: 'peso', name: 'Peso', color: '#1A1916' },
+              { key: 'media', name: 'Media 7d', color: '#B7B2A8', dashed: true },
             ]}
           />
         </section>

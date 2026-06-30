@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Caret } from './Caret';
 import { addDaysToKey, diffDaysKeys, formatKeyRelative, formatKeyShort, type DateKey } from '@/lib/datetime';
 
 interface DateNavProps {
@@ -12,28 +12,28 @@ interface DateNavProps {
 export function DateNav({ dateKey, onChange, timeZone, max }: DateNavProps) {
   const atMax = max ? diffDaysKeys(dateKey, max) >= 0 : false;
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/80 p-1 shadow-sm backdrop-blur dark:border-white/10 dark:bg-zinc-900/80">
+    <div className="flex items-center justify-between rounded-xl border border-line bg-paper p-1 shadow-card">
       <button
         onClick={() => onChange(addDaysToKey(dateKey, -1))}
-        className="rounded-xl p-2 text-zinc-500 hover:bg-stone-100 dark:hover:bg-zinc-800"
+        className="grid h-9 w-9 place-items-center rounded-lg text-ink-muted transition hover:bg-canvas hover:text-ink"
         aria-label="Día anterior"
       >
-        <ChevronLeft className="h-5 w-5" />
+        <Caret dir="left" />
       </button>
       <button
         onClick={() => max && onChange(max)}
         className="flex flex-col items-center px-2 leading-tight"
       >
-        <span className="text-sm font-semibold capitalize">{formatKeyRelative(dateKey, timeZone)}</span>
-        <span className="text-xs text-zinc-400">{formatKeyShort(dateKey)}</span>
+        <span className="text-sm font-semibold capitalize text-ink">{formatKeyRelative(dateKey, timeZone)}</span>
+        <span className="nums text-xs text-ink-muted">{formatKeyShort(dateKey)}</span>
       </button>
       <button
         onClick={() => !atMax && onChange(addDaysToKey(dateKey, 1))}
         disabled={atMax}
-        className="rounded-xl p-2 text-zinc-500 hover:bg-stone-100 disabled:opacity-30 dark:hover:bg-zinc-800"
+        className="grid h-9 w-9 place-items-center rounded-lg text-ink-muted transition hover:bg-canvas hover:text-ink disabled:opacity-25"
         aria-label="Día siguiente"
       >
-        <ChevronRight className="h-5 w-5" />
+        <Caret dir="right" />
       </button>
     </div>
   );

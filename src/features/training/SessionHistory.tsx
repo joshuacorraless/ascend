@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { CalendarDays, ChevronRight, Trash2 } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Caret } from '@/components/ui/Caret';
 import { useSettings } from '@/app/providers/settings';
 import { useToast } from '@/app/providers/toast';
 import { useConfirm } from '@/app/providers/confirm';
@@ -33,7 +33,6 @@ export function SessionHistory() {
   if ((sessions ?? []).length === 0) {
     return (
       <EmptyState
-        icon={CalendarDays}
         title="Sin sesiones todavía"
         description="Cuando completes un entrenamiento, aparecerá aquí tu historial."
       />
@@ -41,30 +40,26 @@ export function SessionHistory() {
   }
 
   return (
-    <ul className="space-y-2">
+    <ul className="space-y-2.5">
       {(sessions ?? []).map((s) => (
-        <li key={s.id} className="card flex items-center gap-2">
+        <li key={s.id} className="card flex items-center gap-2 !py-3">
           <button
             onClick={() => navigate(`/entrenamiento/sesion/${s.id}`)}
             className="flex min-w-0 flex-1 items-center gap-3 text-left"
           >
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-950 dark:text-brand-300">
-              <CalendarDays className="h-5 w-5" />
-            </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate font-medium">{s.name}</p>
-              <p className="text-xs text-zinc-400">
+              <p className="truncate font-medium text-ink">{s.name}</p>
+              <p className="nums text-xs text-ink-muted">
                 {formatKeyRelative(s.localDate, settings.timeZone)} · {formatDuration(sessionDurationSeconds(s))}
               </p>
             </div>
-            <ChevronRight className="h-5 w-5 shrink-0 text-zinc-300" />
+            <Caret dir="right" className="shrink-0 text-ink-faint" />
           </button>
           <button
             onClick={() => remove(s)}
-            aria-label={`Borrar ${s.name}`}
-            className="shrink-0 rounded-lg p-2 text-zinc-400 transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40"
+            className="shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium text-ink-muted transition hover:text-danger-600"
           >
-            <Trash2 className="h-4 w-4" />
+            Quitar
           </button>
         </li>
       ))}

@@ -1,18 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import {
-  ArrowDown,
-  ArrowUp,
-  Check,
-  CheckCircle2,
-  Copy,
-  Plus,
-  Search,
-  Trash2,
-  X,
-} from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
+import { Caret } from '@/components/ui/Caret';
 import { useSettings } from '@/app/providers/settings';
 import { useToast } from '@/app/providers/toast';
 import { useConfirm } from '@/app/providers/confirm';
@@ -51,13 +41,13 @@ export function SessionScreen() {
   const elapsed = useElapsed(session?.startedAt);
 
   if (session === undefined) {
-    return <p className="py-20 text-center text-sm text-zinc-400">Cargando sesión…</p>;
+    return <p className="py-20 text-center text-sm text-ink-muted">Cargando sesión…</p>;
   }
   if (session === null) {
     return (
       <div className="py-20 text-center">
-        <p className="text-zinc-500">Esta sesión ya no existe.</p>
-        <button className="btn-primary mt-3" onClick={() => navigate('/entrenamiento')}>
+        <p className="text-ink-muted">Esta sesión ya no existe.</p>
+        <button className="btn-primary mt-4" onClick={() => navigate('/entrenamiento')}>
           Volver
         </button>
       </div>
@@ -116,25 +106,25 @@ export function SessionScreen() {
 
   return (
     <div className="space-y-4">
-      <header className="sticky top-0 z-10 -mx-4 border-b border-zinc-200 bg-zinc-50/95 px-4 py-3 pt-safe backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
-        <div className="flex items-center justify-between gap-2">
+      <header className="sticky top-0 z-10 -mx-5 border-b border-line bg-canvas/90 px-5 py-3 pt-safe backdrop-blur-xl">
+        <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="truncate text-lg font-bold">{session.name}</h1>
-            <p className="text-xs text-zinc-500">
+            <h1 className="truncate text-lg font-semibold text-ink">{session.name}</h1>
+            <p className="nums text-xs text-ink-muted">
               {readOnly ? 'Completada' : formatDuration(elapsed)} · {doneSets} series · vol {round(volume)} {settings.weightUnit}
             </p>
           </div>
           {!readOnly ? (
-            <div className="flex shrink-0 gap-2">
-              <button className="btn-ghost !min-h-0 !px-2 !py-1.5 text-xs" onClick={cancel}>
-                <X className="h-4 w-4" />
+            <div className="flex shrink-0 items-center gap-1">
+              <button className="rounded-lg px-2.5 py-2 text-sm font-medium text-ink-muted transition hover:text-danger-600" onClick={cancel}>
+                Descartar
               </button>
-              <button className="btn-primary !min-h-0 !px-3 !py-1.5 text-sm" onClick={finish}>
-                <CheckCircle2 className="h-4 w-4" /> Finalizar
+              <button className="btn-primary !min-h-0 px-3.5 py-2 text-sm" onClick={finish}>
+                Finalizar
               </button>
             </div>
           ) : (
-            <button className="btn-secondary !min-h-0 !px-3 !py-1.5 text-sm" onClick={() => navigate('/entrenamiento')}>
+            <button className="btn-secondary !min-h-0 px-3.5 py-2 text-sm" onClick={() => navigate('/entrenamiento')}>
               Volver
             </button>
           )}
@@ -142,7 +132,7 @@ export function SessionScreen() {
       </header>
 
       {orderedLogs.length === 0 && (
-        <p className="py-8 text-center text-sm text-zinc-500">
+        <p className="py-8 text-center text-sm text-ink-muted">
           Esta sesión no tiene ejercicios. Agrega uno para empezar.
         </p>
       )}
@@ -163,7 +153,7 @@ export function SessionScreen() {
 
       {!readOnly && (
         <button className="btn-secondary w-full" onClick={() => setAddOpen(true)}>
-          <Plus className="h-4 w-4" /> Agregar ejercicio
+          Agregar ejercicio
         </button>
       )}
 
@@ -225,38 +215,51 @@ function ExerciseCard({
 
   return (
     <section className="card">
-      <div className="mb-2 flex items-center gap-2">
-        <h3 className="flex-1 font-semibold">{log.exerciseName}</h3>
+      <div className="mb-3 flex items-center gap-1.5">
+        <h3 className="flex-1 truncate font-semibold text-ink">{log.exerciseName}</h3>
         {!readOnly && (
           <>
             <UnitToggle unit={unit} onChange={setUnit} />
-            <button className="rounded p-1 text-zinc-400 hover:text-brand-600 disabled:opacity-30" onClick={onMoveUp} disabled={isFirst} aria-label="Subir">
-              <ArrowUp className="h-4 w-4" />
+            <button
+              className="grid h-8 w-8 place-items-center rounded-lg text-ink-muted transition hover:text-ink disabled:opacity-25"
+              onClick={onMoveUp}
+              disabled={isFirst}
+              aria-label="Subir"
+            >
+              <Caret dir="up" />
             </button>
-            <button className="rounded p-1 text-zinc-400 hover:text-brand-600 disabled:opacity-30" onClick={onMoveDown} disabled={isLast} aria-label="Bajar">
-              <ArrowDown className="h-4 w-4" />
+            <button
+              className="grid h-8 w-8 place-items-center rounded-lg text-ink-muted transition hover:text-ink disabled:opacity-25"
+              onClick={onMoveDown}
+              disabled={isLast}
+              aria-label="Bajar"
+            >
+              <Caret dir="down" />
             </button>
-            <button className="rounded p-1 text-zinc-400 hover:text-red-600" onClick={onRemove} aria-label="Quitar ejercicio">
-              <Trash2 className="h-4 w-4" />
+            <button
+              className="rounded-lg px-2 py-1 text-xs font-medium text-ink-muted transition hover:text-danger-600"
+              onClick={onRemove}
+            >
+              Quitar
             </button>
           </>
         )}
       </div>
 
       {prev && prev.length > 0 && (
-        <div className="mb-2 flex items-center justify-between rounded-lg bg-zinc-50 px-2 py-1.5 text-xs text-zinc-500 dark:bg-zinc-800/50">
-          <span className="truncate">
+        <div className="mb-2.5 flex items-center justify-between gap-2 rounded-lg border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink-muted">
+          <span className="nums truncate">
             Anterior: {prev.map((s) => `${round(weightToDisplay(s.weightKg, unit), 1)}×${s.reps}`).join(', ')}
           </span>
           {!readOnly && (
-            <button className="ml-2 flex shrink-0 items-center gap-1 font-medium text-brand-600" onClick={copyPrevious}>
-              <Copy className="h-3.5 w-3.5" /> Copiar
+            <button className="shrink-0 font-medium text-brand-600 transition hover:text-brand-700" onClick={copyPrevious}>
+              Copiar
             </button>
           )}
         </div>
       )}
 
-      <div className="grid grid-cols-[2rem_1fr_1fr_2.5rem_2rem] items-center gap-2 px-1 pb-1 text-[11px] font-medium text-zinc-400">
+      <div className="grid grid-cols-[2rem_1fr_1fr_2.5rem_2rem] items-center gap-2 px-1 pb-1.5 text-2xs font-medium text-ink-faint">
         <span>#</span>
         <span>{unit}</span>
         <span>Reps</span>
@@ -271,8 +274,11 @@ function ExerciseCard({
       </div>
 
       {!readOnly && (
-        <button className="mt-2 flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-zinc-200 py-2 text-xs text-zinc-500 hover:text-brand-600 dark:border-zinc-700" onClick={() => addSet(log, sets)}>
-          <Plus className="h-3.5 w-3.5" /> Agregar serie
+        <button
+          className="mt-2.5 w-full rounded-lg border border-dashed border-line py-2 text-xs font-medium text-ink-muted transition hover:border-ink-faint hover:text-ink"
+          onClick={() => addSet(log, sets)}
+        >
+          Agregar serie
         </button>
       )}
     </section>
@@ -315,6 +321,7 @@ function SetRow({ set, unit, readOnly }: { set: SetLog; unit: WeightUnit; readOn
   };
 
   const typeBadge = set.setType === 'calentamiento' ? 'W' : set.setType === 'dropset' ? 'D' : set.setType === 'fallo' ? 'F' : String(set.setNumber);
+  const special = set.setType !== 'efectiva';
 
   return (
     <div className={cn('grid grid-cols-[2rem_1fr_1fr_2.5rem_2rem] items-center gap-2', set.completed && 'opacity-70')}>
@@ -323,8 +330,8 @@ function SetRow({ set, unit, readOnly }: { set: SetLog; unit: WeightUnit; readOn
         disabled={readOnly}
         title={SET_TYPE_LABELS[set.setType]}
         className={cn(
-          'grid h-8 w-8 place-items-center rounded-lg text-xs font-bold',
-          set.setType === 'calentamiento' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300' : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300',
+          'nums grid h-8 w-8 place-items-center rounded-lg text-xs font-semibold transition',
+          special ? 'border border-ink bg-paper text-ink' : 'bg-canvas text-ink-soft',
         )}
       >
         {typeBadge}
@@ -333,7 +340,7 @@ function SetRow({ set, unit, readOnly }: { set: SetLog; unit: WeightUnit; readOn
         type="text"
         inputMode="decimal"
         disabled={readOnly}
-        className="input !px-2 !py-1.5 text-center"
+        className="input nums !px-2 !py-1.5 text-center"
         value={weight}
         onChange={(e) => setWeight(e.target.value)}
         onBlur={persistWeight}
@@ -343,7 +350,7 @@ function SetRow({ set, unit, readOnly }: { set: SetLog; unit: WeightUnit; readOn
         type="number"
         inputMode="numeric"
         disabled={readOnly}
-        className="input !px-2 !py-1.5 text-center"
+        className="input nums !px-2 !py-1.5 text-center"
         value={reps}
         onChange={(e) => setReps(e.target.value)}
         onBlur={persistReps}
@@ -353,7 +360,7 @@ function SetRow({ set, unit, readOnly }: { set: SetLog; unit: WeightUnit; readOn
         type="text"
         inputMode="decimal"
         disabled={readOnly}
-        className="input !px-1 !py-1.5 text-center"
+        className="input nums !px-1 !py-1.5 text-center"
         value={rpe}
         onChange={(e) => setRpe(e.target.value)}
         onBlur={persistRpe}
@@ -363,12 +370,13 @@ function SetRow({ set, unit, readOnly }: { set: SetLog; unit: WeightUnit; readOn
         onClick={() => persist({ completed: !set.completed })}
         disabled={readOnly}
         aria-label="Completada"
+        aria-pressed={set.completed}
         className={cn(
-          'grid h-8 w-8 place-items-center rounded-lg border-2 transition',
-          set.completed ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-zinc-300 text-transparent dark:border-zinc-600',
+          'grid h-8 w-8 place-items-center rounded-lg border transition duration-200 ease-ascend',
+          set.completed ? 'border-ink bg-ink' : 'border-line',
         )}
       >
-        <Check className="h-4 w-4" strokeWidth={3} />
+        {set.completed && <span className="h-2 w-2 rounded-full bg-paper" />}
       </button>
     </div>
   );
@@ -384,18 +392,21 @@ function AddExerciseModal({ open, onClose, onPick }: { open: boolean; onClose: (
   return (
     <Modal open={open} onClose={onClose} title="Agregar ejercicio">
       <div className="space-y-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-          <input className="input pl-9" placeholder="Buscar…" value={search} onChange={(e) => setSearch(e.target.value)} autoFocus />
-        </div>
-        <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+        <input
+          className="input"
+          placeholder="Buscar…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          autoFocus
+        />
+        <div className="divide-y divide-line">
           {filtered.length === 0 ? (
-            <p className="py-6 text-center text-sm text-zinc-500">Sin ejercicios. Créalos en la pestaña Ejercicios.</p>
+            <p className="py-8 text-center text-sm text-ink-muted">Sin ejercicios. Créalos en la pestaña Ejercicios.</p>
           ) : (
             filtered.map((e) => (
               <button key={e.id} onClick={() => onPick(e)} className="flex w-full items-center gap-2 py-3 text-left">
-                <span className="flex-1 font-medium">{e.name}</span>
-                <Plus className="h-4 w-4 text-brand-500" />
+                <span className="flex-1 font-medium text-ink">{e.name}</span>
+                <Caret dir="right" className="text-ink-faint" />
               </button>
             ))
           )}
@@ -408,7 +419,7 @@ function AddExerciseModal({ open, onClose, onPick }: { open: boolean; onClose: (
 // ── Toggle compacto kg/lb por ejercicio ──────────────────────────────────────
 function UnitToggle({ unit, onChange }: { unit: WeightUnit; onChange: (u: WeightUnit) => void }) {
   return (
-    <div className="inline-flex overflow-hidden rounded-lg border border-zinc-200 text-[11px] font-bold dark:border-zinc-700">
+    <div className="inline-flex overflow-hidden rounded-lg border border-line text-2xs font-semibold">
       {(['kg', 'lb'] as const).map((u) => (
         <button
           key={u}
@@ -416,9 +427,7 @@ function UnitToggle({ unit, onChange }: { unit: WeightUnit; onChange: (u: Weight
           aria-pressed={unit === u}
           className={cn(
             'px-2 py-1 transition',
-            unit === u
-              ? 'bg-brand-600 text-white'
-              : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800',
+            unit === u ? 'bg-ink text-paper' : 'text-ink-muted hover:bg-canvas',
           )}
         >
           {u}

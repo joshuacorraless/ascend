@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Archive, ArchiveRestore, Copy, Dumbbell, Pencil, Play, Plus, Star } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { RoutineEditorModal } from './RoutineEditorModal';
 import { startSessionFromRoutine } from './sessionActions';
@@ -72,61 +71,66 @@ export function RoutineList() {
       {activeSession && (
         <button
           onClick={() => navigate(`/entrenamiento/sesion/${activeSession.id}`)}
-          className="flex w-full items-center justify-between rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-left dark:border-amber-800 dark:bg-amber-950/40"
+          className="card flex w-full items-center justify-between gap-3 text-left"
         >
-          <div>
-            <p className="text-xs font-medium text-amber-600 dark:text-amber-400">Sesión en curso</p>
-            <p className="font-semibold">{activeSession.name}</p>
+          <div className="min-w-0">
+            <p className="eyebrow text-brand-600">Sesión en curso</p>
+            <p className="mt-1 truncate font-semibold text-ink">{activeSession.name}</p>
           </div>
-          <span className="btn-primary !min-h-0 !px-3 !py-1.5 text-sm">Continuar</span>
+          <span className="btn-primary !min-h-0 shrink-0 px-3.5 py-2 text-sm">Continuar</span>
         </button>
       )}
 
       <div className="flex items-center justify-between">
-        <button className="btn-primary !min-h-0 !px-3 !py-1.5 text-sm" onClick={() => setCreating(true)}>
-          <Plus className="h-4 w-4" /> Nueva rutina
+        <button className="btn-primary !min-h-0 px-3.5 py-2 text-sm" onClick={() => setCreating(true)}>
+          Nueva rutina
         </button>
-        <label className="flex items-center gap-2 text-xs text-zinc-500">
-          <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
+        <label className="flex items-center gap-2 text-xs text-ink-muted">
+          <input
+            type="checkbox"
+            className="accent-ink"
+            checked={showArchived}
+            onChange={(e) => setShowArchived(e.target.checked)}
+          />
           Ver archivadas
         </label>
       </div>
 
       {(routines ?? []).length === 0 ? (
-        <EmptyState icon={Dumbbell} title="Sin rutinas" description="Crea tu primera rutina (Push, Pull, Pierna…)." />
+        <EmptyState title="Sin rutinas" description="Crea tu primera rutina (Push, Pull, Pierna…)." />
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {(routines ?? []).map((r) => (
             <li key={r.id} className={cn('card space-y-3', r.archived && 'opacity-60')}>
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="truncate font-semibold">{r.name}</p>
-                    {r.active && !r.archived && <Star className="h-3.5 w-3.5 shrink-0 fill-brand-400 text-brand-400" />}
+                  <div className="flex items-center gap-2">
+                    {r.active && !r.archived && (
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600" aria-hidden />
+                    )}
+                    <p className="truncate font-semibold text-ink">{r.name}</p>
                   </div>
-                  <p className="text-xs text-zinc-400">
+                  <p className="nums mt-0.5 text-xs text-ink-muted">
                     {r.exercises.length} ejercicios
                     {r.daysOfWeek.length > 0 ? ` · ${r.daysOfWeek.map((d) => WEEKDAY_LABELS[d]).join(' ')}` : ''}
                   </p>
                 </div>
                 {!r.archived && (
-                  <button className="btn-primary !min-h-0 shrink-0 !px-3 !py-1.5 text-sm" onClick={() => start(r)}>
-                    <Play className="h-4 w-4" /> Empezar
+                  <button className="btn-primary !min-h-0 shrink-0 px-3.5 py-2 text-sm" onClick={() => start(r)}>
+                    Empezar
                   </button>
                 )}
               </div>
-              <div className="flex items-center gap-1 border-t border-zinc-100 pt-2 dark:border-zinc-800">
-                <ActionBtn icon={Pencil} label="Editar" onClick={() => setEdit(r)} />
-                <ActionBtn icon={Copy} label="Duplicar" onClick={() => duplicate(r)} />
+              <div className="flex items-center gap-1 border-t border-line pt-2.5">
+                <ActionBtn label="Editar" onClick={() => setEdit(r)} />
+                <ActionBtn label="Duplicar" onClick={() => duplicate(r)} />
                 {!r.archived && (
                   <ActionBtn
-                    icon={Star}
                     label={r.active ? 'Quitar activa' : 'Marcar activa'}
                     onClick={() => repos.routines.put({ ...r, active: !r.active, updatedAt: new Date().toISOString() })}
                   />
                 )}
                 <ActionBtn
-                  icon={r.archived ? ArchiveRestore : Archive}
                   label={r.archived ? 'Restaurar' : 'Archivar'}
                   onClick={() => repos.routines.setArchived(r.id, !r.archived)}
                 />
@@ -142,10 +146,13 @@ export function RoutineList() {
   );
 }
 
-function ActionBtn({ icon: Icon, label, onClick }: { icon: typeof Pencil; label: string; onClick: () => void }) {
+function ActionBtn({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 text-xs text-zinc-500 hover:bg-zinc-100 hover:text-brand-600 dark:hover:bg-zinc-800">
-      <Icon className="h-3.5 w-3.5" /> {label}
+    <button
+      onClick={onClick}
+      className="flex-1 rounded-lg py-1.5 text-xs font-medium text-ink-muted transition hover:bg-canvas hover:text-ink"
+    >
+      {label}
     </button>
   );
 }

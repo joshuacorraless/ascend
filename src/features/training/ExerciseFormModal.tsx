@@ -138,8 +138,8 @@ export function ExerciseFormModal({
           </div>
         </div>
 
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={unilateral} onChange={(e) => setUnilateral(e.target.checked)} />
+        <label className="flex items-center gap-2 text-sm text-ink-soft">
+          <input type="checkbox" className="accent-ink" checked={unilateral} onChange={(e) => setUnilateral(e.target.checked)} />
           Ejercicio unilateral (un lado a la vez)
         </label>
 

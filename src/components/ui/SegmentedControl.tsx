@@ -11,6 +11,8 @@ interface SegmentedControlProps<T extends string> {
   onChange: (value: T) => void;
   className?: string;
   size?: 'sm' | 'md';
+  /** Ocupa todo el ancho con segmentos de igual tamaño. */
+  stretch?: boolean;
 }
 
 export function SegmentedControl<T extends string>({
@@ -19,13 +21,11 @@ export function SegmentedControl<T extends string>({
   onChange,
   className,
   size = 'md',
+  stretch = false,
 }: SegmentedControlProps<T>) {
   return (
     <div
-      className={cn(
-        'inline-flex rounded-2xl border border-stone-200/80 bg-white/50 p-1 shadow-inner shadow-white/70 dark:border-white/10 dark:bg-zinc-900/80 dark:shadow-none',
-        className,
-      )}
+      className={cn('surface', stretch ? 'flex w-full' : 'inline-flex', className)}
       role="tablist"
     >
       {options.map((opt) => {
@@ -37,11 +37,10 @@ export function SegmentedControl<T extends string>({
             aria-selected={active}
             onClick={() => onChange(opt.value)}
             className={cn(
-              'rounded-xl font-semibold transition',
-              size === 'sm' ? 'px-3 py-1 text-xs' : 'px-3.5 py-2 text-sm',
-              active
-                ? 'bg-stone-950 text-white shadow-sm dark:bg-white dark:text-zinc-950'
-                : 'text-zinc-500 hover:bg-white/70 hover:text-stone-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-200',
+              'rounded-lg font-medium transition duration-200 ease-ascend',
+              stretch && 'flex-1',
+              size === 'sm' ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm',
+              active ? 'bg-ink text-paper shadow-sm' : 'text-ink-muted hover:text-ink',
             )}
           >
             {opt.label}

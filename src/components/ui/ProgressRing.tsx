@@ -43,7 +43,7 @@ export function ProgressRing({
           r={radius}
           fill="none"
           strokeWidth={strokeWidth}
-          className={cn('stroke-zinc-200 dark:stroke-zinc-800', trackClassName)}
+          className={cn('stroke-line', trackClassName)}
         />
         <circle
           cx={size / 2}
@@ -55,8 +55,8 @@ export function ProgressRing({
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           className={cn(
-            'transition-[stroke-dashoffset] duration-500',
-            over ? 'stroke-amber-500' : 'stroke-teal-500',
+            'transition-[stroke-dashoffset] duration-700 ease-ascend',
+            over ? 'stroke-danger-500' : 'stroke-ink',
           )}
         />
       </svg>

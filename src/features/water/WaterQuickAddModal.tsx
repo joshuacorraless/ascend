@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Droplet, Undo2 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useSettings } from '@/app/providers/settings';
@@ -62,19 +61,18 @@ export function WaterQuickAddModal({
   return (
     <Modal open={open} onClose={onClose} title="Agua">
       <div className="space-y-5">
-        <div className="rounded-2xl bg-sky-50 p-4 text-center dark:bg-sky-950/40">
-          <Droplet className="mx-auto h-7 w-7 text-sky-500" />
-          <p className="mt-2 text-2xl font-bold">{formatVolume(total, settings.volumeUnit)}</p>
-          <p className="text-sm text-zinc-500">
-            de {formatVolume(target, settings.volumeUnit)} ({Math.round(percent)}%)
+        <div className="rounded-2xl border border-line bg-canvas p-5 text-center">
+          <p className="nums text-3xl font-semibold text-ink">{formatVolume(total, settings.volumeUnit)}</p>
+          <p className="eyebrow mt-1.5">
+            de {formatVolume(target, settings.volumeUnit)} · {Math.round(percent)}%
           </p>
-          <ProgressBar percent={percent} tone="sky" className="mt-3" />
+          <ProgressBar percent={percent} className="mt-4" />
         </div>
 
         <div className="grid grid-cols-3 gap-2">
           {PRESETS_ML.map((ml) => (
-            <button key={ml} className="btn-secondary flex-col !py-3" onClick={() => add(ml)}>
-              <span className="text-base font-bold">{formatVolume(ml, settings.volumeUnit)}</span>
+            <button key={ml} className="btn-secondary !py-3" onClick={() => add(ml)}>
+              <span className="nums text-base font-semibold">{formatVolume(ml, settings.volumeUnit)}</span>
             </button>
           ))}
         </div>
@@ -104,7 +102,7 @@ export function WaterQuickAddModal({
           onClick={undoLast}
           disabled={(entries ?? []).length === 0}
         >
-          <Undo2 className="h-4 w-4" /> Deshacer último
+          Deshacer último
         </button>
       </div>
     </Modal>

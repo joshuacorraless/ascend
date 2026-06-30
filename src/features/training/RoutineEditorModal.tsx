@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
+import { Caret } from '@/components/ui/Caret';
 import { Field } from '@/components/ui/Field';
 import { MUSCLE_LABELS } from './constants';
 import { useToast } from '@/app/providers/toast';
@@ -123,7 +123,7 @@ export function RoutineEditorModal({
 
         <div>
           <span className="label">Ejercicios</span>
-          <div className="mb-2 flex gap-2">
+          <div className="mb-2.5 flex gap-2">
             <select className="input flex-1" value={picker} onChange={(e) => setPicker(e.target.value)}>
               <option value="">Seleccionar ejercicio…</option>
               {available.map((e) => (
@@ -132,29 +132,29 @@ export function RoutineEditorModal({
                 </option>
               ))}
             </select>
-            <button className="btn-secondary" onClick={addExercise} disabled={!picker}>
-              <Plus className="h-4 w-4" />
+            <button className="btn-secondary px-4" onClick={addExercise} disabled={!picker}>
+              Añadir
             </button>
           </div>
 
           {items.length === 0 ? (
-            <p className="text-sm text-zinc-500">Sin ejercicios todavía.</p>
+            <p className="text-sm text-ink-muted">Sin ejercicios todavía.</p>
           ) : (
             <ul className="space-y-2">
               {items.map((it, i) => {
                 const ex = exById.get(it.exerciseId);
                 return (
-                  <li key={i} className="rounded-xl border border-zinc-200 p-3 dark:border-zinc-700">
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="flex-1 font-medium">{ex?.name ?? 'Ejercicio'}</span>
-                      <button className="rounded p-1 text-zinc-400 hover:text-brand-600 disabled:opacity-30" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Subir">
-                        <ArrowUp className="h-4 w-4" />
+                  <li key={i} className="rounded-xl border border-line bg-canvas p-3.5">
+                    <div className="mb-2.5 flex items-center gap-1.5">
+                      <span className="flex-1 truncate font-medium text-ink">{ex?.name ?? 'Ejercicio'}</span>
+                      <button className="grid h-7 w-7 place-items-center rounded-lg text-ink-muted transition hover:text-ink disabled:opacity-25" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Subir">
+                        <Caret dir="up" />
                       </button>
-                      <button className="rounded p-1 text-zinc-400 hover:text-brand-600 disabled:opacity-30" onClick={() => move(i, 1)} disabled={i === items.length - 1} aria-label="Bajar">
-                        <ArrowDown className="h-4 w-4" />
+                      <button className="grid h-7 w-7 place-items-center rounded-lg text-ink-muted transition hover:text-ink disabled:opacity-25" onClick={() => move(i, 1)} disabled={i === items.length - 1} aria-label="Bajar">
+                        <Caret dir="down" />
                       </button>
-                      <button className="rounded p-1 text-zinc-400 hover:text-red-600" onClick={() => remove(i)} aria-label="Quitar">
-                        <Trash2 className="h-4 w-4" />
+                      <button className="rounded-lg px-2 py-1 text-xs font-medium text-ink-muted transition hover:text-danger-600" onClick={() => remove(i)}>
+                        Quitar
                       </button>
                     </div>
                     <div className="grid grid-cols-4 gap-2">
@@ -163,7 +163,7 @@ export function RoutineEditorModal({
                       <NumField label="Rep max" value={it.repRangeMax} onChange={(v) => update(i, { repRangeMax: v })} />
                       <NumField label="Desc (s)" value={it.restSeconds ?? 0} onChange={(v) => update(i, { restSeconds: v })} />
                     </div>
-                    {ex && <p className="mt-1 text-xs text-zinc-400">{MUSCLE_LABELS[ex.primaryMuscle]}</p>}
+                    {ex && <p className="mt-1.5 text-xs text-ink-muted">{MUSCLE_LABELS[ex.primaryMuscle]}</p>}
                   </li>
                 );
               })}
@@ -178,11 +178,11 @@ export function RoutineEditorModal({
 function NumField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] text-zinc-500">{label}</span>
+      <span className="mb-1 block text-2xs font-medium text-ink-muted">{label}</span>
       <input
         type="number"
         inputMode="numeric"
-        className="input !px-2 !py-1.5 text-center"
+        className="input nums !px-2 !py-1.5 text-center"
         value={value}
         onChange={(e) => onChange(Math.max(0, Math.round(Number(e.target.value) || 0)))}
       />

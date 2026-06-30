@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Plus, Scale, Trash2, TrendingDown, TrendingUp, Minus } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SimpleLineChart } from '@/components/ui/SimpleLineChart';
+import { Caret } from '@/components/ui/Caret';
 import { WeightQuickAddModal } from './WeightQuickAddModal';
 import { useSettings } from '@/app/providers/settings';
 import { useToday } from '@/app/hooks/useToday';
@@ -46,24 +46,23 @@ export function BodyWeightScreen() {
     if (ok) await repos.bodyWeight.remove(e.id);
   };
 
-  const TrendIcon = stats.trend === 'subiendo' ? TrendingUp : stats.trend === 'bajando' ? TrendingDown : Minus;
   const fmt = (kg: number) => `${round(weightToDisplay(kg, unit), 1)} ${unit}`;
   const fmtDelta = (kg: number) => `${kg > 0 ? '+' : ''}${round(weightToDisplay(kg, unit), 1)} ${unit}`;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <PageHeader
+        eyebrow="Composición"
         title="Peso corporal"
         right={
-          <button className="btn-primary !min-h-0 !px-3 !py-1.5 text-sm" onClick={() => setAddOpen(true)}>
-            <Plus className="h-4 w-4" /> Registrar
+          <button className="btn-primary !min-h-0 px-3.5 py-2 text-sm" onClick={() => setAddOpen(true)}>
+            Registrar
           </button>
         }
       />
 
       {list.length === 0 ? (
         <EmptyState
-          icon={Scale}
           title="Sin registros de peso"
           description="Registra tu peso para ver tu tendencia y la media móvil de 7 días."
           action={
@@ -77,47 +76,43 @@ export function BodyWeightScreen() {
           <section className="card">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-xs text-zinc-500">Actual</p>
-                <p className="text-2xl font-bold">{stats.current !== undefined ? fmt(stats.current) : '—'}</p>
-              </div>
-              <div className="flex items-center justify-end gap-2">
-                <TrendIcon
-                  className={
-                    stats.trend === 'subiendo'
-                      ? 'h-5 w-5 text-amber-500'
-                      : stats.trend === 'bajando'
-                        ? 'h-5 w-5 text-emerald-500'
-                        : 'h-5 w-5 text-zinc-400'
-                  }
-                />
-                <div className="text-right">
-                  <p className="text-xs text-zinc-500">Últimos 7 días</p>
-                  <p className="font-semibold">{fmtDelta(stats.weeklyChange)}</p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-3 grid grid-cols-2 gap-3 border-t border-zinc-100 pt-3 text-sm dark:border-zinc-800">
-              <div>
-                <p className="text-xs text-zinc-500">Cambio total</p>
-                <p className="font-semibold">{fmtDelta(stats.totalChange)}</p>
+                <p className="eyebrow">Actual</p>
+                <p className="nums mt-1 text-2xl font-semibold text-ink">
+                  {stats.current !== undefined ? fmt(stats.current) : '—'}
+                </p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-zinc-500">Registros</p>
-                <p className="font-semibold">{list.length}</p>
+                <p className="eyebrow">Últimos 7 días</p>
+                <p className="nums mt-1 flex items-center justify-end gap-1.5 font-semibold text-ink">
+                  {stats.trend === 'subiendo' && <Caret dir="up" className="text-ink-muted" />}
+                  {stats.trend === 'bajando' && <Caret dir="down" className="text-ink-muted" />}
+                  {stats.trend === 'estable' && <span className="text-ink-faint">—</span>}
+                  {fmtDelta(stats.weeklyChange)}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-4 text-sm">
+              <div>
+                <p className="eyebrow">Cambio total</p>
+                <p className="nums mt-1 font-semibold text-ink">{fmtDelta(stats.totalChange)}</p>
+              </div>
+              <div className="text-right">
+                <p className="eyebrow">Registros</p>
+                <p className="nums mt-1 font-semibold text-ink">{list.length}</p>
               </div>
             </div>
           </section>
 
           {chartData.length >= 2 && (
             <section className="card">
-              <div className="mb-2 flex items-center justify-between">
-                <h2 className="font-semibold">Evolución</h2>
-                <div className="flex items-center gap-3 text-xs text-zinc-500">
-                  <span className="flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-full bg-brand-500" /> Peso
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-base font-semibold text-ink">Evolución</h2>
+                <div className="flex items-center gap-3 text-xs text-ink-muted">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-ink" /> Peso
                   </span>
-                  <span className="flex items-center gap-1">
-                    <span className="h-2 w-3 rounded-full bg-amber-500" /> Media 7d
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-px w-3 bg-ink-faint" /> Media 7d
                   </span>
                 </div>
               </div>
@@ -127,32 +122,31 @@ export function BodyWeightScreen() {
                 xFormatter={formatKeyShort}
                 unit={` ${unit}`}
                 lines={[
-                  { key: 'peso', name: 'Peso', color: '#6366f1' },
-                  { key: 'media', name: 'Media 7d', color: '#f59e0b', dashed: true },
+                  { key: 'peso', name: 'Peso', color: '#1A1916' },
+                  { key: 'media', name: 'Media 7d', color: '#B7B2A8', dashed: true },
                 ]}
               />
             </section>
           )}
 
-          <section className="space-y-2">
-            <h2 className="px-1 font-semibold">Historial</h2>
+          <section className="space-y-2.5">
+            <h2 className="px-1 text-base font-semibold text-ink">Historial</h2>
             <ul className="space-y-2">
               {[...list].reverse().map((e) => (
-                <li key={e.id} className="card flex items-center gap-3 !p-3">
-                  <div className="flex-1">
-                    <p className="font-semibold">{fmt(e.weightKg)}</p>
-                    <p className="text-xs text-zinc-400">
+                <li key={e.id} className="card flex items-center gap-3 !p-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="nums font-semibold text-ink">{fmt(e.weightKg)}</p>
+                    <p className="text-xs text-ink-muted">
                       {formatKeyRelative(e.localDate, settings.timeZone)}
                       {e.time ? ` · ${e.time}` : ''}
                       {e.notes ? ` · ${e.notes}` : ''}
                     </p>
                   </div>
                   <button
-                    className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-red-600 dark:hover:bg-zinc-800"
+                    className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-muted transition hover:text-danger-600"
                     onClick={() => remove(e)}
-                    aria-label="Eliminar"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    Quitar
                   </button>
                 </li>
               ))}

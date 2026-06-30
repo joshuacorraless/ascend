@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Archive, ArchiveRestore, Check, Pencil, Pill, Plus } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SupplementFormModal } from './SupplementFormModal';
@@ -50,21 +49,22 @@ export function SupplementsScreen() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <PageHeader
+        eyebrow="Rutina diaria"
         title="Suplementos"
         right={
-          <button className="btn-primary !min-h-0 !px-3 !py-1.5 text-sm" onClick={() => setCreating(true)}>
-            <Plus className="h-4 w-4" /> Nuevo
+          <button className="btn-primary !min-h-0 px-3.5 py-2 text-sm" onClick={() => setCreating(true)}>
+            Nuevo
           </button>
         }
       />
 
       {/* Checklist de hoy */}
       <section className="card">
-        <h2 className="mb-2 font-semibold">Hoy</h2>
+        <h2 className="mb-3 text-base font-semibold text-ink">Hoy</h2>
         {scheduledToday.length === 0 ? (
-          <p className="text-sm text-zinc-500">No hay suplementos programados para hoy.</p>
+          <p className="text-sm text-ink-muted">No hay suplementos programados para hoy.</p>
         ) : (
           <div className="-mx-2">
             {scheduledToday.map((s) => {
@@ -73,19 +73,22 @@ export function SupplementsScreen() {
                 <button
                   key={s.id}
                   onClick={() => setSupplementCompleted(s, dateKey, !completed)}
-                  className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
+                  className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left transition hover:bg-canvas"
                 >
                   <span
                     className={cn(
-                      'grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 transition',
-                      completed ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-zinc-300 text-transparent dark:border-zinc-600',
+                      'grid h-6 w-6 shrink-0 place-items-center rounded-full border transition duration-200 ease-ascend',
+                      completed ? 'border-ink bg-ink' : 'border-line',
                     )}
+                    aria-hidden
                   >
-                    <Check className="h-4 w-4" strokeWidth={3} />
+                    {completed && <span className="h-2 w-2 rounded-full bg-paper" />}
                   </span>
                   <span className="flex-1">
-                    <span className={cn('font-medium', completed && 'text-zinc-400 line-through')}>{s.name}</span>
-                    <span className="ml-2 text-xs text-zinc-400">
+                    <span className={cn('text-sm font-medium', completed ? 'text-ink-faint line-through' : 'text-ink')}>
+                      {s.name}
+                    </span>
+                    <span className="ml-2 text-xs text-ink-muted">
                       {s.dose ? `${s.dose} · ` : ''}
                       {SUPPLEMENT_TIME_LABELS[s.time]}
                     </span>
@@ -100,27 +103,27 @@ export function SupplementsScreen() {
       {/* Adherencia 7 días */}
       {history && history.some((d) => d.scheduled > 0) && (
         <section className="card">
-          <h2 className="mb-3 font-semibold">Últimos 7 días</h2>
+          <h2 className="mb-4 text-base font-semibold text-ink">Últimos 7 días</h2>
           <div className="flex justify-between gap-1">
             {history.map((d) => {
               const ratio = d.scheduled > 0 ? d.completed / d.scheduled : 0;
               return (
-                <div key={d.date} className="flex flex-1 flex-col items-center gap-1">
+                <div key={d.date} className="flex flex-1 flex-col items-center gap-2">
                   <div
                     className={cn(
-                      'grid h-9 w-9 place-items-center rounded-full text-xs font-semibold',
+                      'nums grid h-9 w-9 place-items-center rounded-full text-xs font-semibold',
                       d.scheduled === 0
-                        ? 'bg-zinc-100 text-zinc-300 dark:bg-zinc-800'
+                        ? 'border border-line text-ink-faint'
                         : ratio >= 1
-                          ? 'bg-emerald-500 text-white'
+                          ? 'bg-ink text-paper'
                           : ratio > 0
-                            ? 'bg-amber-400 text-white'
-                            : 'bg-zinc-200 text-zinc-400 dark:bg-zinc-800',
+                            ? 'bg-ink/25 text-ink'
+                            : 'bg-line text-ink-muted',
                     )}
                   >
                     {d.scheduled > 0 ? `${d.completed}/${d.scheduled}` : '–'}
                   </div>
-                  <span className="text-[10px] text-zinc-400">{formatKeyShort(d.date).split(' ')[0]}</span>
+                  <span className="text-2xs text-ink-faint">{formatKeyShort(d.date).split(' ')[0]}</span>
                 </div>
               );
             })}
@@ -129,43 +132,50 @@ export function SupplementsScreen() {
       )}
 
       {/* Gestión */}
-      <section className="space-y-2">
+      <section className="space-y-2.5">
         <div className="flex items-center justify-between px-1">
-          <h2 className="font-semibold">Mis suplementos</h2>
-          <label className="flex items-center gap-2 text-xs text-zinc-500">
-            <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
+          <h2 className="text-base font-semibold text-ink">Mis suplementos</h2>
+          <label className="flex items-center gap-2 text-xs text-ink-muted">
+            <input
+              type="checkbox"
+              className="accent-ink"
+              checked={showArchived}
+              onChange={(e) => setShowArchived(e.target.checked)}
+            />
             Ver archivados
           </label>
         </div>
         {(supplements ?? []).length === 0 ? (
           <EmptyState
-            icon={Pill}
             title="Sin suplementos"
             description="Crea tu primer suplemento para verlo en tu checklist diario."
           />
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {(supplements ?? []).map((s) => (
-              <li key={s.id} className={cn('card flex items-center gap-3 !p-3', s.archived && 'opacity-60')}>
-                <Pill className="h-5 w-5 shrink-0 text-brand-500" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{s.name}</p>
-                  <p className="text-xs text-zinc-400">
+              <li key={s.id} className={cn('card !p-4', s.archived && 'opacity-60')}>
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-ink">{s.name}</p>
+                  <p className="text-xs text-ink-muted">
                     {s.dose ? `${s.dose} · ` : ''}
                     {SUPPLEMENT_TIME_LABELS[s.time]} ·{' '}
                     {s.daysOfWeek.length === 0 ? 'todos los días' : `${s.daysOfWeek.length} día(s)`}
                   </p>
                 </div>
-                <button className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-brand-600 dark:hover:bg-zinc-800" onClick={() => setEdit(s)} aria-label="Editar">
-                  <Pencil className="h-4 w-4" />
-                </button>
-                <button
-                  className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-brand-600 dark:hover:bg-zinc-800"
-                  onClick={() => repos.supplements.setArchived(s.id, !s.archived)}
-                  aria-label={s.archived ? 'Restaurar' : 'Archivar'}
-                >
-                  {s.archived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
-                </button>
+                <div className="mt-3 flex justify-end gap-1 border-t border-line pt-2.5">
+                  <button
+                    className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-muted transition hover:bg-canvas hover:text-ink"
+                    onClick={() => setEdit(s)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-muted transition hover:bg-canvas hover:text-ink"
+                    onClick={() => repos.supplements.setArchived(s.id, !s.archived)}
+                  >
+                    {s.archived ? 'Restaurar' : 'Archivar'}
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

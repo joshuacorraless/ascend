@@ -15,11 +15,11 @@ export function NutritionScreen() {
   const [date, setDate] = useState<DateKey>(today);
 
   return (
-    <div className="space-y-4">
-      <PageHeader title="Alimentación" />
+    <div className="space-y-5">
+      <PageHeader eyebrow="Nutrición" title="Alimentación" />
 
       <SegmentedControl
-        className="w-full"
+        stretch
         value={view}
         onChange={setView}
         options={[

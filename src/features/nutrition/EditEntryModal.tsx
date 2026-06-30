@@ -145,10 +145,10 @@ export function EditEntryModal({
             ))}
           </select>
         </Field>
-        <div className="rounded-xl bg-zinc-50 p-3 dark:bg-zinc-800/50">
+        <div className="rounded-xl border border-line bg-canvas p-3.5">
           <MacroChips macros={preview} />
           {!hasFood && (
-            <p className="mt-2 text-xs text-zinc-400">
+            <p className="mt-2 text-xs text-ink-muted">
               El alimento original ya no está disponible; se ajusta proporcionalmente.
             </p>
           )}

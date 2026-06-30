@@ -7,16 +7,16 @@ import type { Macros, NutritionGoal } from '@/lib/schema';
 function MacroRow({ label, p, unit }: { label: string; p: MacroProgress; unit: string }) {
   return (
     <div>
-      <div className="mb-1 flex items-baseline justify-between text-sm">
-        <span className="font-bold text-stone-700 dark:text-zinc-300">{label}</span>
-        <span className="tabular-nums text-zinc-500">
-          <span className="font-semibold text-zinc-800 dark:text-zinc-100">{round(p.consumed)}</span>
+      <div className="mb-2 flex items-baseline justify-between text-sm">
+        <span className="font-medium text-ink-soft">{label}</span>
+        <span className="nums text-ink-muted">
+          <span className="font-semibold text-ink">{round(p.consumed)}</span>
           {' / '}
           {round(p.target)} {unit}
           {p.over > 0 ? (
-            <span className="ml-1 text-amber-600 dark:text-amber-400">(+{p.over})</span>
+            <span className="ml-1.5 font-medium text-danger-600">+{p.over}</span>
           ) : (
-            <span className="ml-1 text-zinc-400">quedan {p.remaining}</span>
+            <span className="ml-1.5 text-ink-faint">·&nbsp;{p.remaining}</span>
           )}
         </span>
       </div>
@@ -32,29 +32,30 @@ export function MacrosOverview({ goal, consumed }: { goal: NutritionGoal; consum
   const fat = macroProgress(consumed.fat, goal.fat);
 
   return (
-    <div className="card overflow-hidden">
-      <div className="flex items-center gap-4">
-        <ProgressRing percent={cal.percent} over={cal.over > 0} size={104} strokeWidth={11}>
-          <div className="text-center leading-tight">
-            <p className="text-xl font-black tabular-nums">{round(cal.consumed)}</p>
-            <p className="text-[10px] font-bold uppercase text-zinc-400">de {round(cal.target)}</p>
+    <div className="card">
+      <div className="flex items-center gap-5">
+        <ProgressRing percent={cal.percent} over={cal.over > 0} size={108} strokeWidth={10}>
+          <div className="text-center leading-none">
+            <p className="nums text-2xl font-semibold text-ink">{round(cal.consumed)}</p>
+            <p className="eyebrow mt-1">de {round(cal.target)}</p>
           </div>
         </ProgressRing>
         <div className="flex-1">
-          <p className="text-sm font-bold text-zinc-500">Calorías</p>
+          <p className="eyebrow">Calorías</p>
           {cal.over > 0 ? (
-            <p className="text-lg font-black text-amber-600 dark:text-amber-400">
-              {cal.over} kcal de más
+            <p className="mt-1 text-lg font-semibold text-danger-600">
+              <span className="nums">{cal.over}</span> kcal de más
             </p>
           ) : (
-            <p className="text-lg font-black">
-              {cal.remaining} <span className="text-sm font-medium text-zinc-500">kcal restantes</span>
+            <p className="mt-1 text-lg font-semibold text-ink">
+              <span className="nums">{cal.remaining}</span>{' '}
+              <span className="text-sm font-normal text-ink-muted">kcal restantes</span>
             </p>
           )}
         </div>
       </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-6 space-y-4">
         <MacroRow label="Proteína" p={protein} unit="g" />
         <MacroRow label="Carbohidratos" p={carbs} unit="g" />
         <MacroRow label="Grasas" p={fat} unit="g" />

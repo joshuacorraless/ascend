@@ -142,7 +142,7 @@ export function FoodFormModal({
           </Field>
         </div>
 
-        <p className="text-xs text-zinc-400">Valores nutricionales por la porción indicada arriba.</p>
+        <p className="text-xs text-ink-muted">Valores nutricionales por la porción indicada arriba.</p>
 
         <Field label="Calorías (kcal)" htmlFor="f-cal" error={errors.calories?.message}>
           <input id="f-cal" type="text" inputMode="decimal" className={fieldInputClass(!!errors.calories)} {...register('calories', numReq)} />

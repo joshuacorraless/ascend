@@ -9,11 +9,11 @@ export function TrainingScreen() {
   const [tab, setTab] = useState<'rutinas' | 'ejercicios' | 'historial'>('rutinas');
 
   return (
-    <div className="space-y-4">
-      <PageHeader title="Entrenamiento" />
+    <div className="space-y-5">
+      <PageHeader eyebrow="Fuerza" title="Entrenamiento" />
 
       <SegmentedControl
-        className="w-full"
+        stretch
         value={tab}
         onChange={setTab}
         options={[

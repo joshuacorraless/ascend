@@ -52,9 +52,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
         }
       >
         {opts?.message && (
-          <p className="rounded-2xl bg-stone-100/80 p-3 text-sm font-medium text-zinc-600 dark:bg-zinc-800/70 dark:text-zinc-300">
-            {opts.message}
-          </p>
+          <p className="text-sm leading-relaxed text-ink-soft">{opts.message}</p>
         )}
       </Modal>
     </ConfirmContext.Provider>

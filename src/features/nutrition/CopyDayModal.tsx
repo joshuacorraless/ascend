@@ -66,20 +66,23 @@ export function CopyDayModal({
         <DateNav dateKey={source} onChange={setSource} timeZone={settings.timeZone} max={targetDate} />
 
         {list.length === 0 ? (
-          <p className="py-6 text-center text-sm text-zinc-500">Sin comidas ese día.</p>
+          <p className="py-8 text-center text-sm text-ink-muted">Sin comidas ese día.</p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <MacroChips macros={totalsForEntries(list)} />
             {MEAL_TYPE_ORDER.map((meal) => {
               const subset = list.filter((e) => e.mealType === meal);
               if (subset.length === 0) return null;
               return (
-                <div key={meal} className="flex items-center justify-between rounded-xl bg-zinc-50 px-3 py-2 dark:bg-zinc-800/50">
-                  <div>
-                    <p className="text-sm font-medium">{MEAL_TYPE_LABELS[meal]}</p>
-                    <p className="text-xs text-zinc-400">{subset.map((e) => e.name).join(', ')}</p>
+                <div key={meal} className="flex items-center justify-between gap-3 rounded-xl border border-line bg-canvas px-3.5 py-2.5">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-ink">{MEAL_TYPE_LABELS[meal]}</p>
+                    <p className="truncate text-xs text-ink-muted">{subset.map((e) => e.name).join(', ')}</p>
                   </div>
-                  <button className="btn-ghost !min-h-0 !px-2 !py-1 text-xs text-brand-600" onClick={() => copyMeal(meal)}>
+                  <button
+                    className="shrink-0 rounded-lg px-2 py-1 text-sm font-medium text-brand-600 transition hover:text-brand-700"
+                    onClick={() => copyMeal(meal)}
+                  >
                     Copiar
                   </button>
                 </div>
