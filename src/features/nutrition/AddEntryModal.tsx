@@ -7,7 +7,7 @@ import { MacroChips } from './MacroChips';
 import { FoodFormModal } from './FoodFormModal';
 import { LabelScanModal } from './LabelScanModal';
 import { RecipeFormModal } from './RecipeFormModal';
-import { MEAL_TYPE_LABELS } from './mealTypes';
+import { mealLabel } from './mealTypes';
 import {
   buildEntryFromFood,
   buildEntryFromRecipe,
@@ -15,6 +15,7 @@ import {
   describeAmount,
   previewFoodMacros,
 } from './entryBuilders';
+import { useSettings } from '@/app/providers/settings';
 import { useToast } from '@/app/providers/toast';
 import { getRepositories } from '@/lib/repositories';
 import { recipeMacrosPerServing, scaleMacros } from '@/lib/domain';
@@ -34,8 +35,10 @@ export function AddEntryModal({
   dateKey: DateKey;
   mealType: MealType;
 }) {
+  const { settings } = useSettings();
   const { success } = useToast();
   const repos = getRepositories();
+  const mealName = mealLabel(settings, mealType);
   const foods = useLiveQuery(() => repos.foods.list(), [], [] as Food[]);
   const recipes = useLiveQuery(() => repos.recipes.list(), [], [] as Recipe[]);
   const recent = useLiveQuery(() => repos.meals.recent(40), [], [] as MealEntry[]);
@@ -93,7 +96,7 @@ export function AddEntryModal({
     const amt = parseDecimalInput(amount);
     if (!Number.isFinite(amt) || amt <= 0) return;
     await repos.meals.put(buildEntryFromFood(selFood, mealType, dateKey, amt));
-    success(`Añadido a ${MEAL_TYPE_LABELS[mealType]}`);
+    success(`Añadido a ${mealName}`);
     reset();
   };
 
@@ -102,7 +105,7 @@ export function AddEntryModal({
     const servings = parseDecimalInput(amount);
     if (!Number.isFinite(servings) || servings <= 0) return;
     await repos.meals.put(buildEntryFromRecipe(selRecipe, foodsById, mealType, dateKey, servings));
-    success(`Añadido a ${MEAL_TYPE_LABELS[mealType]}`);
+    success(`Añadido a ${mealName}`);
     reset();
   };
 
@@ -192,7 +195,7 @@ export function AddEntryModal({
   // ── Vista: selector ────────────────────────────────────────────────────────
   return (
     <>
-      <Modal open={open && !newFood && !newRecipe && !scanOpen} onClose={onClose} title={`Agregar a ${MEAL_TYPE_LABELS[mealType]}`}>
+      <Modal open={open && !newFood && !newRecipe && !scanOpen} onClose={onClose} title={`Agregar a ${mealName}`}>
         <div className="space-y-3.5">
           <SegmentedControl
             stretch

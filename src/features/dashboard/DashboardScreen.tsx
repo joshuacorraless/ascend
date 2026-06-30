@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSettings } from '@/app/providers/settings';
 import { useToday } from '@/app/hooks/useToday';
 import { formatKeyHuman, formatKeyRelative } from '@/lib/datetime';
-import { formatVolume, formatWeight, weightToDisplay } from '@/lib/units';
+import { formatVolume, formatWeight } from '@/lib/units';
 import { macroProgress } from '@/lib/domain';
 import { cn } from '@/lib/cn';
 import { Caret } from '@/components/ui/Caret';
@@ -249,9 +249,7 @@ export function DashboardScreen() {
         open={weightOpen}
         onClose={() => setWeightOpen(false)}
         dateKey={dateKey}
-        {...(data.latestWeight
-          ? { defaultKg: Number(weightToDisplay(data.latestWeight.weightKg, settings.weightUnit).toFixed(1)) }
-          : {})}
+        {...(data.latestWeight ? { defaultKg: data.latestWeight.weightKg } : {})}
       />
     </div>
   );

@@ -45,16 +45,14 @@ export const baseEntityShape = {
 
 // ── Enums de dominio ─────────────────────────────────────────────────────────
 
-export const mealTypes = [
-  'desayuno',
-  'almuerzo',
-  'cena',
-  'merienda',
-  'preentreno',
-  'postentreno',
-  'otra',
-] as const;
-export const mealTypeSchema = z.enum(mealTypes);
+/** Ids de los tiempos de comida por defecto (el usuario puede añadir más). */
+export const mealTypes = ['desayuno', 'almuerzo', 'cena', 'merienda'] as const;
+/**
+ * El tiempo de comida es un id libre (string): permite tiempos personalizados
+ * definidos por el usuario y guardados en los ajustes. Los ids por defecto
+ * siguen siendo 'desayuno' | 'almuerzo' | 'cena' | 'merienda'.
+ */
+export const mealTypeSchema = z.string().min(1, 'tiempo de comida requerido');
 export type MealType = z.infer<typeof mealTypeSchema>;
 
 export const weightUnitSchema = z.enum(['kg', 'lb']);

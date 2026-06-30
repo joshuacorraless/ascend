@@ -131,6 +131,8 @@ export interface WorkoutRepository {
 export interface BodyWeightRepository {
   list(): Promise<BodyWeightEntry[]>;
   get(id: string): Promise<BodyWeightEntry | undefined>;
+  /** Registro de un día concreto (para llevar un único peso por día). */
+  getByDate(localDate: string): Promise<BodyWeightEntry | undefined>;
   put(entry: BodyWeightEntry): Promise<void>;
   remove(id: string): Promise<void>;
   latest(): Promise<BodyWeightEntry | undefined>;

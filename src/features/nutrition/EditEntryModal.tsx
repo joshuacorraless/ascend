@@ -3,8 +3,9 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Modal } from '@/components/ui/Modal';
 import { Field } from '@/components/ui/Field';
 import { MacroChips } from './MacroChips';
-import { MEAL_TYPE_LABELS, MEAL_TYPE_ORDER } from './mealTypes';
+import { mealsForEntries } from './mealTypes';
 import { amountToPortions, describeAmount, previewFoodMacros } from './entryBuilders';
+import { useSettings } from '@/app/providers/settings';
 import { useToast } from '@/app/providers/toast';
 import { useConfirm } from '@/app/providers/confirm';
 import { useBusy } from '@/app/hooks/useBusy';
@@ -24,6 +25,7 @@ export function EditEntryModal({
   onClose: () => void;
   entry: MealEntry;
 }) {
+  const { settings } = useSettings();
   const { success } = useToast();
   const confirm = useConfirm();
   const { busy, run } = useBusy();
@@ -136,11 +138,11 @@ export function EditEntryModal({
             id="edit-meal"
             className="input"
             value={mealType}
-            onChange={(e) => setMealType(e.target.value as MealType)}
+            onChange={(e) => setMealType(e.target.value)}
           >
-            {MEAL_TYPE_ORDER.map((m) => (
-              <option key={m} value={m}>
-                {MEAL_TYPE_LABELS[m]}
+            {mealsForEntries(settings, [entry.mealType]).map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
               </option>
             ))}
           </select>

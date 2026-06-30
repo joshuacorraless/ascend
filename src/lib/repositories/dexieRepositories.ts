@@ -253,6 +253,7 @@ export function createDexieRepositories(db: AscendDatabase): Repositories {
   const bodyWeight: BodyWeightRepository = {
     list: () => db.bodyWeightEntries.orderBy('localDate').toArray(),
     get: (id) => db.bodyWeightEntries.get(id),
+    getByDate: (date) => db.bodyWeightEntries.where('localDate').equals(date).first(),
     put: async (e) => {
       await db.bodyWeightEntries.put(e);
     },

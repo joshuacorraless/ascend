@@ -5,47 +5,48 @@ import { MacroChips } from './MacroChips';
 import { AddEntryModal } from './AddEntryModal';
 import { EditEntryModal } from './EditEntryModal';
 import { CopyDayModal } from './CopyDayModal';
-import { MEAL_TYPE_LABELS, MEAL_TYPE_ORDER } from './mealTypes';
+import { MealTimesModal } from './MealTimesModal';
+import { mealLabel, mealsForEntries } from './mealTypes';
 import { cloneEntryToDate } from './entryBuilders';
+import { useSettings } from '@/app/providers/settings';
 import { useToast } from '@/app/providers/toast';
 import { getRepositories } from '@/lib/repositories';
 import { totalsForEntries } from '@/lib/domain';
 import { round } from '@/lib/units';
 import type { DateKey } from '@/lib/datetime';
-import type { MealEntry, MealType } from '@/lib/schema';
-
-const CORE_MEALS: MealType[] = ['desayuno', 'almuerzo', 'cena', 'merienda'];
+import type { MealEntry } from '@/lib/schema';
 
 export function DayLog({ dateKey }: { dateKey: DateKey }) {
   const repos = getRepositories();
+  const { settings } = useSettings();
   const { success } = useToast();
   const meals = useLiveQuery(() => repos.meals.listByDate(dateKey), [dateKey], [] as MealEntry[]);
   const goal = useLiveQuery(() => repos.goals.resolveForDate(dateKey), [dateKey]);
 
-  const [addMeal, setAddMeal] = useState<MealType | null>(null);
+  const [addMeal, setAddMeal] = useState<string | null>(null);
   const [editEntry, setEditEntry] = useState<MealEntry | null>(null);
   const [copyOpen, setCopyOpen] = useState(false);
+  const [timesOpen, setTimesOpen] = useState(false);
 
   const list = meals ?? [];
-  const byMeal = new Map<MealType, MealEntry[]>();
+  const byMeal = new Map<string, MealEntry[]>();
   for (const e of list) {
     const arr = byMeal.get(e.mealType);
     if (arr) arr.push(e);
     else byMeal.set(e.mealType, [e]);
   }
 
-  const sections = MEAL_TYPE_ORDER.filter(
-    (m) => CORE_MEALS.includes(m) || (byMeal.get(m)?.length ?? 0) > 0,
-  );
+  // Muestra todos los tiempos configurados (en orden) + los que existan en datos.
+  const sections = mealsForEntries(settings, list.map((e) => e.mealType));
 
-  const repeatLast = async (meal: MealType) => {
-    const prev = await repos.meals.lastEntriesForMeal(meal, dateKey);
+  const repeatLast = async (mealId: string) => {
+    const prev = await repos.meals.lastEntriesForMeal(mealId, dateKey);
     if (prev.length === 0) {
       success('No hay una comida previa para repetir.');
       return;
     }
     await Promise.all(prev.map((e) => repos.meals.put(cloneEntryToDate(e, dateKey))));
-    success(`Repetida la última: ${MEAL_TYPE_LABELS[meal]}.`);
+    success(`Repetida la última: ${mealLabel(settings, mealId)}.`);
   };
 
   return (
@@ -59,25 +60,30 @@ export function DayLog({ dateKey }: { dateKey: DateKey }) {
         </div>
       )}
 
-      <button className="btn-secondary w-full" onClick={() => setCopyOpen(true)}>
-        Copiar de otro día
-      </button>
+      <div className="grid grid-cols-2 gap-2">
+        <button className="btn-secondary" onClick={() => setCopyOpen(true)}>
+          Copiar de otro día
+        </button>
+        <button className="btn-secondary" onClick={() => setTimesOpen(true)}>
+          Tiempos de comida
+        </button>
+      </div>
 
       {sections.map((meal) => {
-        const entries = byMeal.get(meal) ?? [];
+        const entries = byMeal.get(meal.id) ?? [];
         const subtotal = totalsForEntries(entries);
         return (
-          <section key={meal} className="card">
+          <section key={meal.id} className="card">
             <div className="mb-3 flex items-center justify-between">
               <div className="flex items-baseline gap-2.5">
-                <h3 className="text-base font-semibold text-ink">{MEAL_TYPE_LABELS[meal]}</h3>
+                <h3 className="text-base font-semibold text-ink">{meal.name}</h3>
                 {entries.length > 0 && (
                   <span className="nums text-xs text-ink-muted">{round(subtotal.calories)} kcal</span>
                 )}
               </div>
               <button
                 className="rounded-lg px-2 py-1 text-sm font-medium text-brand-600 transition hover:text-brand-700"
-                onClick={() => setAddMeal(meal)}
+                onClick={() => setAddMeal(meal.id)}
               >
                 Agregar
               </button>
@@ -85,7 +91,7 @@ export function DayLog({ dateKey }: { dateKey: DateKey }) {
 
             {entries.length === 0 ? (
               <button
-                onClick={() => repeatLast(meal)}
+                onClick={() => repeatLast(meal.id)}
                 className="w-full rounded-xl border border-dashed border-line py-3 text-xs font-medium text-ink-muted transition hover:border-ink-faint hover:text-ink"
               >
                 Repetir última
@@ -121,6 +127,7 @@ export function DayLog({ dateKey }: { dateKey: DateKey }) {
         <EditEntryModal open={editEntry !== null} onClose={() => setEditEntry(null)} entry={editEntry} />
       )}
       <CopyDayModal open={copyOpen} onClose={() => setCopyOpen(false)} targetDate={dateKey} />
+      <MealTimesModal open={timesOpen} onClose={() => setTimesOpen(false)} />
     </div>
   );
 }

@@ -3,14 +3,14 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Modal } from '@/components/ui/Modal';
 import { DateNav } from '@/components/ui/DateNav';
 import { MacroChips } from './MacroChips';
-import { MEAL_TYPE_LABELS, MEAL_TYPE_ORDER } from './mealTypes';
+import { mealsForEntries } from './mealTypes';
 import { cloneEntryToDate } from './entryBuilders';
 import { useSettings } from '@/app/providers/settings';
 import { useToast } from '@/app/providers/toast';
 import { getRepositories } from '@/lib/repositories';
 import { totalsForEntries } from '@/lib/domain';
 import { addDaysToKey, type DateKey } from '@/lib/datetime';
-import type { MealEntry, MealType } from '@/lib/schema';
+import type { MealEntry } from '@/lib/schema';
 
 export function CopyDayModal({
   open,
@@ -43,12 +43,12 @@ export function CopyDayModal({
     onClose();
   };
 
-  const copyMeal = async (meal: MealType) => {
+  const copyMeal = async (meal: { id: string; name: string }) => {
     const repos = getRepositories();
-    const subset = list.filter((e) => e.mealType === meal);
+    const subset = list.filter((e) => e.mealType === meal.id);
     if (subset.length === 0) return;
     await Promise.all(subset.map((e) => repos.meals.put(cloneEntryToDate(e, targetDate))));
-    success(`Copiado ${MEAL_TYPE_LABELS[meal]}.`);
+    success(`Copiado ${meal.name}.`);
   };
 
   return (
@@ -70,13 +70,13 @@ export function CopyDayModal({
         ) : (
           <div className="space-y-2.5">
             <MacroChips macros={totalsForEntries(list)} />
-            {MEAL_TYPE_ORDER.map((meal) => {
-              const subset = list.filter((e) => e.mealType === meal);
+            {mealsForEntries(settings, list.map((e) => e.mealType)).map((meal) => {
+              const subset = list.filter((e) => e.mealType === meal.id);
               if (subset.length === 0) return null;
               return (
-                <div key={meal} className="flex items-center justify-between gap-3 rounded-xl border border-line bg-canvas px-3.5 py-2.5">
+                <div key={meal.id} className="flex items-center justify-between gap-3 rounded-xl border border-line bg-canvas px-3.5 py-2.5">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-ink">{MEAL_TYPE_LABELS[meal]}</p>
+                    <p className="text-sm font-medium text-ink">{meal.name}</p>
                     <p className="truncate text-xs text-ink-muted">{subset.map((e) => e.name).join(', ')}</p>
                   </div>
                   <button

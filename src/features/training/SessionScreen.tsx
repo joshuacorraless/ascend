@@ -160,8 +160,8 @@ export function SessionScreen() {
       <AddExerciseModal
         open={addOpen}
         onClose={() => setAddOpen(false)}
-        onPick={async (ex) => {
-          await addExerciseToSession(session.id, ex, orderedLogs.length);
+        onPick={async (ex, options) => {
+          await addExerciseToSession(session.id, ex, orderedLogs.length, options);
           setAddOpen(false);
         }}
       />
@@ -403,11 +403,27 @@ function SetRow({
 }
 
 // ── Selector de ejercicio para añadir a la sesión ────────────────────────────
-function AddExerciseModal({ open, onClose, onPick }: { open: boolean; onClose: () => void; onPick: (e: Exercise) => void }) {
+function AddExerciseModal({
+  open,
+  onClose,
+  onPick,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onPick: (e: Exercise, options?: { toFailure?: boolean }) => void;
+}) {
   const [search, setSearch] = useState('');
+  const [toFailure, setToFailure] = useState(false);
   const exercises = useLiveQuery(() => getRepositories().exercises.list(), [], [] as Exercise[]);
   const term = search.trim().toLowerCase();
   const filtered = (exercises ?? []).filter((e) => !term || e.name.toLowerCase().includes(term));
+
+  useEffect(() => {
+    if (open) {
+      setSearch('');
+      setToFailure(false);
+    }
+  }, [open]);
 
   return (
     <Modal open={open} onClose={onClose} title="Agregar ejercicio">
@@ -419,12 +435,24 @@ function AddExerciseModal({ open, onClose, onPick }: { open: boolean; onClose: (
           onChange={(e) => setSearch(e.target.value)}
           autoFocus
         />
+        <button
+          type="button"
+          onClick={() => setToFailure((v) => !v)}
+          aria-pressed={toFailure}
+          className={cn('chip', toFailure && 'chip-active')}
+        >
+          Al fallo
+        </button>
         <div className="divide-y divide-line">
           {filtered.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-muted">Sin ejercicios. Créalos en la pestaña Ejercicios.</p>
           ) : (
             filtered.map((e) => (
-              <button key={e.id} onClick={() => onPick(e)} className="flex w-full items-center gap-2 py-3 text-left">
+              <button
+                key={e.id}
+                onClick={() => onPick(e, { toFailure })}
+                className="flex w-full items-center gap-2 py-3 text-left"
+              >
                 <span className="flex-1 font-medium text-ink">{e.name}</span>
                 <Caret dir="right" className="text-ink-faint" />
               </button>

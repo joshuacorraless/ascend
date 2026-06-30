@@ -85,6 +85,7 @@ export async function addExerciseToSession(
   sessionId: string,
   exercise: Exercise,
   order: number,
+  options?: { toFailure?: boolean },
 ): Promise<void> {
   const repos = getRepositories();
   const log = newEntity<ExerciseLog>({
@@ -95,7 +96,9 @@ export async function addExerciseToSession(
     order,
   });
   await repos.workout.putExerciseLog(log);
-  await repos.workout.putSetLog(blankSet(sessionId, log.id, exercise.id, 1));
+  await repos.workout.putSetLog(
+    blankSet(sessionId, log.id, exercise.id, 1, options?.toFailure ? { setType: 'fallo' } : undefined),
+  );
 }
 
 /**

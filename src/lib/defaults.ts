@@ -1,8 +1,16 @@
 import { DEFAULT_TIME_ZONE, todayKey } from './datetime';
 import { nowIso } from './ids';
 import { newEntity } from './factories';
-import type { NutritionGoal, UserSettings } from './schema';
+import type { MealDef, NutritionGoal, UserSettings } from './schema';
 import { SETTINGS_ID } from './schema';
+
+/** Tiempos de comida por defecto. El usuario puede añadir, renombrar y reordenar. */
+export const DEFAULT_MEALS: MealDef[] = [
+  { id: 'desayuno', name: 'Desayuno' },
+  { id: 'almuerzo', name: 'Almuerzo' },
+  { id: 'cena', name: 'Cena' },
+  { id: 'merienda', name: 'Merienda' },
+];
 
 export function createDefaultSettings(): UserSettings {
   const ts = nowIso();
@@ -14,6 +22,7 @@ export function createDefaultSettings(): UserSettings {
     theme: 'system',
     locale: 'es',
     oneRmFormula: 'epley',
+    meals: DEFAULT_MEALS.map((m) => ({ ...m })),
     onboarded: false,
     createdAt: ts,
     updatedAt: ts,
