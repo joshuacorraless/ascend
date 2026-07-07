@@ -4,7 +4,7 @@ import type { OneRmFormula, SetLog, WorkoutSession } from '@/lib/schema';
 /**
  * Estimación de 1RM con la fórmula de Epley:  1RM ≈ peso × (1 + reps / 30).
  * Es una ESTIMACIÓN, no una medición. Con 1 repetición devuelve el propio peso.
- * Documentado en DATA_MODEL.md / LIMITATIONS.md.
+ * Documentado en docs/DATA_MODEL.md / docs/LIMITATIONS.md.
  */
 export function epleyOneRm(weightKg: number, reps: number): number {
   if (weightKg <= 0 || reps <= 0) return 0;

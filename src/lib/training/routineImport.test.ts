@@ -53,6 +53,33 @@ describe('parseRoutineImport', () => {
     expect(b).toMatchObject({ equipment: 'peso_corporal', trackingType: 'bodyweight_reps', targetSets: 20 }); // clamp 1..20
   });
 
+  it('reconoce "al fallo" por campo explícito o dentro de reps', () => {
+    const r = parseRoutineImport(
+      JSON.stringify({
+        rutinas: [
+          {
+            nombre: 'A',
+            ejercicios: [
+              { nombre: 'Curl', alFallo: true },
+              { nombre: 'Fondos', fallo: 'sí' },
+              { nombre: 'Remo', reps: 'al fallo' },
+              { nombre: 'Press', reps: '6-10 AMRAP' },
+              { nombre: 'Jalón', reps: '8-12', alFallo: false },
+              { nombre: 'Sentadilla', reps: '5-8' },
+            ],
+          },
+        ],
+      }),
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const exs = r.routines[0]!.exercises;
+    expect(exs.map((e) => e.toFailure)).toEqual([true, true, true, true, false, false]);
+    // El rango sigue presente (defaults) aunque sea al fallo, como en el editor.
+    expect(exs[0]).toMatchObject({ repRangeMin: 8, repRangeMax: 12 });
+    expect(exs[3]).toMatchObject({ repRangeMin: 6, repRangeMax: 10 });
+  });
+
   it('acepta un arreglo de rutinas y una rutina suelta', () => {
     expect(parseRoutineImport(JSON.stringify([{ nombre: 'X', ejercicios: [{ nombre: 'Y' }] }])).ok).toBe(true);
     expect(parseRoutineImport(JSON.stringify({ nombre: 'X', ejercicios: [{ nombre: 'Y' }] })).ok).toBe(true);
@@ -78,6 +105,17 @@ describe('buildImportEntities', () => {
     // Solo "Aperturas" es nuevo; "press de banca" se casa con el existente.
     expect(newExercises.map((e) => e.name)).toEqual(['Aperturas']);
     expect(routines[0]!.exercises[0]!.exerciseId).toBe(existing[0]!.id);
+  });
+
+  it('propaga toFailure al ejercicio de la rutina construida', () => {
+    const parsed = parseRoutineImport(
+      JSON.stringify({
+        rutinas: [{ nombre: 'A', ejercicios: [{ nombre: 'Curl', alFallo: true }, { nombre: 'Remo' }] }],
+      }),
+    );
+    if (!parsed.ok) throw new Error('parse falló');
+    const { routines } = buildImportEntities(parsed.routines, []);
+    expect(routines[0]!.exercises.map((e) => e.toFailure)).toEqual([true, false]);
   });
 
   it('deduplica ejercicios repetidos dentro del mismo import', () => {

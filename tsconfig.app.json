@@ -23,10 +23,9 @@
     "noUncheckedIndexedAccess": true,
     "verbatimModuleSyntax": true,
 
-    /* Path aliases */
-    "baseUrl": ".",
+    /* Path aliases (relativos al tsconfig; sin baseUrl, deprecado en TS 6) */
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
 
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"]

@@ -18,7 +18,8 @@ import type {
  * biblioteca —como si se hubieran metido a mano— y arma las rutinas por día.
  *
  * Formato (ver ROUTINE_TEMPLATE_JSON). Es tolerante: acepta faltantes, sinónimos
- * y alias en inglés, y aplica valores por defecto razonables.
+ * y alias en inglés, y aplica valores por defecto razonables. Las series al
+ * fallo se marcan con `alFallo: true` (o `reps: "al fallo"`).
  */
 
 // ── Forma intermedia ya normalizada y validada ───────────────────────────────
@@ -31,6 +32,7 @@ export interface ParsedExercise {
   targetSets: number;
   repRangeMin: number;
   repRangeMax: number;
+  toFailure: boolean;
   restSeconds?: number;
   notes?: string;
 }
@@ -84,6 +86,17 @@ function asString(v: unknown): string | undefined {
 function asInt(v: unknown): number | undefined {
   const n = typeof v === 'string' ? Number(v.trim()) : typeof v === 'number' ? v : NaN;
   return Number.isFinite(n) ? Math.round(n) : undefined;
+}
+
+function asBool(v: unknown): boolean | undefined {
+  if (typeof v === 'boolean') return v;
+  if (typeof v === 'number') return v !== 0;
+  if (typeof v === 'string') {
+    const s = norm(v);
+    if (['si', 'yes', 'true', '1', 'x', 'fallo', 'al fallo'].includes(s)) return true;
+    if (['no', 'false', '0'].includes(s)) return false;
+  }
+  return undefined;
 }
 
 function clamp(n: number, min: number, max: number): number {
@@ -207,11 +220,17 @@ function parseExercise(raw: unknown): ParsedExercise | null {
   const equipment = mapEquipment(asString(pick(raw, ['equipo', 'equipment', 'maquina', 'máquina'])));
   const type = mapType(asString(pick(raw, ['tipo', 'type'])), muscle);
   const targetSets = clamp(asInt(pick(raw, ['series', 'sets', 'targetSets'])) ?? 3, 1, 20);
+  const repsRaw = pick(raw, ['reps', 'repeticiones', 'rango']);
   const [repRangeMin, repRangeMax] = parseRepRange(
     asInt(pick(raw, ['repsMin', 'repRangeMin', 'minReps', 'reps_min'])),
     asInt(pick(raw, ['repsMax', 'repRangeMax', 'maxReps', 'reps_max'])),
-    pick(raw, ['reps', 'repeticiones', 'rango']),
+    repsRaw,
   );
+  // "Al fallo": campo explícito (alFallo/fallo/toFailure…) o implícito en el
+  // texto de reps ("al fallo", "AMRAP"…). Un false explícito gana.
+  const toFailure =
+    asBool(pick(raw, ['alFallo', 'al_fallo', 'alfallo', 'al fallo', 'fallo', 'toFailure', 'to_failure', 'failure'])) ??
+    (typeof repsRaw === 'string' && /\b(fallo|failure|amrap)\b/.test(norm(repsRaw)));
   const restRaw = asInt(pick(raw, ['descanso', 'rest', 'restSeconds', 'descansoSegundos']));
   const notes = asString(pick(raw, ['notas', 'notes', 'nota']));
 
@@ -224,6 +243,7 @@ function parseExercise(raw: unknown): ParsedExercise | null {
     targetSets,
     repRangeMin,
     repRangeMax,
+    toFailure,
     ...(restRaw !== undefined ? { restSeconds: clamp(restRaw, 0, 3600) } : {}),
     ...(notes ? { notes } : {}),
   };
@@ -301,6 +321,7 @@ export function buildImportEntities(
         targetSets: pe.targetSets,
         repRangeMin: pe.repRangeMin,
         repRangeMax: pe.repRangeMax,
+        toFailure: pe.toFailure,
         ...(pe.restSeconds !== undefined ? { restSeconds: pe.restSeconds } : {}),
         ...(pe.notes ? { notes: pe.notes } : {}),
       };
@@ -351,7 +372,7 @@ export const ROUTINE_TEMPLATE_JSON = JSON.stringify(
           { nombre: 'Press de banca', series: 4, repsMin: 6, repsMax: 10, descanso: 120, musculo: 'pecho', equipo: 'barra' },
           { nombre: 'Press inclinado con mancuernas', series: 3, reps: '8-12', musculo: 'pecho', equipo: 'mancuerna' },
           { nombre: 'Elevaciones laterales', series: 4, reps: 15, musculo: 'hombros', equipo: 'mancuerna' },
-          { nombre: 'Extensión de tríceps en polea', series: 3, repsMin: 10, repsMax: 15, musculo: 'triceps', equipo: 'polea' },
+          { nombre: 'Extensión de tríceps en polea', series: 3, alFallo: true, musculo: 'triceps', equipo: 'polea' },
         ],
       },
       {

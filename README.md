@@ -29,11 +29,12 @@ npm install
 npm run dev        # http://localhost:5173
 npm run check      # typecheck + lint + test + build
 ```
-Detalles de entorno, despliegue e instalación en iPhone → **[SETUP.md](./SETUP.md)**.
+Detalles de entorno, despliegue e instalación en iPhone → **[SETUP.md](./docs/SETUP.md)**.
 
 ## 📁 Estructura
 ```
 api/                         Función serverless de IA (Fase 6)
+docs/                        Documentación (requisitos, decisiones, modelo de datos, …)
 public/                      Íconos PWA, favicon, offline.html
 scripts/generate-icons.mjs   Generador de íconos (npm run icons)
 src/
@@ -47,9 +48,9 @@ src/
     domain/                  Lógica pura testeada (macros, 1RM, volumen, peso, agua)
     backup/                  Export/import JSON con validación y migración
 ```
-Documentación: [REQUIREMENTS](./REQUIREMENTS.md) · [DECISIONS](./DECISIONS.md) ·
-[DATA_MODEL](./DATA_MODEL.md) · [ROADMAP](./ROADMAP.md) · [LIMITATIONS](./LIMITATIONS.md) ·
-[SETUP](./SETUP.md).
+Documentación: [REQUIREMENTS](./docs/REQUIREMENTS.md) · [DECISIONS](./docs/DECISIONS.md) ·
+[DATA_MODEL](./docs/DATA_MODEL.md) · [ROADMAP](./docs/ROADMAP.md) ·
+[LIMITATIONS](./docs/LIMITATIONS.md) · [SETUP](./docs/SETUP.md).
 
 ## 🔐 Privacidad
 Local-first. Lo único que sale del dispositivo es la imagen de una etiqueta **si** usas la IA,
