@@ -1,13 +1,13 @@
 # Límites operativos
 
-Ascend hace explícitas sus fronteras para no confundir una PWA local con un servicio sincronizado o un sistema clínico.
+Ascend es una PWA local: no sincroniza dispositivos y no sustituye una herramienta clínica.
 
 | Área | Límite actual | Mitigación |
 | :-- | :-- | :-- |
 | Persistencia | Los datos pertenecen al navegador y dispositivo actuales. | Exportar respaldos JSON con regularidad. |
 | iOS | Safari puede desalojar almacenamiento tras inactividad o limpieza del sitio. | Instalar la PWA, usarla periódicamente y conservar respaldos externos. |
 | Sincronización | No existe réplica entre dispositivos. | La capa de repositorios permite una futura estrategia local-first. |
-| Primera carga | El app shell necesita conexión antes de quedar disponible offline. | Completar una primera apertura con red. |
+| Primera carga | Los recursos básicos necesitan conexión antes de quedar disponibles sin conexión. | Completar una primera apertura con red. |
 | IA | El análisis de etiquetas requiere conexión y una clave serverless. | El registro manual permanece disponible. |
 | Notificaciones | No se envían avisos push. | Los recordatorios actuales viven dentro de la interfaz. |
 

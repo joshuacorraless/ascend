@@ -1,12 +1,12 @@
 # Registro de decisiones
 
-Estas decisiones explican las garantías estructurales de Ascend y el costo de cambiarlas. La reversibilidad expresa impacto técnico, no prioridad de producto.
+Este registro explica por qué se eligió cada pieza y qué costaría cambiarla. La reversibilidad indica el impacto técnico del cambio, no su prioridad.
 
 | Eje | Elección |
 | :-- | :-- |
 | Ejecución | SPA local-first con una única función serverless opcional. |
 | Persistencia | IndexedDB detrás de contratos de repositorio. |
-| Integridad | Zod en fronteras y snapshots en el histórico. |
+| Integridad | Zod en entradas críticas y snapshots en el histórico. |
 | Evolución | Sustituciones incrementales, sin dependencia prematura de nube. |
 
 ## D1 · Framework: Vite + React + TypeScript (no Next.js)
@@ -30,14 +30,15 @@ Estas decisiones explican las garantías estructurales de Ascend y el costo de c
 - **Motivo:** Una app desplegada no puede escribir un JSON estático. IndexedDB es la base
   local del navegador con capacidad real; Dexie aporta tipado, índices y transacciones.
 - **Alternativas:** `localStorage` (muy limitado), SQLite vía WASM (excesivo para el MVP).
-- **Consecuencias:** Reactividad mediante `dexie-react-hooks` (`useLiveQuery`). La capa de UI
-  no importa Dexie directamente; solo `getRepositories()`.
-- **Reversible:** Alta. Para Supabase basta otra fábrica que cumpla `Repositories`.
+- **Consecuencias:** Reactividad mediante `dexie-react-hooks` (`useLiveQuery`). La interfaz no
+  accede directamente a tablas ni a la instancia de Dexie; las operaciones pasan por `getRepositories()`.
+- **Reversible:** Alta. Otra fábrica puede cumplir `Repositories`, aunque una sincronización
+  real también exige autenticación, políticas de acceso, cola de cambios y resolución de conflictos.
 
-## D3 · Validación con Zod en todas las fronteras
+## D3 · Validación con Zod en entradas críticas
 
 - **Decisión:** Esquemas Zod como fuente de verdad; los tipos TypeScript se derivan con
-  `z.infer`. Se valida en formularios, import de respaldos y respuestas de IA.
+  `z.infer`. Se validan los respaldos, las respuestas de IA y los formularios críticos.
 - **Motivo:** Evitar datos corruptos; un único lugar para forma + validación.
 - **Reversible:** Alta, pero no hay razón para cambiarlo.
 
@@ -97,15 +98,15 @@ Estas decisiones explican las garantías estructurales de Ascend y el costo de c
 | Idioma | Español |
 | Usuario | Único, sin autenticación |
 | Zona horaria por defecto | `America/Costa_Rica` (configurable) |
-| Peso (gym y corporal) | kg (interno), display kg/lb |
-| Agua | ml interno, display ml/L |
+| Peso (gimnasio y corporal) | kg interno, visualización en kg/lb |
+| Agua | ml interno, visualización en ml/L |
 | Tema | Único (gris carbón); el campo `theme` se conserva en el esquema por compatibilidad |
 | Nombre de la app | **Ascend** |
 | Paleta | Datos en rojo/amarillo/azul/verde sobre gris carbón; verde para acciones primarias |
 | Notificaciones del sistema | No en el MVP (solo recordatorios internos) — ver ROADMAP |
 | Superseries / medidas / fotos progreso | Fuera del MVP — ver ROADMAP |
 | Datos de demostración | Disponibles, desactivados por defecto |
-| Una sola sesión de entrenamiento activa a la vez | Sí |
+| Una sola sesión de entrenamiento activa a la vez | Guiado por la interfaz |
 | Autoguardado de sesiones | Sí |
 
 [Volver al README](../README.md) · [Consultar modelo de datos](./DATA_MODEL.md)

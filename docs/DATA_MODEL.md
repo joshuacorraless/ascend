@@ -4,7 +4,7 @@ El modelo separa definiciones editables de hechos históricos. Los esquemas Zod 
 
 | Principio | Aplicación |
 | :-- | :-- |
-| Identidad | UUID y marcas ISO 8601 para cada entidad. |
+| Identidad | UUID en entidades de colección; identificador fijo en los ajustes. |
 | Tiempo local | `localDate` conserva el día observado por el usuario. |
 | Historia | Los registros copian los valores necesarios para no depender del catálogo actual. |
 | Portabilidad | Un sobre versionado contiene y valida todas las tablas. |
@@ -89,15 +89,16 @@ BodyWeightEntry (N)
 - **Definición de ejercicio** ≠ **registros históricos** (`SetLog`).
 - **Objetivos actuales** ≠ **objetivos históricos** (mismo modelo, distinta `effectiveDate`).
 
-## Respaldo (export/import)
+## Respaldo (exportación/importación)
 
 `BackupEnvelope`: `{ app: "ascend", schemaVersion, exportedAt, data: { …una clave por tabla } }`.
-Se valida con Zod antes de importar; si la versión es anterior se migra (hoy no hay
-migraciones activas); si es más nueva, se rechaza. Importar **reemplaza** todos los datos.
+Se valida con Zod antes de importar. Una versión anterior requerirá una migración, aunque hoy
+no existen versiones previas ni migraciones activas; una versión más nueva se rechaza. Importar
+**reemplaza** todos los datos.
 
 ## Cálculos definidos
 
-- **Macros de una cantidad:** `macro_porción × cantidad` (cantidad en nº de porciones; los
+- **Macros de una cantidad:** `macro_porción × cantidad` (cantidad en número de porciones; los
   gramos/ml se convierten con `cantidad = gramos / portionSize`).
 - **Volumen de entrenamiento:** Σ `peso × reps` de series de trabajo completadas.
 - **1RM estimado (Epley):** `peso × (1 + reps/30)`; con 1 rep = el propio peso.

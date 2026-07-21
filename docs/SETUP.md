@@ -27,7 +27,7 @@ La aplicación queda en `http://localhost:5173` y el middleware local expone `/a
 | `npm run build` | Tipado y build PWA de producción. |
 | `npm run preview` | Vista local del artefacto productivo. |
 | `npm run icons` | Regeneración de iconos en `public/icons`. |
-| `npm run check` | Gate completo: tipos, lint, pruebas y build. |
+| `npm run check` | Verificación completa: tipos, lint, pruebas y build. |
 
 ## Configuración opcional
 
@@ -62,7 +62,7 @@ Sin `AI_PROVIDER`, el endpoint prioriza Google cuando existe su clave y después
 1. Abre el despliegue en Safari.
 2. Selecciona **Compartir → Agregar a pantalla de inicio**.
 3. Confirma **Ascend** y abre la aplicación instalada.
-4. Completa una primera carga con conexión; el app shell y los flujos principales quedarán disponibles offline.
+4. Completa una primera carga con conexión; los recursos básicos y los flujos principales quedarán disponibles sin conexión.
 
 Los datos permanecen en ese navegador. Exporta respaldos desde **Ajustes → Datos**.
 

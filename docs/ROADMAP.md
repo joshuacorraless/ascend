@@ -1,6 +1,6 @@
 # Evolución del producto
 
-Ascend prioriza profundidad local antes que amplitud conectada. Cada iniciativa futura debe conservar tres garantías: operación offline, control del usuario y estabilidad del historial.
+Antes de añadir servicios conectados, Ascend debe terminar y estabilizar la experiencia local. Cualquier cambio futuro debe mantener el uso sin conexión, el control de los datos y la integridad del historial.
 
 ## Horizonte
 
@@ -17,7 +17,7 @@ Ascend prioriza profundidad local antes que amplitud conectada. Cada iniciativa 
 
 La capa de repositorios admite una implementación remota, pero sincronizar no consiste en sustituir Dexie. La evolución prevista mantiene IndexedDB como fuente operativa local, añade una cola de cambios y coordina `push/pull` con resolución de conflictos por entidad.
 
-Supabase es la opción de referencia, no una dependencia comprometida. Antes de implementarlo deben definirse identidad, recuperación, borrado, políticas RLS, idempotencia y comportamiento offline.
+Supabase es la opción considerada por ahora, pero todavía no forma parte del proyecto. Antes de implementarlo deben definirse identidad, recuperación, borrado, políticas RLS, idempotencia y comportamiento sin conexión.
 
 ## Recordatorios del sistema
 
@@ -25,6 +25,6 @@ Los avisos push requieren permiso, backend Web Push y una PWA instalada en iOS 1
 
 ## Fuera de alcance
 
-Ascend no proyecta red social, seguidores, chat, marketplace, pagos, entrenadores externos, recomendaciones médicas, planes automáticos, wearables ni conteo de pasos. Esa frontera protege el propósito del producto: seguimiento personal privado y comprensible.
+El foco seguirá siendo el seguimiento personal. Por ahora no se contemplan red social, seguidores, chat, marketplace, pagos, entrenadores externos, recomendaciones médicas, planes automáticos, wearables ni conteo de pasos.
 
 [Volver al README](../README.md) · [Consultar limitaciones](./LIMITATIONS.md)
