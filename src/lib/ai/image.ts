@@ -26,7 +26,11 @@ export interface CompressedImage {
  * reduce el lado mayor a `maxEdge` px y la recodifica como JPEG. Así se envía
  * menos información al proveedor de IA y se respetan los límites del endpoint.
  */
-export async function compressImage(file: File, maxEdge = 1280, quality = 0.8): Promise<CompressedImage> {
+export async function compressImage(
+  file: File,
+  maxEdge = 1280,
+  quality = 0.8,
+): Promise<CompressedImage> {
   const bitmap = await loadBitmap(file);
   const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
   const width = Math.round(bitmap.width * scale);

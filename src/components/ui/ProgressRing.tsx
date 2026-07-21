@@ -2,13 +2,11 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 interface ProgressRingProps {
-  /** Porcentaje 0–100 (puede superar 100; el arco se limita a 100). */
+  /** Puede superar 100; el arco se limita a 100. */
   percent: number;
   size?: number;
   strokeWidth?: number;
-  /** true si se excedió la meta (el arco pasa a color de aviso). */
   over?: boolean;
-  /** Color del arco (CSS). Por defecto blanco. */
   color?: string;
   className?: string;
   trackClassName?: string;

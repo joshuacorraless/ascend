@@ -34,7 +34,9 @@ export function SupplementsScreen() {
     return Promise.all(
       days.map(async (d) => {
         const wd = weekdayOfKey(d);
-        const scheduled = sups.filter((s) => s.daysOfWeek.length === 0 || s.daysOfWeek.includes(wd));
+        const scheduled = sups.filter(
+          (s) => s.daysOfWeek.length === 0 || s.daysOfWeek.includes(wd),
+        );
         const logs = await repos.supplementLogs.listByDate(d);
         const completed = logs.filter((l) => l.completed).length;
         return { date: d, scheduled: scheduled.length, completed };
@@ -54,7 +56,10 @@ export function SupplementsScreen() {
         eyebrow="Rutina diaria"
         title="Suplementos"
         right={
-          <button className="btn-primary !min-h-0 px-3.5 py-2 text-sm" onClick={() => setCreating(true)}>
+          <button
+            className="btn-primary !min-h-0 px-3.5 py-2 text-sm"
+            onClick={() => setCreating(true)}
+          >
             Nuevo
           </button>
         }
@@ -85,7 +90,12 @@ export function SupplementsScreen() {
                     {completed && <span className="h-2 w-2 rounded-full bg-canvas" />}
                   </span>
                   <span className="flex-1">
-                    <span className={cn('text-sm font-medium', completed ? 'text-ink-faint line-through' : 'text-ink')}>
+                    <span
+                      className={cn(
+                        'text-sm font-medium',
+                        completed ? 'text-ink-faint line-through' : 'text-ink',
+                      )}
+                    >
                       {s.name}
                     </span>
                     <span className="ml-2 text-xs text-ink-muted">
@@ -123,7 +133,9 @@ export function SupplementsScreen() {
                   >
                     {d.scheduled > 0 ? `${d.completed}/${d.scheduled}` : '–'}
                   </div>
-                  <span className="text-2xs text-ink-faint">{formatKeyShort(d.date).split(' ')[0]}</span>
+                  <span className="text-2xs text-ink-faint">
+                    {formatKeyShort(d.date).split(' ')[0]}
+                  </span>
                 </div>
               );
             })}

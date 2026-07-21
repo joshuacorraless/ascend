@@ -27,11 +27,7 @@ const notArchived = <T extends { archived: boolean }>(items: T[], opts?: ListOpt
 const byNameEs = (a: { name: string }, b: { name: string }) =>
   a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
 
-/**
- * Construye la implementación de todos los repositorios sobre Dexie.
- * Para migrar a Supabase, basta con escribir otra fábrica que cumpla la misma
- * interfaz `Repositories` y cambiar la línea de `index.ts`.
- */
+/** Implementación de `Repositories` sobre Dexie; intercambiable por otra fábrica que cumpla la interfaz. */
 export function createDexieRepositories(db: AscendDatabase): Repositories {
   const settings: SettingsRepository = {
     get: () => db.settings.get('singleton'),
@@ -55,8 +51,7 @@ export function createDexieRepositories(db: AscendDatabase): Repositories {
     remove: async (id) => {
       await db.goals.delete(id);
     },
-    resolveForDate: (date: DateKey) =>
-      db.goals.where('effectiveDate').belowOrEqual(date).last(),
+    resolveForDate: (date: DateKey) => db.goals.where('effectiveDate').belowOrEqual(date).last(),
     latest: () => db.goals.orderBy('effectiveDate').last(),
   };
 
@@ -101,8 +96,7 @@ export function createDexieRepositories(db: AscendDatabase): Repositories {
   };
 
   const meals: MealRepository = {
-    listByDate: (date) =>
-      db.mealEntries.where('localDate').equals(date).toArray(),
+    listByDate: (date) => db.mealEntries.where('localDate').equals(date).toArray(),
     get: (id) => db.mealEntries.get(id),
     put: async (e) => {
       await db.mealEntries.put(e);

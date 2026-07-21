@@ -63,21 +63,34 @@ export function CopyDayModal({
       }
     >
       <div className="space-y-4">
-        <DateNav dateKey={source} onChange={setSource} timeZone={settings.timeZone} max={targetDate} />
+        <DateNav
+          dateKey={source}
+          onChange={setSource}
+          timeZone={settings.timeZone}
+          max={targetDate}
+        />
 
         {list.length === 0 ? (
           <p className="py-8 text-center text-sm text-ink-muted">Sin comidas ese día.</p>
         ) : (
           <div className="space-y-2.5">
             <MacroChips macros={totalsForEntries(list)} />
-            {mealsForEntries(settings, list.map((e) => e.mealType)).map((meal) => {
+            {mealsForEntries(
+              settings,
+              list.map((e) => e.mealType),
+            ).map((meal) => {
               const subset = list.filter((e) => e.mealType === meal.id);
               if (subset.length === 0) return null;
               return (
-                <div key={meal.id} className="flex items-center justify-between gap-3 rounded-xl border border-line bg-canvas px-3.5 py-2.5">
+                <div
+                  key={meal.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-line bg-canvas px-3.5 py-2.5"
+                >
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-ink">{meal.name}</p>
-                    <p className="truncate text-xs text-ink-muted">{subset.map((e) => e.name).join(', ')}</p>
+                    <p className="truncate text-xs text-ink-muted">
+                      {subset.map((e) => e.name).join(', ')}
+                    </p>
                   </div>
                   <button
                     className="shrink-0 rounded-lg px-2 py-1 text-sm font-medium text-brand-600 transition hover:text-brand-700"

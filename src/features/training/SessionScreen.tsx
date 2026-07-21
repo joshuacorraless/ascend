@@ -34,8 +34,16 @@ export function SessionScreen() {
   const repos = getRepositories();
 
   const session = useLiveQuery(() => repos.workout.getSession(sessionId), [sessionId]);
-  const logs = useLiveQuery(() => repos.workout.listExerciseLogs(sessionId), [sessionId], [] as ExerciseLog[]);
-  const sets = useLiveQuery(() => repos.workout.listSetLogs(sessionId), [sessionId], [] as SetLog[]);
+  const logs = useLiveQuery(
+    () => repos.workout.listExerciseLogs(sessionId),
+    [sessionId],
+    [] as ExerciseLog[],
+  );
+  const sets = useLiveQuery(
+    () => repos.workout.listSetLogs(sessionId),
+    [sessionId],
+    [] as SetLog[],
+  );
   const [addOpen, setAddOpen] = useState(false);
 
   const elapsed = useElapsed(session?.startedAt);
@@ -111,12 +119,16 @@ export function SessionScreen() {
           <div className="min-w-0">
             <h1 className="truncate text-lg font-semibold text-ink">{session.name}</h1>
             <p className="nums text-xs text-ink-muted">
-              {readOnly ? 'Completada' : formatDuration(elapsed)} · {doneSets} series · vol {round(volume)} {settings.weightUnit}
+              {readOnly ? 'Completada' : formatDuration(elapsed)} · {doneSets} series · vol{' '}
+              {round(volume)} {settings.weightUnit}
             </p>
           </div>
           {!readOnly ? (
             <div className="flex shrink-0 items-center gap-1">
-              <button className="rounded-lg px-2.5 py-2 text-sm font-medium text-ink-muted transition hover:text-danger-600" onClick={cancel}>
+              <button
+                className="rounded-lg px-2.5 py-2 text-sm font-medium text-ink-muted transition hover:text-danger-600"
+                onClick={cancel}
+              >
                 Descartar
               </button>
               <button className="btn-primary !min-h-0 px-3.5 py-2 text-sm" onClick={finish}>
@@ -124,7 +136,10 @@ export function SessionScreen() {
               </button>
             </div>
           ) : (
-            <button className="btn-secondary !min-h-0 px-3.5 py-2 text-sm" onClick={() => navigate('/entrenamiento')}>
+            <button
+              className="btn-secondary !min-h-0 px-3.5 py-2 text-sm"
+              onClick={() => navigate('/entrenamiento')}
+            >
               Volver
             </button>
           )}
@@ -169,7 +184,6 @@ export function SessionScreen() {
   );
 }
 
-// ── Tarjeta de un ejercicio dentro de la sesión ──────────────────────────────
 function ExerciseCard({
   log,
   sets,
@@ -193,7 +207,11 @@ function ExerciseCard({
   const repos = getRepositories();
   const unit = log.weightUnit ?? settings.weightUnit;
   const ordered = [...sets].sort((a, b) => a.setNumber - b.setNumber);
-  const prev = useLiveQuery(() => previousExerciseSets(log.exerciseId, log.sessionId), [log.exerciseId, log.sessionId], [] as SetLog[]);
+  const prev = useLiveQuery(
+    () => previousExerciseSets(log.exerciseId, log.sessionId),
+    [log.exerciseId, log.sessionId],
+    [] as SetLog[],
+  );
   const exercise = useLiveQuery(() => repos.exercises.get(log.exerciseId), [log.exerciseId]);
 
   const setUnit = (u: WeightUnit) => repos.workout.putExerciseLog(touch({ ...log, weightUnit: u }));
@@ -219,7 +237,14 @@ function ExerciseCard({
         await repos.workout.putSetLog(touch({ ...current, weightKg: p.weightKg, reps: p.reps }));
       } else {
         await repos.workout.putSetLog(
-          touch({ ...p, id: crypto.randomUUID(), sessionId: log.sessionId, exerciseLogId: log.id, completed: false, createdAt: new Date().toISOString() }),
+          touch({
+            ...p,
+            id: crypto.randomUUID(),
+            sessionId: log.sessionId,
+            exerciseLogId: log.id,
+            completed: false,
+            createdAt: new Date().toISOString(),
+          }),
         );
       }
     }
@@ -266,10 +291,14 @@ function ExerciseCard({
       {prev && prev.length > 0 && (
         <div className="mb-2.5 flex items-center justify-between gap-2 rounded-lg border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink-muted">
           <span className="nums truncate">
-            Anterior: {prev.map((s) => `${round(weightToDisplay(s.weightKg, unit), 1)}×${s.reps}`).join(', ')}
+            Anterior:{' '}
+            {prev.map((s) => `${round(weightToDisplay(s.weightKg, unit), 1)}×${s.reps}`).join(', ')}
           </span>
           {!readOnly && (
-            <button className="shrink-0 font-medium text-brand-600 transition hover:text-brand-700" onClick={copyPrevious}>
+            <button
+              className="shrink-0 font-medium text-brand-600 transition hover:text-brand-700"
+              onClick={copyPrevious}
+            >
               Copiar
             </button>
           )}
@@ -307,7 +336,7 @@ function ExerciseCard({
   );
 }
 
-// ── Fila de una serie (autoguardado) ─────────────────────────────────────────
+// Cada fila guarda sus cambios al momento, sin botón de confirmar.
 function SetRow({
   set,
   unit,
@@ -321,7 +350,9 @@ function SetRow({
   onWeightCommit?: (weightKg: number) => void;
 }) {
   const repos = getRepositories();
-  const [weight, setWeight] = useState(() => (set.weightKg ? String(round(weightToDisplay(set.weightKg, unit), 2)) : ''));
+  const [weight, setWeight] = useState(() =>
+    set.weightKg ? String(round(weightToDisplay(set.weightKg, unit), 2)) : '',
+  );
   const [reps, setReps] = useState(() => (set.reps ? String(set.reps) : ''));
 
   // Resincroniza si el set o la unidad cambian desde fuera (p. ej. "Copiar anterior",
@@ -350,11 +381,23 @@ function SetRow({
     persist({ setType: next });
   };
 
-  const typeBadge = set.setType === 'calentamiento' ? 'W' : set.setType === 'dropset' ? 'D' : set.setType === 'fallo' ? 'F' : String(set.setNumber);
+  const typeBadge =
+    set.setType === 'calentamiento'
+      ? 'W'
+      : set.setType === 'dropset'
+        ? 'D'
+        : set.setType === 'fallo'
+          ? 'F'
+          : String(set.setNumber);
   const special = set.setType !== 'efectiva';
 
   return (
-    <div className={cn('grid grid-cols-[2rem_1fr_1fr_2rem] items-center gap-2', set.completed && 'opacity-70')}>
+    <div
+      className={cn(
+        'grid grid-cols-[2rem_1fr_1fr_2rem] items-center gap-2',
+        set.completed && 'opacity-70',
+      )}
+    >
       <button
         onClick={cycleType}
         disabled={readOnly}
@@ -402,7 +445,6 @@ function SetRow({
   );
 }
 
-// ── Selector de ejercicio para añadir a la sesión ────────────────────────────
 function AddExerciseModal({
   open,
   onClose,
@@ -445,7 +487,9 @@ function AddExerciseModal({
         </button>
         <div className="divide-y divide-line">
           {filtered.length === 0 ? (
-            <p className="py-8 text-center text-sm text-ink-muted">Sin ejercicios. Créalos en la pestaña Ejercicios.</p>
+            <p className="py-8 text-center text-sm text-ink-muted">
+              Sin ejercicios. Créalos en la pestaña Ejercicios.
+            </p>
           ) : (
             filtered.map((e) => (
               <button
@@ -464,7 +508,6 @@ function AddExerciseModal({
   );
 }
 
-// ── Toggle compacto kg/lb por ejercicio ──────────────────────────────────────
 function UnitToggle({ unit, onChange }: { unit: WeightUnit; onChange: (u: WeightUnit) => void }) {
   return (
     <div className="inline-flex overflow-hidden rounded-lg border border-line text-2xs font-semibold">

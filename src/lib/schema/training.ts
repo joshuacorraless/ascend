@@ -83,7 +83,7 @@ export const exerciseLogSchema = z.object({
   exerciseName: z.string().min(1),
   trackingType: trackingTypeSchema,
   order: z.number().int().min(0),
-  /** Unidad de peso elegida para ESTE ejercicio en la sesión (kg por defecto). */
+  /** Unidad de peso elegida para este ejercicio en la sesión (kg por defecto). */
   weightUnit: weightUnitSchema.optional(),
   notes: z.string().optional(),
 });

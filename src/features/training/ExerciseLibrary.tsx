@@ -26,7 +26,10 @@ export function ExerciseLibrary() {
 
   const term = search.trim().toLowerCase();
   const filtered = (exercises ?? []).filter(
-    (e) => !term || e.name.toLowerCase().includes(term) || MUSCLE_LABELS[e.primaryMuscle].toLowerCase().includes(term),
+    (e) =>
+      !term ||
+      e.name.toLowerCase().includes(term) ||
+      MUSCLE_LABELS[e.primaryMuscle].toLowerCase().includes(term),
   );
 
   const loadSeed = async () => {
@@ -44,7 +47,10 @@ export function ExerciseLibrary() {
       />
 
       <div className="flex items-center justify-between">
-        <button className="btn-primary !min-h-0 px-3.5 py-2 text-sm" onClick={() => setCreating(true)}>
+        <button
+          className="btn-primary !min-h-0 px-3.5 py-2 text-sm"
+          onClick={() => setCreating(true)}
+        >
           Nuevo
         </button>
         <label className="flex items-center gap-2 text-xs text-ink-muted">

@@ -1,25 +1,25 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  // Tema único: gris carbón con datos en colores vivos (rojo/amarillo/azul/verde).
+  // Tema único: gris carbón con datos en colores vivos.
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        // — Superficies (gris carbón) —
+        // Superficies
         canvas: '#3C3C3C', // fondo de la app
         paper: '#474747', // tarjetas / superficies elevadas
         inset: '#343434', // rieles / cajas hundidas
         line: '#565656', // bordes / separadores
 
-        // — Texto: blanco + gris #b5b5b5 —
+        // Texto
         ink: {
-          DEFAULT: '#F5F5F5', // principal (blanco)
+          DEFAULT: '#F5F5F5', // principal
           soft: '#D2D2D2',
-          muted: '#B5B5B5', // secundario (gris pedido)
+          muted: '#B5B5B5', // secundario
           faint: '#8C8C8C', // terciario / metadatos
         },
 
-        // — Acento de marca / interacción: verde vivo (reemplaza al índigo). —
+        // Acento de marca / interacción
         brand: {
           50: '#e9fbf0',
           100: '#cdf5dd',
@@ -27,22 +27,22 @@ export default {
           300: '#72e0a0',
           400: '#4dd488',
           500: '#37c97e',
-          600: '#46d488', // texto de enlaces / fondo de botón (brillante sobre gris)
+          600: '#46d488', // texto de enlaces / fondo de botón
           700: '#33c178',
           800: '#28a566',
           900: '#218a55',
           950: '#0f4d2e',
         },
 
-        // — Paleta de datos viva (macros, gráficos, categorías) —
+        // Paleta de datos (macros, gráficos, categorías)
         macro: {
-          cal: '#51CF66', // verde
-          protein: '#FF8787', // rojo
-          carbs: '#FFD43B', // amarillo
-          fat: '#4DABF7', // azul
+          cal: '#51CF66',
+          protein: '#FF8787',
+          carbs: '#FFD43B',
+          fat: '#4DABF7',
         },
 
-        // — Color funcional (destructivo) —
+        // Acciones destructivas
         danger: {
           50: '#fff5f5',
           200: '#ffc9c9',
@@ -54,7 +54,7 @@ export default {
       },
 
       fontFamily: {
-        // Plus Jakarta Sans Variable autohospedada (offline). Cálida y geométrica.
+        // Autohospedada para que la PWA funcione offline.
         sans: [
           '"Plus Jakarta Sans Variable"',
           'system-ui',

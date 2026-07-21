@@ -1,7 +1,6 @@
-# LIMITATIONS.md — Limitaciones reales del MVP
+# Limitaciones conocidas
 
-Se documentan con honestidad las limitaciones conocidas. Nada aquí está "simulado" como
-terminado.
+Limitaciones de la versión actual y sus mitigaciones, donde aplican.
 
 ## Almacenamiento local (IndexedDB)
 - Los datos viven en **este navegador/dispositivo**. Borrar los datos del sitio, desinstalar

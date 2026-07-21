@@ -13,13 +13,7 @@ import { useBusy } from '@/app/hooks/useBusy';
 import { getRepositories } from '@/lib/repositories';
 import { newEntity, touch } from '@/lib/factories';
 import { cn } from '@/lib/cn';
-import type {
-  Equipment,
-  Exercise,
-  ExerciseType,
-  MuscleGroup,
-  TrackingType,
-} from '@/lib/schema';
+import type { Equipment, Exercise, ExerciseType, MuscleGroup, TrackingType } from '@/lib/schema';
 
 export function ExerciseFormModal({
   open,
@@ -91,7 +85,13 @@ export function ExerciseFormModal({
     >
       <div className="space-y-4">
         <Field label="Nombre" htmlFor="e-name">
-          <input id="e-name" className="input" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+          <input
+            id="e-name"
+            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoFocus
+          />
         </Field>
         <Field
           label="Descripción (opcional)"
@@ -108,7 +108,12 @@ export function ExerciseFormModal({
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Músculo principal" htmlFor="e-prim">
-            <select id="e-prim" className="input" value={primaryMuscle} onChange={(e) => setPrimary(e.target.value as MuscleGroup)}>
+            <select
+              id="e-prim"
+              className="input"
+              value={primaryMuscle}
+              onChange={(e) => setPrimary(e.target.value as MuscleGroup)}
+            >
               {MUSCLE_ORDER.map((m) => (
                 <option key={m} value={m}>
                   {MUSCLE_LABELS[m]}
@@ -117,7 +122,12 @@ export function ExerciseFormModal({
             </select>
           </Field>
           <Field label="Equipo" htmlFor="e-eq">
-            <select id="e-eq" className="input" value={equipment} onChange={(e) => setEquipment(e.target.value as Equipment)}>
+            <select
+              id="e-eq"
+              className="input"
+              value={equipment}
+              onChange={(e) => setEquipment(e.target.value as Equipment)}
+            >
               {(Object.keys(EQUIPMENT_LABELS) as Equipment[]).map((eq) => (
                 <option key={eq} value={eq}>
                   {EQUIPMENT_LABELS[eq]}
@@ -128,7 +138,12 @@ export function ExerciseFormModal({
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Tipo" htmlFor="e-type">
-            <select id="e-type" className="input" value={type} onChange={(e) => setType(e.target.value as ExerciseType)}>
+            <select
+              id="e-type"
+              className="input"
+              value={type}
+              onChange={(e) => setType(e.target.value as ExerciseType)}
+            >
               {(Object.keys(EXERCISE_TYPE_LABELS) as ExerciseType[]).map((t) => (
                 <option key={t} value={t}>
                   {EXERCISE_TYPE_LABELS[t]}
@@ -137,7 +152,12 @@ export function ExerciseFormModal({
             </select>
           </Field>
           <Field label="Registro" htmlFor="e-track">
-            <select id="e-track" className="input" value={tracking} onChange={(e) => setTracking(e.target.value as TrackingType)}>
+            <select
+              id="e-track"
+              className="input"
+              value={tracking}
+              onChange={(e) => setTracking(e.target.value as TrackingType)}
+            >
               {(Object.keys(TRACKING_TYPE_LABELS) as TrackingType[]).map((t) => (
                 <option key={t} value={t}>
                   {TRACKING_TYPE_LABELS[t]}
@@ -151,7 +171,11 @@ export function ExerciseFormModal({
           <span className="label">Músculos secundarios (opcional)</span>
           <div className="flex flex-wrap gap-1.5">
             {MUSCLE_ORDER.filter((m) => m !== primaryMuscle).map((m) => (
-              <button key={m} onClick={() => toggleSecondary(m)} className={cn('chip', secondary.includes(m) && 'chip-active')}>
+              <button
+                key={m}
+                onClick={() => toggleSecondary(m)}
+                className={cn('chip', secondary.includes(m) && 'chip-active')}
+              >
                 {MUSCLE_LABELS[m]}
               </button>
             ))}
@@ -159,12 +183,22 @@ export function ExerciseFormModal({
         </div>
 
         <label className="flex items-center gap-2 text-sm text-ink-soft">
-          <input type="checkbox" className="accent-ink" checked={unilateral} onChange={(e) => setUnilateral(e.target.checked)} />
+          <input
+            type="checkbox"
+            className="accent-ink"
+            checked={unilateral}
+            onChange={(e) => setUnilateral(e.target.checked)}
+          />
           Ejercicio unilateral (un lado a la vez)
         </label>
 
         <Field label="Notas técnicas (opcional)" htmlFor="e-notes">
-          <input id="e-notes" className="input" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <input
+            id="e-notes"
+            className="input"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
         </Field>
       </div>
     </Modal>

@@ -1,16 +1,15 @@
-/**
- * Utilidades de fecha. La app razona en "días locales" (YYYY-MM-DD) calculados
- * según la zona horaria configurada por el usuario. Una clave de día es una
- * fecha de calendario pura: la tratamos en UTC para hacer aritmética sin que el
- * horario de verano la desplace.
- */
+// La app razona en "días locales" (YYYY-MM-DD) según la zona horaria del usuario.
+// La aritmética de claves de día se hace en UTC para que el horario de verano no las desplace.
 
 export const DEFAULT_TIME_ZONE = 'America/Costa_Rica';
 
 export type DateKey = string; // 'YYYY-MM-DD'
 
 /** Devuelve la clave de día local (YYYY-MM-DD) de una fecha en una zona horaria. */
-export function localDateKey(date: Date = new Date(), timeZone: string = DEFAULT_TIME_ZONE): DateKey {
+export function localDateKey(
+  date: Date = new Date(),
+  timeZone: string = DEFAULT_TIME_ZONE,
+): DateKey {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone,
     year: 'numeric',

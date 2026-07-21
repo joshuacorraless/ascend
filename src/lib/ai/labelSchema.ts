@@ -1,12 +1,9 @@
 import { z } from 'zod';
 
 /**
- * Esquema ESTRICTO de la extracción de una etiqueta nutricional por IA.
- * Compartido entre el frontend (validación de la respuesta) y el endpoint
- * serverless. Solo depende de `zod` para poder importarse desde `api/`.
- *
- * Todos los valores nutricionales son POR PORCIÓN. Lo que el modelo no pueda
- * leer con seguridad debe venir como `null` (no inventado).
+ * Esquema de la extracción de una etiqueta nutricional. Compartido entre el
+ * frontend y el endpoint serverless, por lo que solo depende de `zod`.
+ * Los valores son por porción; lo que el modelo no pueda leer llega como `null`.
  */
 const nullableNum = z.number().finite().nonnegative().nullable();
 

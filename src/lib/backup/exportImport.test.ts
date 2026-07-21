@@ -30,7 +30,9 @@ describe('export / import JSON', () => {
   it('exporta, valida e importa conservando los datos', async () => {
     const repos = getRepositories();
     await ensureInitialized();
-    await repos.goals.put(createGoal({ calories: 2000, protein: 150, carbs: 200, fat: 60, waterMl: 3000 }));
+    await repos.goals.put(
+      createGoal({ calories: 2000, protein: 150, carbs: 200, fat: 60, waterMl: 3000 }),
+    );
     await repos.foods.put(demoFood());
 
     const json = await buildBackupJson();
@@ -59,7 +61,9 @@ describe('export / import JSON', () => {
   });
 
   it('rechaza una estructura que no cumple el esquema', () => {
-    const r = parseBackup(JSON.stringify({ app: 'ascend', schemaVersion: 1, exportedAt: nowIso() }));
+    const r = parseBackup(
+      JSON.stringify({ app: 'ascend', schemaVersion: 1, exportedAt: nowIso() }),
+    );
     expect(r.ok).toBe(false);
   });
 });

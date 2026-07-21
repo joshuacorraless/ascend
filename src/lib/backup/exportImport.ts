@@ -1,24 +1,14 @@
 import { getRepositories } from '@/lib/repositories';
-import {
-  CURRENT_SCHEMA_VERSION,
-  backupEnvelopeSchema,
-  type BackupEnvelope,
-} from '@/lib/schema';
+import { CURRENT_SCHEMA_VERSION, backupEnvelopeSchema, type BackupEnvelope } from '@/lib/schema';
 import { todayKey } from '@/lib/datetime';
 
 export type ImportResult =
   | { ok: true; envelope: BackupEnvelope; migratedFrom?: number }
   | { ok: false; error: string };
 
-/**
- * Migra un sobre de respaldo de una versión anterior a la actual.
- * Hoy solo existe la v1; cuando cambie el esquema, encadena transformaciones
- * incrementales aquí (v1→v2, v2→v3, …).
- */
+/** Migra un respaldo de versiones anteriores encadenando transformaciones incrementales. */
 function migrateEnvelope(envelope: BackupEnvelope): BackupEnvelope {
   const current = envelope;
-  // Ejemplo (no activo):
-  // if (current.schemaVersion === 1) { current = { ...current, schemaVersion: 2, data: ... }; }
   return current;
 }
 
@@ -80,7 +70,7 @@ export async function downloadBackup(): Promise<void> {
   URL.revokeObjectURL(url);
 }
 
-/** Aplica un respaldo ya validado, reemplazando TODOS los datos actuales. */
+/** Aplica un respaldo ya validado, reemplazando todos los datos actuales. */
 export async function applyBackup(envelope: BackupEnvelope): Promise<void> {
   const repos = getRepositories();
   await repos.storage.importReplace(envelope);

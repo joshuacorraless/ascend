@@ -43,7 +43,10 @@ export function RoutineProgressScreen() {
     return (
       <div className="space-y-5">
         <BackBar onBack={() => navigate('/progreso')} />
-        <EmptyState title="Rutina no encontrada" description="Puede que se haya archivado o eliminado." />
+        <EmptyState
+          title="Rutina no encontrada"
+          description="Puede que se haya archivado o eliminado."
+        />
       </div>
     );
   }
@@ -68,7 +71,10 @@ export function RoutineProgressScreen() {
       <section className="card grid grid-cols-3 gap-2 text-center">
         <Stat label="Sesiones" value={`${data.sessionCount}`} />
         <Stat label="Por semana" value={`${data.perWeek}`} />
-        <Stat label="Última" value={data.lastDate ? formatKeyRelative(data.lastDate, settings.timeZone) : '—'} />
+        <Stat
+          label="Última"
+          value={data.lastDate ? formatKeyRelative(data.lastDate, settings.timeZone) : '—'}
+        />
       </section>
 
       {chartData.length >= 2 && (
@@ -102,7 +108,8 @@ export function RoutineProgressScreen() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-ink">{ex?.name ?? 'Ejercicio'}</p>
                       <p className="nums text-xs text-ink-muted">
-                        {ex ? MUSCLE_LABELS[ex.primaryMuscle] : ''} · {rex.targetSets}×{rex.repRangeMin}-{rex.repRangeMax}
+                        {ex ? MUSCLE_LABELS[ex.primaryMuscle] : ''} · {rex.targetSets}×
+                        {rex.repRangeMin}-{rex.repRangeMax}
                       </p>
                     </div>
                     <Caret dir="right" className="shrink-0 text-ink-faint" />

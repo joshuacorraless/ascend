@@ -52,7 +52,8 @@ export function ExerciseDetailScreen() {
   const points = useMemo(() => {
     if (!progress) return [];
     const all = progressSeries(progress.sets, progress.sessionDates, metric, settings.oneRmFormula);
-    const filtered = range === 'all' ? all : all.filter((p) => p.date >= addDaysToKey(dateKey, -Number(range)));
+    const filtered =
+      range === 'all' ? all : all.filter((p) => p.date >= addDaysToKey(dateKey, -Number(range)));
     return filtered.map((p) => ({
       date: p.date,
       valor: metricDef.weighted ? round(weightToDisplay(p.value, unit), 1) : p.value,
@@ -60,7 +61,10 @@ export function ExerciseDetailScreen() {
   }, [progress, metric, range, settings, dateKey, metricDef.weighted, unit]);
 
   const summaries = useMemo(
-    () => (progress ? exerciseSessionSummaries(progress.sets, progress.sessionDates, settings.oneRmFormula) : []),
+    () =>
+      progress
+        ? exerciseSessionSummaries(progress.sets, progress.sessionDates, settings.oneRmFormula)
+        : [],
     [progress, settings.oneRmFormula],
   );
   const prs = useMemo(
@@ -83,7 +87,9 @@ export function ExerciseDetailScreen() {
       <header className="px-1">
         <h1 className="text-2xl font-semibold text-ink">{exercise?.name ?? 'Ejercicio'}</h1>
         <p className="nums mt-1 text-sm text-ink-muted">
-          {progress ? `${progress.sessionCount} sesión${progress.sessionCount === 1 ? '' : 'es'} registradas` : ''}
+          {progress
+            ? `${progress.sessionCount} sesión${progress.sessionCount === 1 ? '' : 'es'} registradas`
+            : ''}
         </p>
       </header>
 
@@ -94,7 +100,6 @@ export function ExerciseDetailScreen() {
         />
       ) : (
         <>
-          {/* Comparación última vs anterior */}
           {summaries.length >= 1 && (
             <Comparison last={summaries[0]!} prev={summaries[1]} fmtW={fmtW} fmtVol={fmtVol} />
           )}
@@ -108,7 +113,12 @@ export function ExerciseDetailScreen() {
                 onChange={setMetric}
                 options={METRICS.map((m) => ({ value: m.value, label: m.label }))}
               />
-              <SegmentedControl size="sm" value={range} onChange={setRange} options={RANGES.map((r) => ({ ...r }))} />
+              <SegmentedControl
+                size="sm"
+                value={range}
+                onChange={setRange}
+                options={RANGES.map((r) => ({ ...r }))}
+              />
             </div>
             {points.length < 1 ? (
               <p className="py-8 text-center text-sm text-ink-muted">Sin datos en este rango.</p>
@@ -141,7 +151,7 @@ export function ExerciseDetailScreen() {
             </section>
           )}
 
-          {/* Historial real */}
+          {/* Historial */}
           <section className="space-y-2.5">
             <h2 className="px-1 text-base font-semibold text-ink">Historial</h2>
             <ul className="space-y-2.5">
@@ -175,7 +185,6 @@ export function ExerciseDetailScreen() {
   );
 }
 
-// ── Comparación última vs anterior sesión ────────────────────────────────────
 function Comparison({
   last,
   prev,
@@ -191,13 +200,35 @@ function Comparison({
     <section className="card">
       <h2 className="mb-1 text-base font-semibold text-ink">Última sesión vs anterior</h2>
       <p className="mb-4 text-xs text-ink-muted">
-        {prev ? 'Comparado con tu sesión previa de este ejercicio.' : 'Aún no hay una sesión previa para comparar.'}
+        {prev
+          ? 'Comparado con tu sesión previa de este ejercicio.'
+          : 'Aún no hay una sesión previa para comparar.'}
       </p>
       <div className="grid grid-cols-2 gap-2.5">
-        <Metric label="Peso máx" current={fmtW(last.maxWeightKg)} delta={prev ? last.maxWeightKg - prev.maxWeightKg : undefined} display={(d) => fmtW(Math.abs(d))} />
-        <Metric label="Volumen" current={fmtVol(last.volume)} delta={prev ? last.volume - prev.volume : undefined} display={(d) => fmtVol(Math.abs(d))} />
-        <Metric label="Reps totales" current={`${last.totalReps}`} delta={prev ? last.totalReps - prev.totalReps : undefined} display={(d) => `${Math.abs(d)}`} />
-        <Metric label="Series" current={`${last.workingSets}`} delta={prev ? last.workingSets - prev.workingSets : undefined} display={(d) => `${Math.abs(d)}`} />
+        <Metric
+          label="Peso máx"
+          current={fmtW(last.maxWeightKg)}
+          delta={prev ? last.maxWeightKg - prev.maxWeightKg : undefined}
+          display={(d) => fmtW(Math.abs(d))}
+        />
+        <Metric
+          label="Volumen"
+          current={fmtVol(last.volume)}
+          delta={prev ? last.volume - prev.volume : undefined}
+          display={(d) => fmtVol(Math.abs(d))}
+        />
+        <Metric
+          label="Reps totales"
+          current={`${last.totalReps}`}
+          delta={prev ? last.totalReps - prev.totalReps : undefined}
+          display={(d) => `${Math.abs(d)}`}
+        />
+        <Metric
+          label="Series"
+          current={`${last.workingSets}`}
+          delta={prev ? last.workingSets - prev.workingSets : undefined}
+          display={(d) => `${Math.abs(d)}`}
+        />
       </div>
     </section>
   );

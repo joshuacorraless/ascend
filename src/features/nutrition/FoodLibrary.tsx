@@ -65,9 +65,16 @@ export function FoodLibrary() {
 
   const term = search.trim().toLowerCase();
   const filteredFoods = (foods ?? [])
-    .filter((f) => !term || f.name.toLowerCase().includes(term) || (f.brand ?? '').toLowerCase().includes(term))
+    .filter(
+      (f) =>
+        !term ||
+        f.name.toLowerCase().includes(term) ||
+        (f.brand ?? '').toLowerCase().includes(term),
+    )
     .sort((a, b) => Number(b.favorite) - Number(a.favorite));
-  const filteredRecipes = (recipes ?? []).filter((r) => !term || r.name.toLowerCase().includes(term));
+  const filteredRecipes = (recipes ?? []).filter(
+    (r) => !term || r.name.toLowerCase().includes(term),
+  );
 
   return (
     <div className="space-y-4">
@@ -97,7 +104,10 @@ export function FoodLibrary() {
             {tab === 'alimentos' ? 'Nuevo' : 'Nueva receta'}
           </button>
           {tab === 'alimentos' && (
-            <button className="btn-secondary !min-h-0 px-3.5 py-2 text-sm" onClick={() => setScanOpen(true)}>
+            <button
+              className="btn-secondary !min-h-0 px-3.5 py-2 text-sm"
+              onClick={() => setScanOpen(true)}
+            >
               Escanear
             </button>
           )}
@@ -117,19 +127,26 @@ export function FoodLibrary() {
         filteredFoods.length === 0 ? (
           <EmptyState
             title="Sin alimentos"
-            description={term ? 'Sin resultados.' : 'Crea tu primer alimento para empezar a registrar.'}
+            description={
+              term ? 'Sin resultados.' : 'Crea tu primer alimento para empezar a registrar.'
+            }
           />
         ) : (
           <ul className="space-y-2.5">
             {filteredFoods.map((f) => (
               <li key={f.id} className={cn('card !p-4', f.archived && 'opacity-60')}>
                 <div className="flex items-start gap-3">
-                  <FavoriteDot active={f.favorite} onClick={() => repos.foods.setFavorite(f.id, !f.favorite)} />
+                  <FavoriteDot
+                    active={f.favorite}
+                    onClick={() => repos.foods.setFavorite(f.id, !f.favorite)}
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-ink">{f.name}</p>
                     <p className="nums text-xs text-ink-muted">
                       {f.brand ? `${f.brand} · ` : ''}por {f.portionSize}
-                      {f.portionUnit === 'g' || f.portionUnit === 'ml' ? f.portionUnit : ` ${f.portionUnit}`}
+                      {f.portionUnit === 'g' || f.portionUnit === 'ml'
+                        ? f.portionUnit
+                        : ` ${f.portionUnit}`}
                     </p>
                     <MacroChips macros={f} className="mt-2" />
                   </div>
@@ -147,7 +164,9 @@ export function FoodLibrary() {
       ) : filteredRecipes.length === 0 ? (
         <EmptyState
           title="Sin recetas"
-          description={term ? 'Sin resultados.' : 'Combina varios alimentos en una receta reutilizable.'}
+          description={
+            term ? 'Sin resultados.' : 'Combina varios alimentos en una receta reutilizable.'
+          }
         />
       ) : (
         <ul className="space-y-2.5">
@@ -173,7 +192,9 @@ export function FoodLibrary() {
       {editFood && <FoodFormModal open onClose={() => setEditFood(null)} initial={editFood} />}
       <LabelScanModal open={scanOpen} onClose={() => setScanOpen(false)} />
       <RecipeFormModal open={newRecipe} onClose={() => setNewRecipe(false)} />
-      {editRecipe && <RecipeFormModal open onClose={() => setEditRecipe(null)} initial={editRecipe} />}
+      {editRecipe && (
+        <RecipeFormModal open onClose={() => setEditRecipe(null)} initial={editRecipe} />
+      )}
     </div>
   );
 }

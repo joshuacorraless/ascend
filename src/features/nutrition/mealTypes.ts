@@ -28,7 +28,6 @@ export function mealsForEntries(
   return [...base, ...extras];
 }
 
-/** Genera un id estable para un tiempo de comida nuevo. */
 export function newMealId(): string {
   return `meal-${crypto.randomUUID().slice(0, 8)}`;
 }

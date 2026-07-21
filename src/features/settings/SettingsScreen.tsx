@@ -131,7 +131,9 @@ export function SettingsScreen() {
       title: 'Importar rutina',
       message: `Se agregarán ${result.routines.length} rutina(s) (${result.routines
         .map((r) => r.name)
-        .join(', ')}) con ${totalExercises} ejercicios. Los ejercicios que ya existan se reutilizan; tus datos actuales no se borran.`,
+        .join(
+          ', ',
+        )}) con ${totalExercises} ejercicios. Los ejercicios que ya existan se reutilizan; tus datos actuales no se borran.`,
       confirmLabel: 'Importar',
       cancelLabel: 'Cancelar',
     });
@@ -231,8 +233,8 @@ export function SettingsScreen() {
 
       <Section title="Datos y respaldo">
         <p className="text-sm text-ink-muted">
-          <span className="nums">{totalRecords}</span> registros en este dispositivo. Tus datos nunca
-          salen de aquí salvo que tú los exportes.
+          <span className="nums">{totalRecords}</span> registros en este dispositivo. Tus datos
+          nunca salen de aquí salvo que tú los exportes.
         </p>
         <div className="grid grid-cols-2 gap-2">
           <button className="btn-secondary" onClick={onExport}>

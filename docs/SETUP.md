@@ -1,4 +1,4 @@
-# SETUP.md — Instalación, variables de entorno y despliegue
+# Instalación, variables de entorno y despliegue
 
 ## Requisitos
 - Node.js **20+** (probado con 22) y npm.
@@ -37,7 +37,7 @@ usa el que tenga clave). **Recomendado: Google Gemini, que tiene nivel gratuito.
 | `ANTHROPIC_MODEL` | Modelo (por defecto `claude-opus-4-8`). | No |
 | `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | Futuro (Supabase). | Sí (anon key es pública por diseño) |
 
-> ⚠️ La clave de IA **nunca** se expone al frontend: solo la usa la función serverless
+> La clave de IA **nunca** se expone al frontend: solo la usa la función serverless
 > `api/analyze-label`. No la pongas en variables `VITE_*`.
 
 ### Conseguir una clave GRATIS de Gemini

@@ -2,10 +2,6 @@ import { round } from '@/lib/units';
 import { cn } from '@/lib/cn';
 import type { Macros } from '@/lib/schema';
 
-/**
- * Resumen de macros en colores vivos: calorías (verde), proteína (rojo),
- * carbohidratos (amarillo) y grasas (azul). Cada píldora con su color.
- */
 export function MacroChips({ macros, className }: { macros: Macros; className?: string }) {
   return (
     <div className={cn('nums flex flex-wrap items-center gap-1.5 text-xs font-bold', className)}>

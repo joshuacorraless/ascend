@@ -1,12 +1,9 @@
 import { z } from 'zod';
 
-/**
- * Versión del esquema de datos persistido. Increméntala cuando cambie la forma
- * de los datos guardados; las migraciones de Dexie y del import JSON la usan.
- */
+/** Versión del esquema persistido; las migraciones de Dexie y del import JSON dependen de ella. */
 export const SCHEMA_VERSION = 1;
 
-// ── Primitivas reutilizables ─────────────────────────────────────────────────
+// Primitivas reutilizables
 
 /** Identificador único (UUID v4 generado con crypto.randomUUID). */
 export const idSchema = z.string().min(1, 'id requerido');
@@ -43,15 +40,11 @@ export const baseEntityShape = {
   updatedAt: isoSchema,
 };
 
-// ── Enums de dominio ─────────────────────────────────────────────────────────
+// Enums de dominio
 
 /** Ids de los tiempos de comida por defecto (el usuario puede añadir más). */
 export const mealTypes = ['desayuno', 'almuerzo', 'cena', 'merienda'] as const;
-/**
- * El tiempo de comida es un id libre (string): permite tiempos personalizados
- * definidos por el usuario y guardados en los ajustes. Los ids por defecto
- * siguen siendo 'desayuno' | 'almuerzo' | 'cena' | 'merienda'.
- */
+/** Id libre (string) para admitir tiempos de comida personalizados además de los por defecto. */
 export const mealTypeSchema = z.string().min(1, 'tiempo de comida requerido');
 export type MealType = z.infer<typeof mealTypeSchema>;
 

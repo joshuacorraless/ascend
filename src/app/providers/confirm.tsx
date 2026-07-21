@@ -51,9 +51,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           </div>
         }
       >
-        {opts?.message && (
-          <p className="text-sm leading-relaxed text-ink-soft">{opts.message}</p>
-        )}
+        {opts?.message && <p className="text-sm leading-relaxed text-ink-soft">{opts.message}</p>}
       </Modal>
     </ConfirmContext.Provider>
   );

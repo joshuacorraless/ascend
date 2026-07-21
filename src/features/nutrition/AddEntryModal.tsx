@@ -55,7 +55,12 @@ export function AddEntryModal({
 
   const term = search.trim().toLowerCase();
   const filteredFoods = (foods ?? [])
-    .filter((f) => !term || f.name.toLowerCase().includes(term) || (f.brand ?? '').toLowerCase().includes(term))
+    .filter(
+      (f) =>
+        !term ||
+        f.name.toLowerCase().includes(term) ||
+        (f.brand ?? '').toLowerCase().includes(term),
+    )
     .sort((a, b) => Number(b.favorite) - Number(a.favorite));
   const filteredRecipes = (recipes ?? []).filter(
     (r) => !term || r.name.toLowerCase().includes(term),
@@ -109,7 +114,7 @@ export function AddEntryModal({
     reset();
   };
 
-  // ── Vista: editor de cantidad de un alimento ───────────────────────────────
+  // Editor de cantidad del alimento seleccionado.
   if (selFood) {
     const amt = parseDecimalInput(amount) || 0;
     const unit = PORTION_UNIT_LABELS[selFood.portionUnit] ?? selFood.portionUnit;
@@ -131,7 +136,8 @@ export function AddEntryModal({
       >
         <div className="space-y-4">
           <label className="label" htmlFor="amt">
-            Cantidad ({selFood.portionUnit === 'g' || selFood.portionUnit === 'ml' ? unit : `nº de ${unit}`})
+            Cantidad (
+            {selFood.portionUnit === 'g' || selFood.portionUnit === 'ml' ? unit : `nº de ${unit}`})
           </label>
           <input
             id="amt"
@@ -151,7 +157,7 @@ export function AddEntryModal({
     );
   }
 
-  // ── Vista: editor de porciones de una receta ───────────────────────────────
+  // Editor de porciones de la receta seleccionada.
   if (selRecipe) {
     const servings = parseDecimalInput(amount) || 0;
     const preview = scaleMacros(recipeMacrosPerServing(selRecipe, foodsById), servings);
@@ -192,10 +198,13 @@ export function AddEntryModal({
     );
   }
 
-  // ── Vista: selector ────────────────────────────────────────────────────────
   return (
     <>
-      <Modal open={open && !newFood && !newRecipe && !scanOpen} onClose={onClose} title={`Agregar a ${mealName}`}>
+      <Modal
+        open={open && !newFood && !newRecipe && !scanOpen}
+        onClose={onClose}
+        title={`Agregar a ${mealName}`}
+      >
         <div className="space-y-3.5">
           <SegmentedControl
             stretch
@@ -230,7 +239,11 @@ export function AddEntryModal({
                   <p className="eyebrow mb-2">Recientes</p>
                   <div className="flex flex-wrap gap-1.5">
                     {recentFoods.map((f) => (
-                      <button key={f.id} className="chip transition hover:border-ink-faint" onClick={() => pickFood(f)}>
+                      <button
+                        key={f.id}
+                        className="chip transition hover:border-ink-faint"
+                        onClick={() => pickFood(f)}
+                      >
                         {f.name}
                       </button>
                     ))}
@@ -305,13 +318,17 @@ function FoodRow({ food, onClick }: { food: Food; onClick: () => void }) {
     <button onClick={onClick} className="flex w-full items-center gap-3 py-3 text-left">
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5">
-          {food.favorite && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-ink" aria-hidden />}
+          {food.favorite && (
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-ink" aria-hidden />
+          )}
           <span className="truncate font-medium text-ink">{food.name}</span>
         </span>
         <span className="nums text-xs text-ink-muted">
           {food.brand ? `${food.brand} · ` : ''}
           {food.calories} kcal / {food.portionSize}
-          {food.portionUnit === 'g' || food.portionUnit === 'ml' ? food.portionUnit : ` ${food.portionUnit}`}
+          {food.portionUnit === 'g' || food.portionUnit === 'ml'
+            ? food.portionUnit
+            : ` ${food.portionUnit}`}
         </span>
       </span>
       <Caret dir="right" className="shrink-0 text-ink-faint" />

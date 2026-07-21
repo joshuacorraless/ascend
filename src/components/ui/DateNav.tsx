@@ -1,5 +1,11 @@
 import { Caret } from './Caret';
-import { addDaysToKey, diffDaysKeys, formatKeyRelative, formatKeyShort, type DateKey } from '@/lib/datetime';
+import {
+  addDaysToKey,
+  diffDaysKeys,
+  formatKeyRelative,
+  formatKeyShort,
+  type DateKey,
+} from '@/lib/datetime';
 
 interface DateNavProps {
   dateKey: DateKey;
@@ -24,7 +30,9 @@ export function DateNav({ dateKey, onChange, timeZone, max }: DateNavProps) {
         onClick={() => max && onChange(max)}
         className="flex flex-col items-center px-2 leading-tight"
       >
-        <span className="text-sm font-semibold capitalize text-ink">{formatKeyRelative(dateKey, timeZone)}</span>
+        <span className="text-sm font-semibold capitalize text-ink">
+          {formatKeyRelative(dateKey, timeZone)}
+        </span>
         <span className="nums text-xs text-ink-muted">{formatKeyShort(dateKey)}</span>
       </button>
       <button

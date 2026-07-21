@@ -5,9 +5,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 import path from 'node:path';
 
 /**
- * En `npm run dev` Vite no ejecuta las funciones de `/api`. Este middleware
- * monta el mismo handler para poder probar el análisis de etiquetas en local
- * (requiere ANTHROPIC_API_KEY en .env.local). En producción lo sirve Vercel.
+ * Vite no ejecuta las funciones de /api en desarrollo; este middleware monta
+ * el mismo handler que sirve Vercel en producción.
  */
 function devApiPlugin(): Plugin {
   return {
@@ -16,7 +15,6 @@ function devApiPlugin(): Plugin {
     configureServer(server) {
       server.middlewares.use('/api/analyze-label', async (req, res) => {
         try {
-          // Reutiliza exactamente el mismo handler que corre en Vercel.
           const mod = await server.ssrLoadModule('/api/analyze-label.ts');
           const handler = mod.default as (req: unknown, res: unknown) => Promise<void>;
 
@@ -54,11 +52,9 @@ function devApiPlugin(): Plugin {
   };
 }
 
-// https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  // Expone las variables del endpoint de IA (de `.env.local`) en process.env
-  // para que el middleware de desarrollo (`npm run dev`) pueda leer la clave.
-  // Estas variables NUNCA se envían al cliente (no llevan prefijo VITE_).
+  // Expone las claves de .env.local al middleware de desarrollo. Sin prefijo
+  // VITE_, no llegan al cliente.
   const env = loadEnv(mode, process.cwd(), '');
   const aiKeys = [
     'AI_PROVIDER',
@@ -82,7 +78,7 @@ export default defineConfig(({ mode }) => {
     react(),
     devApiPlugin(),
     VitePWA({
-      // Actualización controlada: avisamos al usuario en vez de recargar solos.
+      // 'prompt': el usuario decide cuándo aplicar una actualización del SW.
       registerType: 'prompt',
       includeAssets: ['favicon.svg', 'icons/apple-touch-icon-180.png', 'offline.html'],
       manifest: {
@@ -111,8 +107,7 @@ export default defineConfig(({ mode }) => {
         ],
       },
       workbox: {
-        // App shell local-first: precacheamos lo construido y servimos el
-        // index para navegaciones offline (la app vive en IndexedDB).
+        // Precachea el app shell y sirve index.html en navegaciones offline.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
@@ -120,7 +115,6 @@ export default defineConfig(({ mode }) => {
         clientsClaim: true,
       },
       devOptions: {
-        // Permite probar el SW en `npm run dev` si hace falta.
         enabled: false,
       },
     }),

@@ -41,7 +41,15 @@ export function RoutineEditorModal({
     if (!picker) return;
     setItems((prev) => [
       ...prev,
-      { exerciseId: picker, order: prev.length, targetSets: 3, repRangeMin: 8, repRangeMax: 12, restSeconds: 90, toFailure: false },
+      {
+        exerciseId: picker,
+        order: prev.length,
+        targetSets: 3,
+        repRangeMin: 8,
+        repRangeMax: 12,
+        restSeconds: 90,
+        toFailure: false,
+      },
     ]);
     setPicker('');
   };
@@ -105,16 +113,32 @@ export function RoutineEditorModal({
     >
       <div className="space-y-4">
         <Field label="Nombre" htmlFor="rt-name">
-          <input id="rt-name" className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Push, Pull, Pierna…" autoFocus />
+          <input
+            id="rt-name"
+            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Push, Pull, Pierna…"
+            autoFocus
+          />
         </Field>
         <Field label="Descripción (opcional)" htmlFor="rt-desc">
-          <input id="rt-desc" className="input" value={description} onChange={(e) => setDescription(e.target.value)} />
+          <input
+            id="rt-desc"
+            className="input"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
         </Field>
         <div>
           <span className="label">Días sugeridos (opcional)</span>
           <div className="flex flex-wrap gap-1.5">
             {WEEKDAY_LABELS.map((label, idx) => (
-              <button key={idx} onClick={() => toggleDay(idx)} className={cn('chip', days.includes(idx) && 'chip-active')}>
+              <button
+                key={idx}
+                onClick={() => toggleDay(idx)}
+                className={cn('chip', days.includes(idx) && 'chip-active')}
+              >
                 {label}
               </button>
             ))}
@@ -124,7 +148,11 @@ export function RoutineEditorModal({
         <div>
           <span className="label">Ejercicios</span>
           <div className="mb-2.5 flex gap-2">
-            <select className="input flex-1" value={picker} onChange={(e) => setPicker(e.target.value)}>
+            <select
+              className="input flex-1"
+              value={picker}
+              onChange={(e) => setPicker(e.target.value)}
+            >
               <option value="">Seleccionar ejercicio…</option>
               {available.map((e) => (
                 <option key={e.id} value={e.id}>
@@ -146,14 +174,29 @@ export function RoutineEditorModal({
                 return (
                   <li key={i} className="rounded-xl border border-line bg-inset p-3.5">
                     <div className="mb-2.5 flex items-start gap-1.5">
-                      <span className="flex-1 font-semibold leading-snug text-ink">{ex?.name ?? 'Ejercicio'}</span>
-                      <button className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-muted transition hover:text-ink disabled:opacity-25" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Subir">
+                      <span className="flex-1 font-semibold leading-snug text-ink">
+                        {ex?.name ?? 'Ejercicio'}
+                      </span>
+                      <button
+                        className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-muted transition hover:text-ink disabled:opacity-25"
+                        onClick={() => move(i, -1)}
+                        disabled={i === 0}
+                        aria-label="Subir"
+                      >
                         <Caret dir="up" />
                       </button>
-                      <button className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-muted transition hover:text-ink disabled:opacity-25" onClick={() => move(i, 1)} disabled={i === items.length - 1} aria-label="Bajar">
+                      <button
+                        className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-muted transition hover:text-ink disabled:opacity-25"
+                        onClick={() => move(i, 1)}
+                        disabled={i === items.length - 1}
+                        aria-label="Bajar"
+                      >
                         <Caret dir="down" />
                       </button>
-                      <button className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-ink-muted transition hover:text-danger-600" onClick={() => remove(i)}>
+                      <button
+                        className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-ink-muted transition hover:text-danger-600"
+                        onClick={() => remove(i)}
+                      >
                         Quitar
                       </button>
                     </div>
@@ -167,21 +210,41 @@ export function RoutineEditorModal({
                     </button>
 
                     <div className={cn('grid gap-2', it.toFailure ? 'grid-cols-2' : 'grid-cols-4')}>
-                      <NumField label="Series" value={it.targetSets} onChange={(v) => update(i, { targetSets: v })} />
+                      <NumField
+                        label="Series"
+                        value={it.targetSets}
+                        onChange={(v) => update(i, { targetSets: v })}
+                      />
                       {!it.toFailure && (
                         <>
-                          <NumField label="Rep min" value={it.repRangeMin} onChange={(v) => update(i, { repRangeMin: v })} />
-                          <NumField label="Rep max" value={it.repRangeMax} onChange={(v) => update(i, { repRangeMax: v })} />
+                          <NumField
+                            label="Rep min"
+                            value={it.repRangeMin}
+                            onChange={(v) => update(i, { repRangeMin: v })}
+                          />
+                          <NumField
+                            label="Rep max"
+                            value={it.repRangeMax}
+                            onChange={(v) => update(i, { repRangeMax: v })}
+                          />
                         </>
                       )}
-                      <NumField label="Desc (s)" value={it.restSeconds ?? 0} onChange={(v) => update(i, { restSeconds: v })} />
+                      <NumField
+                        label="Desc (s)"
+                        value={it.restSeconds ?? 0}
+                        onChange={(v) => update(i, { restSeconds: v })}
+                      />
                     </div>
                     {it.toFailure && (
                       <p className="mt-2 text-xs text-ink-muted">
                         Registrarás las repeticiones reales alcanzadas en cada serie.
                       </p>
                     )}
-                    {ex && <p className="mt-1.5 text-xs text-ink-muted">{MUSCLE_LABELS[ex.primaryMuscle]}</p>}
+                    {ex && (
+                      <p className="mt-1.5 text-xs text-ink-muted">
+                        {MUSCLE_LABELS[ex.primaryMuscle]}
+                      </p>
+                    )}
                   </li>
                 );
               })}
@@ -193,7 +256,15 @@ export function RoutineEditorModal({
   );
 }
 
-function NumField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+function NumField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+}) {
   return (
     <label className="block">
       <span className="mb-1 block text-2xs font-medium text-ink-muted">{label}</span>

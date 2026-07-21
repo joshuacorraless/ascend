@@ -1,10 +1,4 @@
-import type {
-  Equipment,
-  ExerciseType,
-  MuscleGroup,
-  SetType,
-  TrackingType,
-} from '@/lib/schema';
+import type { Equipment, ExerciseType, MuscleGroup, SetType, TrackingType } from '@/lib/schema';
 
 export const MUSCLE_LABELS: Record<MuscleGroup, string> = {
   pecho: 'Pecho',

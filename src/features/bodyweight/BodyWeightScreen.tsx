@@ -47,7 +47,8 @@ export function BodyWeightScreen() {
   };
 
   const fmt = (kg: number) => `${round(weightToDisplay(kg, unit), 1)} ${unit}`;
-  const fmtDelta = (kg: number) => `${kg > 0 ? '+' : ''}${round(weightToDisplay(kg, unit), 1)} ${unit}`;
+  const fmtDelta = (kg: number) =>
+    `${kg > 0 ? '+' : ''}${round(weightToDisplay(kg, unit), 1)} ${unit}`;
 
   return (
     <div className="space-y-5">
@@ -55,7 +56,10 @@ export function BodyWeightScreen() {
         eyebrow="Composición"
         title="Peso corporal"
         right={
-          <button className="btn-primary !min-h-0 px-3.5 py-2 text-sm" onClick={() => setAddOpen(true)}>
+          <button
+            className="btn-primary !min-h-0 px-3.5 py-2 text-sm"
+            onClick={() => setAddOpen(true)}
+          >
             Registrar
           </button>
         }

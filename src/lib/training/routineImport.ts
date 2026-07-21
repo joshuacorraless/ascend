@@ -12,17 +12,13 @@ import type {
 } from '@/lib/schema';
 
 /**
- * Importación ADITIVA de rutinas desde un JSON propio del usuario (p. ej. una
- * rutina que llevaba en otro lado). A diferencia del respaldo completo (que
- * reemplaza TODO), esto solo agrega: crea los ejercicios que falten en la
- * biblioteca —como si se hubieran metido a mano— y arma las rutinas por día.
- *
- * Formato (ver ROUTINE_TEMPLATE_JSON). Es tolerante: acepta faltantes, sinónimos
- * y alias en inglés, y aplica valores por defecto razonables. Las series al
- * fallo se marcan con `alFallo: true` (o `reps: "al fallo"`).
+ * Importación aditiva de rutinas desde JSON: crea los ejercicios que falten en
+ * la biblioteca y arma las rutinas por día, sin tocar el resto de los datos
+ * (a diferencia del respaldo completo, que reemplaza). El formato tolera
+ * sinónimos, alias en inglés y campos faltantes; ver ROUTINE_TEMPLATE_JSON.
  */
 
-// ── Forma intermedia ya normalizada y validada ───────────────────────────────
+// Forma intermedia normalizada y validada
 export interface ParsedExercise {
   name: string;
   primaryMuscle: MuscleGroup;
@@ -54,14 +50,9 @@ export interface RoutineImportSummary {
   routineNames: string[];
 }
 
-// ── Utilidades de coerción ───────────────────────────────────────────────────
+// Utilidades de coerción
 function norm(s: string): string {
-  return s
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -103,52 +94,144 @@ function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
 }
 
-// ── Mapas de sinónimos ───────────────────────────────────────────────────────
+// Mapas de sinónimos
 const DAY_MAP: Record<string, number> = {
   // domingo = 0 … sábado = 6 (consistente con Date.getDay)
-  domingo: 0, dom: 0, sunday: 0, sun: 0, d: 0,
-  lunes: 1, lun: 1, monday: 1, mon: 1, l: 1,
-  martes: 2, mar: 2, tuesday: 2, tue: 2,
-  miercoles: 3, mie: 3, mier: 3, wednesday: 3, wed: 3, x: 3,
-  jueves: 4, jue: 4, thursday: 4, thu: 4, j: 4,
-  viernes: 5, vie: 5, friday: 5, fri: 5, v: 5,
-  sabado: 6, sab: 6, saturday: 6, sat: 6, s: 6,
+  domingo: 0,
+  dom: 0,
+  sunday: 0,
+  sun: 0,
+  d: 0,
+  lunes: 1,
+  lun: 1,
+  monday: 1,
+  mon: 1,
+  l: 1,
+  martes: 2,
+  mar: 2,
+  tuesday: 2,
+  tue: 2,
+  miercoles: 3,
+  mie: 3,
+  mier: 3,
+  wednesday: 3,
+  wed: 3,
+  x: 3,
+  jueves: 4,
+  jue: 4,
+  thursday: 4,
+  thu: 4,
+  j: 4,
+  viernes: 5,
+  vie: 5,
+  friday: 5,
+  fri: 5,
+  v: 5,
+  sabado: 6,
+  sab: 6,
+  saturday: 6,
+  sat: 6,
+  s: 6,
 };
 
 const MUSCLE_MAP: Record<string, MuscleGroup> = {
-  pecho: 'pecho', pectoral: 'pecho', pectorales: 'pecho', chest: 'pecho',
-  espalda: 'espalda', back: 'espalda', dorsal: 'espalda', dorsales: 'espalda', lat: 'espalda', lats: 'espalda',
-  hombro: 'hombros', hombros: 'hombros', deltoides: 'hombros', delts: 'hombros', shoulders: 'hombros',
-  biceps: 'biceps', bicep: 'biceps',
-  triceps: 'triceps', tricep: 'triceps',
-  cuadriceps: 'cuadriceps', cuads: 'cuadriceps', quad: 'cuadriceps', quads: 'cuadriceps', pierna: 'cuadriceps', piernas: 'cuadriceps', legs: 'cuadriceps',
-  femoral: 'femoral', femorales: 'femoral', isquios: 'femoral', isquiotibiales: 'femoral', hamstring: 'femoral', hamstrings: 'femoral',
-  gluteo: 'gluteo', gluteos: 'gluteo', glute: 'gluteo', glutes: 'gluteo',
-  gemelo: 'gemelo', gemelos: 'gemelo', pantorrilla: 'gemelo', pantorrillas: 'gemelo', calf: 'gemelo', calves: 'gemelo',
-  core: 'core', abdomen: 'core', abdominales: 'core', abs: 'core',
-  antebrazo: 'antebrazo', antebrazos: 'antebrazo', forearm: 'antebrazo', forearms: 'antebrazo',
-  trapecio: 'trapecio', trapecios: 'trapecio', traps: 'trapecio',
+  pecho: 'pecho',
+  pectoral: 'pecho',
+  pectorales: 'pecho',
+  chest: 'pecho',
+  espalda: 'espalda',
+  back: 'espalda',
+  dorsal: 'espalda',
+  dorsales: 'espalda',
+  lat: 'espalda',
+  lats: 'espalda',
+  hombro: 'hombros',
+  hombros: 'hombros',
+  deltoides: 'hombros',
+  delts: 'hombros',
+  shoulders: 'hombros',
+  biceps: 'biceps',
+  bicep: 'biceps',
+  triceps: 'triceps',
+  tricep: 'triceps',
+  cuadriceps: 'cuadriceps',
+  cuads: 'cuadriceps',
+  quad: 'cuadriceps',
+  quads: 'cuadriceps',
+  pierna: 'cuadriceps',
+  piernas: 'cuadriceps',
+  legs: 'cuadriceps',
+  femoral: 'femoral',
+  femorales: 'femoral',
+  isquios: 'femoral',
+  isquiotibiales: 'femoral',
+  hamstring: 'femoral',
+  hamstrings: 'femoral',
+  gluteo: 'gluteo',
+  gluteos: 'gluteo',
+  glute: 'gluteo',
+  glutes: 'gluteo',
+  gemelo: 'gemelo',
+  gemelos: 'gemelo',
+  pantorrilla: 'gemelo',
+  pantorrillas: 'gemelo',
+  calf: 'gemelo',
+  calves: 'gemelo',
+  core: 'core',
+  abdomen: 'core',
+  abdominales: 'core',
+  abs: 'core',
+  antebrazo: 'antebrazo',
+  antebrazos: 'antebrazo',
+  forearm: 'antebrazo',
+  forearms: 'antebrazo',
+  trapecio: 'trapecio',
+  trapecios: 'trapecio',
+  traps: 'trapecio',
   cardio: 'cardio',
 };
 
 const EQUIPMENT_MAP: Record<string, Equipment> = {
-  barra: 'barra', barbell: 'barra',
-  mancuerna: 'mancuerna', mancuernas: 'mancuerna', dumbbell: 'mancuerna', dumbbells: 'mancuerna', db: 'mancuerna',
-  maquina: 'maquina', machine: 'maquina',
-  polea: 'polea', poleas: 'polea', cable: 'polea', cables: 'polea',
-  'peso corporal': 'peso_corporal', peso_corporal: 'peso_corporal', corporal: 'peso_corporal', bodyweight: 'peso_corporal', calistenia: 'peso_corporal',
-  smith: 'smith', multipower: 'smith',
+  barra: 'barra',
+  barbell: 'barra',
+  mancuerna: 'mancuerna',
+  mancuernas: 'mancuerna',
+  dumbbell: 'mancuerna',
+  dumbbells: 'mancuerna',
+  db: 'mancuerna',
+  maquina: 'maquina',
+  machine: 'maquina',
+  polea: 'polea',
+  poleas: 'polea',
+  cable: 'polea',
+  cables: 'polea',
+  'peso corporal': 'peso_corporal',
+  peso_corporal: 'peso_corporal',
+  corporal: 'peso_corporal',
+  bodyweight: 'peso_corporal',
+  calistenia: 'peso_corporal',
+  smith: 'smith',
+  multipower: 'smith',
 };
 
 const TYPE_MAP: Record<string, ExerciseType> = {
-  compuesto: 'compuesto', compound: 'compuesto',
-  aislamiento: 'aislamiento', aislado: 'aislamiento', isolation: 'aislamiento',
+  compuesto: 'compuesto',
+  compound: 'compuesto',
+  aislamiento: 'aislamiento',
+  aislado: 'aislamiento',
+  isolation: 'aislamiento',
   cardio: 'cardio',
-  otro: 'otro', other: 'otro',
+  otro: 'otro',
+  other: 'otro',
 };
 
 function mapDay(v: unknown): number | undefined {
-  const n = typeof v === 'number' ? v : typeof v === 'string' && /^\d+$/.test(v.trim()) ? Number(v) : undefined;
+  const n =
+    typeof v === 'number'
+      ? v
+      : typeof v === 'string' && /^\d+$/.test(v.trim())
+        ? Number(v)
+        : undefined;
   if (n !== undefined) return n >= 0 && n <= 6 ? n : undefined;
   const s = asString(v);
   return s ? DAY_MAP[norm(s)] : undefined;
@@ -178,7 +261,11 @@ function mapType(s: string | undefined, muscle: MuscleGroup): ExerciseType {
 }
 
 /** Resuelve el rango de reps a partir de min/max o de un campo `reps` ("8-12", 10…). */
-function parseRepRange(min: number | undefined, max: number | undefined, raw: unknown): [number, number] {
+function parseRepRange(
+  min: number | undefined,
+  max: number | undefined,
+  raw: unknown,
+): [number, number] {
   let lo = min;
   let hi = max;
   if ((lo === undefined || hi === undefined) && raw !== undefined) {
@@ -199,7 +286,7 @@ function parseRepRange(min: number | undefined, max: number | undefined, raw: un
   return [a, b];
 }
 
-// ── Parseo del archivo ───────────────────────────────────────────────────────
+// Parseo del archivo
 function extractRoutines(json: unknown): unknown[] | null {
   if (Array.isArray(json)) return json;
   if (isRecord(json)) {
@@ -216,8 +303,12 @@ function parseExercise(raw: unknown): ParsedExercise | null {
   const name = asString(pick(raw, ['nombre', 'name', 'ejercicio', 'exercise']));
   if (!name) return null;
 
-  const muscle = mapMuscle(asString(pick(raw, ['musculo', 'músculo', 'muscle', 'primaryMuscle', 'grupo'])));
-  const equipment = mapEquipment(asString(pick(raw, ['equipo', 'equipment', 'maquina', 'máquina'])));
+  const muscle = mapMuscle(
+    asString(pick(raw, ['musculo', 'músculo', 'muscle', 'primaryMuscle', 'grupo'])),
+  );
+  const equipment = mapEquipment(
+    asString(pick(raw, ['equipo', 'equipment', 'maquina', 'máquina'])),
+  );
   const type = mapType(asString(pick(raw, ['tipo', 'type'])), muscle);
   const targetSets = clamp(asInt(pick(raw, ['series', 'sets', 'targetSets'])) ?? 3, 1, 20);
   const repsRaw = pick(raw, ['reps', 'repeticiones', 'rango']);
@@ -229,7 +320,18 @@ function parseExercise(raw: unknown): ParsedExercise | null {
   // "Al fallo": campo explícito (alFallo/fallo/toFailure…) o implícito en el
   // texto de reps ("al fallo", "AMRAP"…). Un false explícito gana.
   const toFailure =
-    asBool(pick(raw, ['alFallo', 'al_fallo', 'alfallo', 'al fallo', 'fallo', 'toFailure', 'to_failure', 'failure'])) ??
+    asBool(
+      pick(raw, [
+        'alFallo',
+        'al_fallo',
+        'alfallo',
+        'al fallo',
+        'fallo',
+        'toFailure',
+        'to_failure',
+        'failure',
+      ]),
+    ) ??
     (typeof repsRaw === 'string' && /\b(fallo|failure|amrap)\b/.test(norm(repsRaw)));
   const restRaw = asInt(pick(raw, ['descanso', 'rest', 'restSeconds', 'descansoSegundos']));
   const notes = asString(pick(raw, ['notas', 'notes', 'nota']));
@@ -280,12 +382,15 @@ export function parseRoutineImport(text: string): RoutineImportParse {
   }
   const routines = rawRoutines.map(parseRoutine).filter((r): r is ParsedRoutine => r !== null);
   if (routines.length === 0) {
-    return { ok: false, error: 'Ninguna rutina tenía un ejercicio válido (revisa nombres y "ejercicios").' };
+    return {
+      ok: false,
+      error: 'Ninguna rutina tenía un ejercicio válido (revisa nombres y "ejercicios").',
+    };
   }
   return { ok: true, routines };
 }
 
-// ── Construcción de entidades (pura, sin BD) ─────────────────────────────────
+// Construcción de entidades (pura, sin BD)
 export function buildImportEntities(
   routines: ParsedRoutine[],
   existing: Exercise[],
@@ -360,7 +465,7 @@ export async function applyRoutineImport(routines: ParsedRoutine[]): Promise<Rou
   return summary;
 }
 
-// ── Plantilla de ejemplo descargable ─────────────────────────────────────────
+// Plantilla de ejemplo descargable
 export const ROUTINE_TEMPLATE_JSON = JSON.stringify(
   {
     rutinas: [
@@ -369,20 +474,65 @@ export const ROUTINE_TEMPLATE_JSON = JSON.stringify(
         dias: ['lunes', 'jueves'],
         descripcion: 'Pecho, hombro y tríceps',
         ejercicios: [
-          { nombre: 'Press de banca', series: 4, repsMin: 6, repsMax: 10, descanso: 120, musculo: 'pecho', equipo: 'barra' },
-          { nombre: 'Press inclinado con mancuernas', series: 3, reps: '8-12', musculo: 'pecho', equipo: 'mancuerna' },
-          { nombre: 'Elevaciones laterales', series: 4, reps: 15, musculo: 'hombros', equipo: 'mancuerna' },
-          { nombre: 'Extensión de tríceps en polea', series: 3, alFallo: true, musculo: 'triceps', equipo: 'polea' },
+          {
+            nombre: 'Press de banca',
+            series: 4,
+            repsMin: 6,
+            repsMax: 10,
+            descanso: 120,
+            musculo: 'pecho',
+            equipo: 'barra',
+          },
+          {
+            nombre: 'Press inclinado con mancuernas',
+            series: 3,
+            reps: '8-12',
+            musculo: 'pecho',
+            equipo: 'mancuerna',
+          },
+          {
+            nombre: 'Elevaciones laterales',
+            series: 4,
+            reps: 15,
+            musculo: 'hombros',
+            equipo: 'mancuerna',
+          },
+          {
+            nombre: 'Extensión de tríceps en polea',
+            series: 3,
+            alFallo: true,
+            musculo: 'triceps',
+            equipo: 'polea',
+          },
         ],
       },
       {
         nombre: 'Pierna',
         dias: ['martes', 'viernes'],
         ejercicios: [
-          { nombre: 'Sentadilla', series: 4, reps: '5-8', descanso: 180, musculo: 'cuadriceps', equipo: 'barra' },
-          { nombre: 'Prensa de piernas', series: 3, reps: 12, musculo: 'cuadriceps', equipo: 'maquina' },
+          {
+            nombre: 'Sentadilla',
+            series: 4,
+            reps: '5-8',
+            descanso: 180,
+            musculo: 'cuadriceps',
+            equipo: 'barra',
+          },
+          {
+            nombre: 'Prensa de piernas',
+            series: 3,
+            reps: 12,
+            musculo: 'cuadriceps',
+            equipo: 'maquina',
+          },
           { nombre: 'Curl femoral', series: 3, reps: 12, musculo: 'femoral', equipo: 'maquina' },
-          { nombre: 'Elevación de gemelos', series: 4, reps: 15, musculo: 'gemelo', equipo: 'maquina' },
+          {
+            nombre: 'Elevación de gemelos',
+            series: 4,
+            reps: 15,
+            musculo: 'gemelo',
+            equipo: 'maquina',
+          },
         ],
       },
     ],

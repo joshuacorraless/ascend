@@ -1,10 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
-/**
- * Botón de acción menor: mínimo pero claramente pulsable (relleno hundido +
- * borde sutil). Para filas de acciones como Editar / Duplicar / Archivar.
- */
+// Botón secundario para filas de acciones (Editar / Duplicar / Archivar).
 export function ActionButton({
   children,
   onClick,

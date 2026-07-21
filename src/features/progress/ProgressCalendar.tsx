@@ -3,7 +3,12 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Caret } from '@/components/ui/Caret';
 import { useSettings } from '@/app/providers/settings';
 import { getRepositories } from '@/lib/repositories';
-import { dayHabitStatus, totalsForEntries, type HabitDayStatus, type HabitLevel } from '@/lib/domain';
+import {
+  dayHabitStatus,
+  totalsForEntries,
+  type HabitDayStatus,
+  type HabitLevel,
+} from '@/lib/domain';
 import {
   WEEKDAY_LABELS,
   addMonthsToKey,
@@ -43,7 +48,8 @@ function useHabitsCalendar(monthAnchor: DateKey, timeZone: string): DayStatusMap
       repos.water.listRange(start, end),
     ]);
     const waterByDay = new Map<DateKey, number>();
-    for (const w of waterEntries) waterByDay.set(w.localDate, (waterByDay.get(w.localDate) ?? 0) + w.amountMl);
+    for (const w of waterEntries)
+      waterByDay.set(w.localDate, (waterByDay.get(w.localDate) ?? 0) + w.amountMl);
 
     const entries = await Promise.all(
       days.map(async (date): Promise<readonly [DateKey, HabitDayStatus | null]> => {
@@ -56,7 +62,9 @@ function useHabitsCalendar(monthAnchor: DateKey, timeZone: string): DayStatusMap
         const scheduled = supplements.filter(
           (s) => s.daysOfWeek.length === 0 || s.daysOfWeek.includes(weekday),
         );
-        const completedIds = new Set(suppLogs.filter((l) => l.completed).map((l) => l.supplementId));
+        const completedIds = new Set(
+          suppLogs.filter((l) => l.completed).map((l) => l.supplementId),
+        );
         const completedScheduled = scheduled.filter((s) => completedIds.has(s.id)).length;
         const waterMl = waterByDay.get(date) ?? 0;
         const status = dayHabitStatus({
@@ -84,7 +92,9 @@ const LEVEL_CELL: Record<HabitLevel, string> = {
 
 export function ProgressCalendar() {
   const { settings } = useSettings();
-  const [monthAnchor, setMonthAnchor] = useState(() => startOfMonthKey(todayKey(settings.timeZone)));
+  const [monthAnchor, setMonthAnchor] = useState(() =>
+    startOfMonthKey(todayKey(settings.timeZone)),
+  );
   const [selected, setSelected] = useState<DateKey | null>(null);
 
   const statuses = useHabitsCalendar(monthAnchor, settings.timeZone);

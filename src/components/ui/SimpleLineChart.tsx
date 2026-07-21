@@ -13,7 +13,6 @@ export interface ChartLine {
   key: string;
   name: string;
   color: string;
-  /** Línea punteada (p. ej. para medias). */
   dashed?: boolean;
   width?: number;
 }
@@ -49,7 +48,12 @@ export function SimpleLineChart({
             </linearGradient>
           )}
         </defs>
-        <CartesianGrid strokeDasharray="2 5" stroke="#FFFFFF" strokeOpacity={0.08} vertical={false} />
+        <CartesianGrid
+          strokeDasharray="2 5"
+          stroke="#FFFFFF"
+          strokeOpacity={0.08}
+          vertical={false}
+        />
         <XAxis
           dataKey={xKey}
           tick={AXIS_TICK}

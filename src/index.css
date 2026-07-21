@@ -1,4 +1,4 @@
-/* Plus Jakarta Sans Variable autohospedada (offline en la PWA). */
+/* Fuente autohospedada para que la PWA funcione offline. */
 @import '@fontsource-variable/plus-jakarta-sans/index.css';
 
 @tailwind base;
@@ -18,8 +18,15 @@
 
   body {
     @apply bg-canvas text-ink antialiased;
-    font-family: 'Plus Jakarta Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    font-feature-settings: 'liga' 1, 'calt' 1;
+    font-family:
+      'Plus Jakarta Sans Variable',
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      sans-serif;
+    font-feature-settings:
+      'liga' 1,
+      'calt' 1;
     text-rendering: optimizeLegibility;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
@@ -63,7 +70,7 @@
 }
 
 @layer components {
-  /* — Superficie principal — */
+  /* Superficies */
   .card {
     @apply rounded-2xl border border-line bg-paper p-5 shadow-card;
   }
@@ -76,7 +83,7 @@
     @apply rounded-xl border border-line bg-inset p-1;
   }
 
-  /* — Etiquetas — */
+  /* Etiquetas */
   .eyebrow {
     @apply text-2xs font-bold uppercase text-ink-muted;
   }
@@ -84,7 +91,7 @@
     @apply mb-1.5 block text-sm font-semibold text-ink-soft;
   }
 
-  /* — Campos — */
+  /* Campos */
   .input {
     @apply w-full rounded-xl border border-line bg-inset px-3.5 py-3 text-ink
       outline-none transition duration-200 ease-ascend
@@ -95,14 +102,13 @@
     @apply border-danger-500 focus:border-danger-500 focus:ring-danger-500/30;
   }
 
-  /* — Botones — objetivo táctil 48px — */
+  /* Botones (objetivo táctil de 48px) */
   .btn {
     @apply inline-flex min-h-[48px] select-none items-center justify-center gap-2 rounded-xl
       px-4 text-sm font-bold tracking-[-0.01em]
       transition duration-200 ease-ascend active:scale-[0.985]
       disabled:pointer-events-none disabled:opacity-40;
   }
-  /* Acción primaria: verde vivo con texto oscuro. */
   .btn-primary {
     @apply btn bg-brand-600 text-[#10271b] shadow-[0_12px_26px_-12px_rgba(55,201,126,0.55)]
       hover:bg-brand-500;
@@ -133,7 +139,6 @@
 }
 
 @layer utilities {
-  /* Lienzo gris carbón con una profundidad apenas perceptible. */
   .app-canvas {
     background-color: #3c3c3c;
     background-image: radial-gradient(120% 80% at 50% 0%, #424242 0%, #3a3a3a 60%, #383838 100%);

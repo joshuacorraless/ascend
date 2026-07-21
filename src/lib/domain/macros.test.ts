@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  amountToQuantity,
-  macroProgress,
-  recipeMacros,
-  scaleMacros,
-  sumMacros,
-} from './macros';
+import { amountToQuantity, macroProgress, recipeMacros, scaleMacros, sumMacros } from './macros';
 import type { Food, Macros, Recipe } from '@/lib/schema';
 
 const base: Macros = { calories: 100, protein: 10, carbs: 20, fat: 5, fiber: 2 };

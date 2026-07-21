@@ -29,7 +29,11 @@ export function RoutineList() {
     [showArchived],
     [] as WorkoutRoutine[],
   );
-  const exercises = useLiveQuery(() => repos.exercises.list({ includeArchived: true }), [], [] as Exercise[]);
+  const exercises = useLiveQuery(
+    () => repos.exercises.list({ includeArchived: true }),
+    [],
+    [] as Exercise[],
+  );
   const exById = useMemo(() => new Map((exercises ?? []).map((e) => [e.id, e])), [exercises]);
   const activeSession = useLiveQuery(() => repos.workout.getActiveSession(), []);
 
@@ -83,7 +87,10 @@ export function RoutineList() {
       )}
 
       <div className="flex items-center justify-between">
-        <button className="btn-primary !min-h-0 px-3.5 py-2 text-sm" onClick={() => setCreating(true)}>
+        <button
+          className="btn-primary !min-h-0 px-3.5 py-2 text-sm"
+          onClick={() => setCreating(true)}
+        >
           Nueva rutina
         </button>
         <label className="flex items-center gap-2 text-xs text-ink-muted">
@@ -98,7 +105,10 @@ export function RoutineList() {
       </div>
 
       {(routines ?? []).length === 0 ? (
-        <EmptyState title="Sin rutinas" description="Crea tu primera rutina (Push, Pull, Pierna…)." />
+        <EmptyState
+          title="Sin rutinas"
+          description="Crea tu primera rutina (Push, Pull, Pierna…)."
+        />
       ) : (
         <ul className="space-y-2.5">
           {(routines ?? []).map((r) => (
@@ -107,17 +117,25 @@ export function RoutineList() {
                 <div className="min-w-0">
                   <div className="flex items-start gap-2">
                     {r.active && !r.archived && (
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" aria-hidden />
+                      <span
+                        className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500"
+                        aria-hidden
+                      />
                     )}
                     <p className="font-semibold leading-snug text-ink">{r.name}</p>
                   </div>
                   <p className="nums mt-0.5 text-xs text-ink-muted">
                     {r.exercises.length} ejercicios
-                    {r.daysOfWeek.length > 0 ? ` · ${r.daysOfWeek.map((d) => WEEKDAY_LABELS[d]).join(' ')}` : ''}
+                    {r.daysOfWeek.length > 0
+                      ? ` · ${r.daysOfWeek.map((d) => WEEKDAY_LABELS[d]).join(' ')}`
+                      : ''}
                   </p>
                 </div>
                 {!r.archived && (
-                  <button className="btn-primary !min-h-0 shrink-0 px-3.5 py-2 text-sm" onClick={() => start(r)}>
+                  <button
+                    className="btn-primary !min-h-0 shrink-0 px-3.5 py-2 text-sm"
+                    onClick={() => start(r)}
+                  >
                     Empezar
                   </button>
                 )}
@@ -128,7 +146,13 @@ export function RoutineList() {
                 {!r.archived && (
                   <ActionButton
                     aria-pressed={r.active}
-                    onClick={() => repos.routines.put({ ...r, active: !r.active, updatedAt: new Date().toISOString() })}
+                    onClick={() =>
+                      repos.routines.put({
+                        ...r,
+                        active: !r.active,
+                        updatedAt: new Date().toISOString(),
+                      })
+                    }
                   >
                     {r.active ? 'Activa' : 'Activar'}
                   </ActionButton>

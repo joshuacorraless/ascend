@@ -11,7 +11,6 @@ interface SegmentedControlProps<T extends string> {
   onChange: (value: T) => void;
   className?: string;
   size?: 'sm' | 'md';
-  /** Ocupa todo el ancho con segmentos de igual tamaño. */
   stretch?: boolean;
 }
 

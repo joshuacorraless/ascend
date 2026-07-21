@@ -1,11 +1,7 @@
 import { round } from '@/lib/units';
 import type { OneRmFormula, SetLog, WorkoutSession } from '@/lib/schema';
 
-/**
- * Estimación de 1RM con la fórmula de Epley:  1RM ≈ peso × (1 + reps / 30).
- * Es una ESTIMACIÓN, no una medición. Con 1 repetición devuelve el propio peso.
- * Documentado en docs/DATA_MODEL.md / docs/LIMITATIONS.md.
- */
+/** 1RM estimado con la fórmula de Epley: peso × (1 + reps / 30). Con 1 rep devuelve el propio peso. */
 export function epleyOneRm(weightKg: number, reps: number): number {
   if (weightKg <= 0 || reps <= 0) return 0;
   if (reps === 1) return round(weightKg, 1);
@@ -49,7 +45,10 @@ export function effectiveSetCount(sets: SetLog[]): number {
 }
 
 /** Mejor serie por 1RM estimado (excluye calentamientos). */
-export function bestSetByOneRm(sets: SetLog[], formula: OneRmFormula = 'epley'): SetLog | undefined {
+export function bestSetByOneRm(
+  sets: SetLog[],
+  formula: OneRmFormula = 'epley',
+): SetLog | undefined {
   let best: SetLog | undefined;
   let bestVal = -1;
   for (const s of sets) {
@@ -63,7 +62,7 @@ export function bestSetByOneRm(sets: SetLog[], formula: OneRmFormula = 'epley'):
   return best;
 }
 
-// ── Récords personales por ejercicio ─────────────────────────────────────────
+// Récords personales por ejercicio
 
 export interface ExercisePersonalRecords {
   /** Mayor peso movido en una serie de trabajo. */
@@ -77,8 +76,8 @@ export interface ExercisePersonalRecords {
 }
 
 /**
- * Calcula los PRs de UN ejercicio a partir de todas sus series de trabajo
- * completadas. No mezcla ejercicios distintos: el llamador filtra por exerciseId.
+ * PRs de un ejercicio a partir de sus series de trabajo completadas.
+ * El llamador filtra por exerciseId; aquí no se mezclan ejercicios.
  */
 export function personalRecords(
   sets: SetLog[],
@@ -106,7 +105,7 @@ export function personalRecords(
   };
 }
 
-// ── Series temporales para gráficos (un punto por sesión) ────────────────────
+// Series temporales para gráficos (un punto por sesión)
 
 export type ProgressMetric =
   | 'maxWeight'
@@ -178,7 +177,7 @@ export function sessionDurationSeconds(session: WorkoutSession): number {
   return 0;
 }
 
-// ── Resumen por sesión de UN ejercicio (historial + comparación) ─────────────
+// Resumen por sesión de un ejercicio (historial y comparación)
 
 export interface ExerciseSessionSummary {
   sessionId: string;
@@ -193,10 +192,7 @@ export interface ExerciseSessionSummary {
   estOneRm: number;
 }
 
-/**
- * Agrupa las series de un ejercicio por sesión y devuelve un resumen por sesión,
- * ordenado por fecha DESCENDENTE (la más reciente primero). Solo datos reales.
- */
+/** Resumen por sesión de un ejercicio, ordenado de la más reciente a la más antigua. */
 export function exerciseSessionSummaries(
   sets: SetLog[],
   sessionDates: Map<string, string>,

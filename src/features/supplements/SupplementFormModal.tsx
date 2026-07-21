@@ -44,7 +44,12 @@ export function SupplementFormModal({
       ...(notes.trim() ? { notes: notes.trim() } : {}),
     };
     const saved: Supplement = initial
-      ? touch({ ...initial, ...values, dose: dose.trim() || undefined, notes: notes.trim() || undefined })
+      ? touch({
+          ...initial,
+          ...values,
+          dose: dose.trim() || undefined,
+          notes: notes.trim() || undefined,
+        })
       : newEntity<Supplement>({ ...values, archived: false });
     await repos.supplements.put(saved);
     success(initial ? 'Suplemento actualizado.' : 'Suplemento creado.');
@@ -64,13 +69,35 @@ export function SupplementFormModal({
     >
       <div className="space-y-4">
         <Field label="Nombre" htmlFor="s-name">
-          <input id="s-name" className="input" value={name} onChange={(e) => setName(e.target.value)} autoFocus placeholder="Multivitamínico, Magnesio…" />
+          <input
+            id="s-name"
+            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoFocus
+            placeholder="Multivitamínico, Magnesio…"
+          />
         </Field>
-        <Field label="Dosis (opcional)" htmlFor="s-dose" hint="Solo informativo; la app no recomienda dosis.">
-          <input id="s-dose" className="input" value={dose} onChange={(e) => setDose(e.target.value)} placeholder="5 g, 1 cápsula…" />
+        <Field
+          label="Dosis (opcional)"
+          htmlFor="s-dose"
+          hint="Solo informativo; la app no recomienda dosis."
+        >
+          <input
+            id="s-dose"
+            className="input"
+            value={dose}
+            onChange={(e) => setDose(e.target.value)}
+            placeholder="5 g, 1 cápsula…"
+          />
         </Field>
         <Field label="Momento del día" htmlFor="s-time">
-          <select id="s-time" className="input" value={time} onChange={(e) => setTime(e.target.value as SupplementTime)}>
+          <select
+            id="s-time"
+            className="input"
+            value={time}
+            onChange={(e) => setTime(e.target.value as SupplementTime)}
+          >
             {SUPPLEMENT_TIME_ORDER.map((t) => (
               <option key={t} value={t}>
                 {SUPPLEMENT_TIME_LABELS[t]}
@@ -93,7 +120,12 @@ export function SupplementFormModal({
           </div>
         </div>
         <Field label="Notas (opcional)" htmlFor="s-notes">
-          <input id="s-notes" className="input" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <input
+            id="s-notes"
+            className="input"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
         </Field>
       </div>
     </Modal>

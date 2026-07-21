@@ -11,15 +11,14 @@ interface SettingsContextValue {
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
 
-// Ascend usa una única colorimetría "tinta sobre lino" (tema claro). El campo
-// `theme` se conserva en el esquema por compatibilidad de datos, pero no se aplica.
+// El campo `theme` sigue existiendo en el esquema por compatibilidad de datos,
+// pero no se aplica: la app usa una única colorimetría.
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const repos = getRepositories();
   const [ready, setReady] = useState(false);
   const settings = useLiveQuery(() => repos.settings.get(), []);
 
-  // Inicializa los ajustes por defecto si la BD está vacía.
   useEffect(() => {
     let active = true;
     ensureInitialized()

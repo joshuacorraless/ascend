@@ -8,7 +8,7 @@ export function round(value: number, digits = 0): number {
   return Math.round((value + Number.EPSILON) * f) / f;
 }
 
-// ── Peso (interno siempre en kg) ─────────────────────────────────────────────
+// Peso (interno siempre en kg)
 
 export function kgToLb(kg: number): number {
   return kg / KG_PER_LB;
@@ -32,7 +32,7 @@ export function formatWeight(kg: number, unit: WeightUnit, digits = 1): string {
   return `${round(weightToDisplay(kg, unit), digits)} ${unit}`;
 }
 
-// ── Volumen / agua (interno siempre en ml) ───────────────────────────────────
+// Volumen / agua (interno siempre en ml)
 
 export function volumeToDisplay(ml: number, unit: VolumeUnit): number {
   return unit === 'ml' ? ml : ml / 1000;
@@ -47,7 +47,7 @@ export function formatVolume(ml: number, unit: VolumeUnit): string {
   return `${round(ml)} ml`;
 }
 
-// ── Etiquetas legibles de unidades de porción ────────────────────────────────
+// Etiquetas legibles de unidades de porción
 
 export const PORTION_UNIT_LABELS: Record<string, string> = {
   g: 'g',

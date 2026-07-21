@@ -37,7 +37,6 @@ export function EditEntryModal({
   const [mealType, setMealType] = useState<MealType>(entry.mealType);
   const [value, setValue] = useState('');
 
-  // Inicializa el campo cuando se resuelve el alimento o cambia la entrada.
   useEffect(() => {
     if (food) {
       const amount =
@@ -116,7 +115,11 @@ export function EditEntryModal({
           <button className="btn-danger" onClick={() => run(remove)} disabled={busy}>
             Eliminar
           </button>
-          <button className="btn-primary flex-1" onClick={() => run(save)} disabled={num <= 0 || busy}>
+          <button
+            className="btn-primary flex-1"
+            onClick={() => run(save)}
+            disabled={num <= 0 || busy}
+          >
             {busy ? 'Guardando…' : 'Guardar'}
           </button>
         </div>

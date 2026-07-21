@@ -29,7 +29,11 @@ export function WaterQuickAddModal({
   const repos = getRepositories();
   const [custom, setCustom] = useState('');
 
-  const entries = useLiveQuery(() => repos.water.listByDate(dateKey), [dateKey], [] as WaterEntry[]);
+  const entries = useLiveQuery(
+    () => repos.water.listByDate(dateKey),
+    [dateKey],
+    [] as WaterEntry[],
+  );
   const goal = useLiveQuery(() => repos.goals.resolveForDate(dateKey), [dateKey]);
 
   const total = sumWater(entries ?? []);
@@ -62,7 +66,9 @@ export function WaterQuickAddModal({
     <Modal open={open} onClose={onClose} title="Agua">
       <div className="space-y-5">
         <div className="rounded-2xl border border-line bg-canvas p-5 text-center">
-          <p className="nums text-3xl font-semibold text-ink">{formatVolume(total, settings.volumeUnit)}</p>
+          <p className="nums text-3xl font-semibold text-ink">
+            {formatVolume(total, settings.volumeUnit)}
+          </p>
           <p className="eyebrow mt-1.5">
             de {formatVolume(target, settings.volumeUnit)} · {Math.round(percent)}%
           </p>
@@ -72,7 +78,9 @@ export function WaterQuickAddModal({
         <div className="grid grid-cols-3 gap-2">
           {PRESETS_ML.map((ml) => (
             <button key={ml} className="btn-secondary !py-3" onClick={() => add(ml)}>
-              <span className="nums text-base font-semibold">{formatVolume(ml, settings.volumeUnit)}</span>
+              <span className="nums text-base font-semibold">
+                {formatVolume(ml, settings.volumeUnit)}
+              </span>
             </button>
           ))}
         </div>

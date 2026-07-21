@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Ascend — PWA personal local-first para nutrición, hidratación, suplementos, peso y entrenamiento.",
+  "description": "PWA local-first para registrar nutrición, hidratación, suplementos, peso corporal y entrenamiento.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit && vite build",

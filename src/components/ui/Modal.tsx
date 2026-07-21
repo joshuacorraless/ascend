@@ -38,7 +38,11 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
       aria-modal="true"
       aria-label={title}
     >
-      <div className="absolute inset-0 animate-fade-in bg-ink/40 backdrop-blur-[2px]" onClick={onClose} aria-hidden />
+      <div
+        className="absolute inset-0 animate-fade-in bg-ink/40 backdrop-blur-[2px]"
+        onClick={onClose}
+        aria-hidden
+      />
       <div
         className={cn(
           'relative flex max-h-[92dvh] w-full animate-sheet-up flex-col rounded-t-3xl bg-paper shadow-lift',
@@ -46,7 +50,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
           size === 'md' ? 'sm:max-w-md' : 'sm:max-w-2xl',
         )}
       >
-        {/* Asidero de hoja (móvil): forma geométrica, no icono. */}
+        {/* Asidero de la hoja en móvil */}
         <div className="mx-auto mt-2.5 h-1 w-9 rounded-full bg-line sm:hidden" aria-hidden />
         <div className="flex items-center justify-between gap-4 px-5 pb-3 pt-3.5 sm:pt-5">
           <h2 className="text-lg font-semibold text-ink">{title}</h2>
@@ -59,9 +63,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
         </div>
         <div className="divider" />
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">{children}</div>
-        {footer && (
-          <div className="border-t border-line px-5 py-4 pb-safe">{footer}</div>
-        )}
+        {footer && <div className="border-t border-line px-5 py-4 pb-safe">{footer}</div>}
       </div>
     </div>
   );

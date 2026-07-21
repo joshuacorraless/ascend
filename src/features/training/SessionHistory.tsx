@@ -15,7 +15,11 @@ export function SessionHistory() {
   const { success } = useToast();
   const confirm = useConfirm();
   const navigate = useNavigate();
-  const sessions = useLiveQuery(() => getRepositories().workout.listSessions(), [], [] as WorkoutSession[]);
+  const sessions = useLiveQuery(
+    () => getRepositories().workout.listSessions(),
+    [],
+    [] as WorkoutSession[],
+  );
 
   const remove = async (session: WorkoutSession) => {
     const ok = await confirm({
@@ -50,7 +54,8 @@ export function SessionHistory() {
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium text-ink">{s.name}</p>
               <p className="nums text-xs text-ink-muted">
-                {formatKeyRelative(s.localDate, settings.timeZone)} · {formatDuration(sessionDurationSeconds(s))}
+                {formatKeyRelative(s.localDate, settings.timeZone)} ·{' '}
+                {formatDuration(sessionDurationSeconds(s))}
               </p>
             </div>
             <Caret dir="right" className="shrink-0 text-ink-faint" />

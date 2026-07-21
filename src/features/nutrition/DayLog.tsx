@@ -37,7 +37,10 @@ export function DayLog({ dateKey }: { dateKey: DateKey }) {
   }
 
   // Muestra todos los tiempos configurados (en orden) + los que existan en datos.
-  const sections = mealsForEntries(settings, list.map((e) => e.mealType));
+  const sections = mealsForEntries(
+    settings,
+    list.map((e) => e.mealType),
+  );
 
   const repeatLast = async (mealId: string) => {
     const prev = await repos.meals.lastEntriesForMeal(mealId, dateKey);
@@ -78,7 +81,9 @@ export function DayLog({ dateKey }: { dateKey: DateKey }) {
               <div className="flex items-baseline gap-2.5">
                 <h3 className="text-base font-semibold text-ink">{meal.name}</h3>
                 {entries.length > 0 && (
-                  <span className="nums text-xs text-ink-muted">{round(subtotal.calories)} kcal</span>
+                  <span className="nums text-xs text-ink-muted">
+                    {round(subtotal.calories)} kcal
+                  </span>
                 )}
               </div>
               <button
@@ -100,7 +105,10 @@ export function DayLog({ dateKey }: { dateKey: DateKey }) {
               <ul className="divide-y divide-line">
                 {entries.map((e) => (
                   <li key={e.id}>
-                    <button onClick={() => setEditEntry(e)} className="flex w-full items-center gap-3 py-2.5 text-left">
+                    <button
+                      onClick={() => setEditEntry(e)}
+                      className="flex w-full items-center gap-3 py-2.5 text-left"
+                    >
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-medium text-ink">{e.name}</p>
                         <p className="text-xs text-ink-muted">{e.portionLabel}</p>
@@ -124,7 +132,11 @@ export function DayLog({ dateKey }: { dateKey: DateKey }) {
         />
       )}
       {editEntry && (
-        <EditEntryModal open={editEntry !== null} onClose={() => setEditEntry(null)} entry={editEntry} />
+        <EditEntryModal
+          open={editEntry !== null}
+          onClose={() => setEditEntry(null)}
+          entry={editEntry}
+        />
       )}
       <CopyDayModal open={copyOpen} onClose={() => setCopyOpen(false)} targetDate={dateKey} />
       <MealTimesModal open={timesOpen} onClose={() => setTimesOpen(false)} />

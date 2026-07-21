@@ -59,7 +59,10 @@ function Card({
             className="group flex items-center gap-1.5 text-base font-semibold text-ink"
           >
             {title}
-            <Caret dir="right" className="text-ink-faint transition group-hover:translate-x-0.5 group-hover:text-ink-muted" />
+            <Caret
+              dir="right"
+              className="text-ink-faint transition group-hover:translate-x-0.5 group-hover:text-ink-muted"
+            />
           </button>
         ) : (
           <h2 className="text-base font-semibold text-ink">{title}</h2>
@@ -88,7 +91,12 @@ function SupplementItem({ status, dateKey }: { status: SupplementStatus; dateKey
         {completed && <span className="h-2 w-2 rounded-full bg-canvas" />}
       </span>
       <span className="flex-1">
-        <span className={cn('text-sm font-medium', completed ? 'text-ink-faint line-through' : 'text-ink')}>
+        <span
+          className={cn(
+            'text-sm font-medium',
+            completed ? 'text-ink-faint line-through' : 'text-ink',
+          )}
+        >
           {supplement.name}
         </span>
         {supplement.dose && <span className="ml-2 text-xs text-ink-muted">{supplement.dose}</span>}
@@ -123,10 +131,30 @@ export function DashboardScreen() {
       </header>
 
       <div className="grid grid-cols-4 gap-2.5">
-        <QuickAction label="Comida" detail="registrar" color="#51CF66" onClick={() => navigate('/alimentacion')} />
-        <QuickAction label="Agua" detail="sumar" color="#4DABF7" onClick={() => setWaterOpen(true)} />
-        <QuickAction label="Peso" detail="medir" color="#FFD43B" onClick={() => setWeightOpen(true)} />
-        <QuickAction label="Gym" detail="entrenar" color="#FF8787" onClick={() => navigate('/entrenamiento')} />
+        <QuickAction
+          label="Comida"
+          detail="registrar"
+          color="#51CF66"
+          onClick={() => navigate('/alimentacion')}
+        />
+        <QuickAction
+          label="Agua"
+          detail="sumar"
+          color="#4DABF7"
+          onClick={() => setWaterOpen(true)}
+        />
+        <QuickAction
+          label="Peso"
+          detail="medir"
+          color="#FFD43B"
+          onClick={() => setWeightOpen(true)}
+        />
+        <QuickAction
+          label="Gym"
+          detail="entrenar"
+          color="#FF8787"
+          onClick={() => navigate('/entrenamiento')}
+        />
       </div>
 
       {data.goal ? (

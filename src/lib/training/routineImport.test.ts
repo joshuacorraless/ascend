@@ -1,11 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { getRepositories } from '@/lib/repositories';
 import { newEntity } from '@/lib/factories';
-import {
-  applyRoutineImport,
-  buildImportEntities,
-  parseRoutineImport,
-} from './routineImport';
+import { applyRoutineImport, buildImportEntities, parseRoutineImport } from './routineImport';
 import type { Exercise } from '@/lib/schema';
 
 function existingExercise(name: string): Exercise {
@@ -25,7 +21,13 @@ describe('parseRoutineImport', () => {
   it('mapea días (nombres con/sin acento) a 0-6 y ordena', () => {
     const r = parseRoutineImport(
       JSON.stringify({
-        rutinas: [{ nombre: 'Push', dias: ['Miércoles', 'lunes', 'dom'], ejercicios: [{ nombre: 'Press' }] }],
+        rutinas: [
+          {
+            nombre: 'Push',
+            dias: ['Miércoles', 'lunes', 'dom'],
+            ejercicios: [{ nombre: 'Press' }],
+          },
+        ],
       }),
     );
     expect(r.ok).toBe(true);
@@ -49,8 +51,18 @@ describe('parseRoutineImport', () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     const [a, b] = r.routines[0]!.exercises;
-    expect(a).toMatchObject({ primaryMuscle: 'espalda', equipment: 'polea', repRangeMin: 8, repRangeMax: 12, targetSets: 3 });
-    expect(b).toMatchObject({ equipment: 'peso_corporal', trackingType: 'bodyweight_reps', targetSets: 20 }); // clamp 1..20
+    expect(a).toMatchObject({
+      primaryMuscle: 'espalda',
+      equipment: 'polea',
+      repRangeMin: 8,
+      repRangeMax: 12,
+      targetSets: 3,
+    });
+    expect(b).toMatchObject({
+      equipment: 'peso_corporal',
+      trackingType: 'bodyweight_reps',
+      targetSets: 20,
+    }); // clamp 1..20
   });
 
   it('reconoce "al fallo" por campo explícito o dentro de reps', () => {
@@ -81,13 +93,19 @@ describe('parseRoutineImport', () => {
   });
 
   it('acepta un arreglo de rutinas y una rutina suelta', () => {
-    expect(parseRoutineImport(JSON.stringify([{ nombre: 'X', ejercicios: [{ nombre: 'Y' }] }])).ok).toBe(true);
-    expect(parseRoutineImport(JSON.stringify({ nombre: 'X', ejercicios: [{ nombre: 'Y' }] })).ok).toBe(true);
+    expect(
+      parseRoutineImport(JSON.stringify([{ nombre: 'X', ejercicios: [{ nombre: 'Y' }] }])).ok,
+    ).toBe(true);
+    expect(
+      parseRoutineImport(JSON.stringify({ nombre: 'X', ejercicios: [{ nombre: 'Y' }] })).ok,
+    ).toBe(true);
   });
 
   it('rechaza JSON inválido o sin ejercicios', () => {
     expect(parseRoutineImport('no es json').ok).toBe(false);
-    expect(parseRoutineImport(JSON.stringify({ rutinas: [{ nombre: 'A', ejercicios: [] }] })).ok).toBe(false);
+    expect(
+      parseRoutineImport(JSON.stringify({ rutinas: [{ nombre: 'A', ejercicios: [] }] })).ok,
+    ).toBe(false);
   });
 });
 
@@ -96,7 +114,9 @@ describe('buildImportEntities', () => {
     const existing = [existingExercise('Press de Banca')];
     const parsed = parseRoutineImport(
       JSON.stringify({
-        rutinas: [{ nombre: 'Push', ejercicios: [{ nombre: 'press de banca' }, { nombre: 'Aperturas' }] }],
+        rutinas: [
+          { nombre: 'Push', ejercicios: [{ nombre: 'press de banca' }, { nombre: 'Aperturas' }] },
+        ],
       }),
     );
     expect(parsed.ok).toBe(true);
@@ -110,7 +130,9 @@ describe('buildImportEntities', () => {
   it('propaga toFailure al ejercicio de la rutina construida', () => {
     const parsed = parseRoutineImport(
       JSON.stringify({
-        rutinas: [{ nombre: 'A', ejercicios: [{ nombre: 'Curl', alFallo: true }, { nombre: 'Remo' }] }],
+        rutinas: [
+          { nombre: 'A', ejercicios: [{ nombre: 'Curl', alFallo: true }, { nombre: 'Remo' }] },
+        ],
       }),
     );
     if (!parsed.ok) throw new Error('parse falló');
@@ -142,7 +164,9 @@ describe('applyRoutineImport (integración)', () => {
   it('persiste ejercicios nuevos y rutinas, y es aditivo al reimportar', async () => {
     const repos = getRepositories();
     const parsed = parseRoutineImport(
-      JSON.stringify({ rutinas: [{ nombre: 'Push', dias: ['lunes'], ejercicios: [{ nombre: 'Press' }] }] }),
+      JSON.stringify({
+        rutinas: [{ nombre: 'Push', dias: ['lunes'], ejercicios: [{ nombre: 'Press' }] }],
+      }),
     );
     if (!parsed.ok) throw new Error('parse falló');
 
@@ -150,7 +174,7 @@ describe('applyRoutineImport (integración)', () => {
     expect(first).toMatchObject({ routinesCreated: 1, exercisesCreated: 1 });
     expect(await repos.exercises.list()).toHaveLength(1);
 
-    // Reimportar: la rutina se vuelve a crear, pero el ejercicio NO se duplica.
+    // Reimportar vuelve a crear la rutina, pero no duplica el ejercicio.
     const second = await applyRoutineImport(parsed.routines);
     expect(second.exercisesCreated).toBe(0);
     expect(await repos.exercises.list()).toHaveLength(1);

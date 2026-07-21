@@ -24,10 +24,18 @@ export function WaterScreen() {
   const repos = getRepositories();
   const [custom, setCustom] = useState('');
 
-  const todayEntries = useLiveQuery(() => repos.water.listByDate(dateKey), [dateKey], [] as WaterEntry[]);
+  const todayEntries = useLiveQuery(
+    () => repos.water.listByDate(dateKey),
+    [dateKey],
+    [] as WaterEntry[],
+  );
   const goal = useLiveQuery(() => repos.goals.resolveForDate(dateKey), [dateKey]);
   const from = addDaysToKey(dateKey, -6);
-  const rangeEntries = useLiveQuery(() => repos.water.listRange(from, dateKey), [from, dateKey], [] as WaterEntry[]);
+  const rangeEntries = useLiveQuery(
+    () => repos.water.listRange(from, dateKey),
+    [from, dateKey],
+    [] as WaterEntry[],
+  );
 
   const total = sumWater(todayEntries ?? []);
   const target = goal?.waterMl ?? 0;
@@ -38,7 +46,9 @@ export function WaterScreen() {
 
   const add = async (ml: number) => {
     if (ml <= 0) return;
-    await repos.water.add(newEntity<WaterEntry>({ localDate: dateKey, loggedAt: nowIso(), amountMl: round(ml) }));
+    await repos.water.add(
+      newEntity<WaterEntry>({ localDate: dateKey, loggedAt: nowIso(), amountMl: round(ml) }),
+    );
     success(`+${formatVolume(ml, settings.volumeUnit)}`);
   };
   const addCustom = async () => {
@@ -60,7 +70,9 @@ export function WaterScreen() {
       <section className="card flex flex-col items-center text-center">
         <ProgressRing percent={percent} size={148} strokeWidth={12} color="#4DABF7">
           <div className="leading-none">
-            <p className="nums text-2xl font-semibold text-ink">{formatVolume(total, settings.volumeUnit)}</p>
+            <p className="nums text-2xl font-semibold text-ink">
+              {formatVolume(total, settings.volumeUnit)}
+            </p>
             <p className="eyebrow mt-1.5">
               de {formatVolume(target, settings.volumeUnit)} · {Math.round(percent)}%
             </p>
@@ -69,7 +81,11 @@ export function WaterScreen() {
 
         <div className="mt-6 grid w-full grid-cols-3 gap-2">
           {PRESETS_ML.map((ml) => (
-            <button key={ml} className="btn-secondary !py-3 nums text-base font-semibold" onClick={() => add(ml)}>
+            <button
+              key={ml}
+              className="btn-secondary !py-3 nums text-base font-semibold"
+              onClick={() => add(ml)}
+            >
               {formatVolume(ml, settings.volumeUnit)}
             </button>
           ))}
@@ -87,7 +103,11 @@ export function WaterScreen() {
             Añadir
           </button>
         </div>
-        <button className="btn-ghost mt-2 w-full" onClick={undoLast} disabled={(todayEntries ?? []).length === 0}>
+        <button
+          className="btn-ghost mt-2 w-full"
+          onClick={undoLast}
+          disabled={(todayEntries ?? []).length === 0}
+        >
           Deshacer último
         </button>
       </section>
@@ -106,12 +126,17 @@ export function WaterScreen() {
               <div key={d.date} className="flex flex-1 flex-col items-center gap-2">
                 <div className="flex w-full flex-1 items-end">
                   <div
-                    className={cn('w-full rounded-t-md transition-all duration-500', met ? 'bg-macro-fat' : 'bg-white/12')}
+                    className={cn(
+                      'w-full rounded-t-md transition-all duration-500',
+                      met ? 'bg-macro-fat' : 'bg-white/12',
+                    )}
                     style={{ height: `${h}%` }}
                     title={formatVolume(d.ml, settings.volumeUnit)}
                   />
                 </div>
-                <span className="text-2xs text-ink-faint">{formatKeyShort(d.date).split(' ')[0]}</span>
+                <span className="text-2xs text-ink-faint">
+                  {formatKeyShort(d.date).split(' ')[0]}
+                </span>
               </div>
             );
           })}

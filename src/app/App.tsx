@@ -5,7 +5,6 @@ import { ToastProvider } from './providers/toast';
 import { ConfirmProvider } from './providers/confirm';
 import { OnboardingScreen } from '@/features/onboarding/OnboardingScreen';
 
-/** Decide entre la bienvenida (primer uso) y la app completa. */
 function Gate() {
   const { settings } = useSettings();
   if (!settings.onboarded) return <OnboardingScreen />;

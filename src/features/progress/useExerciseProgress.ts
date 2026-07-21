@@ -3,11 +3,9 @@ import { getRepositories } from '@/lib/repositories';
 import type { SetLog, WorkoutSession } from '@/lib/schema';
 
 export interface ExerciseProgressData {
-  /** Series de sesiones completadas para el ejercicio. */
   sets: SetLog[];
   /** sessionId → localDate. */
   sessionDates: Map<string, string>;
-  /** Nº de sesiones completadas con este ejercicio. */
   sessionCount: number;
 }
 
@@ -19,9 +17,9 @@ export function useExerciseProgress(exerciseId?: string): ExerciseProgressData |
     const repos = getRepositories();
     const sets = await repos.workout.listSetLogsForExercise(exerciseId);
     const sessionIds = [...new Set(sets.map((s) => s.sessionId))];
-    const sessions = (await Promise.all(sessionIds.map((id) => repos.workout.getSession(id)))).filter(
-      (s): s is WorkoutSession => !!s && s.status === 'completed',
-    );
+    const sessions = (
+      await Promise.all(sessionIds.map((id) => repos.workout.getSession(id)))
+    ).filter((s): s is WorkoutSession => !!s && s.status === 'completed');
     const completed = new Set(sessions.map((s) => s.id));
     const sessionDates = new Map(sessions.map((s) => [s.id, s.localDate]));
     return {

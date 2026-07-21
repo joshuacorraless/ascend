@@ -28,7 +28,6 @@ export interface DashboardData {
   latestWeight: BodyWeightEntry | undefined;
 }
 
-/** Carga reactiva del estado del día (todo lo que muestra el inicio). */
 export function useDashboard(dateKey: DateKey, weekday: number): DashboardData | undefined {
   return useLiveQuery(async () => {
     const repos = getRepositories();
@@ -49,7 +48,11 @@ export function useDashboard(dateKey: DateKey, weekday: number): DashboardData |
       .filter((s) => s.daysOfWeek.length === 0 || s.daysOfWeek.includes(weekday))
       .map((s) => {
         const log = logBySupp.get(s.id);
-        return { supplement: s, completed: log?.completed ?? false, ...(log ? { logId: log.id } : {}) };
+        return {
+          supplement: s,
+          completed: log?.completed ?? false,
+          ...(log ? { logId: log.id } : {}),
+        };
       });
 
     const routinesToday = routines.filter((r) => r.daysOfWeek.includes(weekday));

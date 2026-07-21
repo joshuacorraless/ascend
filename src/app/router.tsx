@@ -2,9 +2,8 @@ import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppShell } from './layout/AppShell';
 import { DashboardScreen } from '@/features/dashboard/DashboardScreen';
-import { NotFoundScreen } from '@/features/misc/NotFoundScreen';
+import { NotFoundScreen } from './NotFoundScreen';
 
-// Carga diferida de las pantallas pesadas (gráficos, IA…) para un arranque ligero.
 const NutritionScreen = lazy(() =>
   import('@/features/nutrition/NutritionScreen').then((m) => ({ default: m.NutritionScreen })),
 );
@@ -18,16 +17,22 @@ const ProgressScreen = lazy(() =>
   import('@/features/progress/ProgressScreen').then((m) => ({ default: m.ProgressScreen })),
 );
 const RoutineProgressScreen = lazy(() =>
-  import('@/features/progress/RoutineProgressScreen').then((m) => ({ default: m.RoutineProgressScreen })),
+  import('@/features/progress/RoutineProgressScreen').then((m) => ({
+    default: m.RoutineProgressScreen,
+  })),
 );
 const ExerciseDetailScreen = lazy(() =>
-  import('@/features/progress/ExerciseDetailScreen').then((m) => ({ default: m.ExerciseDetailScreen })),
+  import('@/features/progress/ExerciseDetailScreen').then((m) => ({
+    default: m.ExerciseDetailScreen,
+  })),
 );
 const WaterScreen = lazy(() =>
   import('@/features/water/WaterScreen').then((m) => ({ default: m.WaterScreen })),
 );
 const SupplementsScreen = lazy(() =>
-  import('@/features/supplements/SupplementsScreen').then((m) => ({ default: m.SupplementsScreen })),
+  import('@/features/supplements/SupplementsScreen').then((m) => ({
+    default: m.SupplementsScreen,
+  })),
 );
 const BodyWeightScreen = lazy(() =>
   import('@/features/bodyweight/BodyWeightScreen').then((m) => ({ default: m.BodyWeightScreen })),

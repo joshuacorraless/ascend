@@ -12,7 +12,7 @@ import {
 export const supplementSchema = z.object({
   ...baseEntityShape,
   name: z.string().min(1, 'nombre requerido'),
-  /** Dosis libre opcional, p. ej. "5 g" o "1 cápsula". Sin recomendaciones médicas. */
+  /** Dosis en texto libre, p. ej. "5 g" o "1 cápsula". */
   dose: z.string().optional(),
   time: supplementTimeSchema,
   /** Días de la semana en que se debe tomar (0-6). Vacío = todos los días. */
@@ -23,8 +23,8 @@ export const supplementSchema = z.object({
 export type Supplement = z.infer<typeof supplementSchema>;
 
 /**
- * Registro diario de un suplemento. Marcar como tomado crea/actualiza este
- * registro independiente; NO modifica la definición del suplemento.
+ * Registro diario de un suplemento, independiente de la definición:
+ * marcarlo como tomado nunca modifica el suplemento en sí.
  */
 export const supplementLogSchema = z.object({
   ...baseEntityShape,

@@ -1,13 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// IMPORTANTE: esta función serverless es UN SOLO archivo autocontenido.
-// Vercel (con "type":"module") NO empaqueta imports relativos a otros archivos
-// de /api, por lo que `import './_core'` fallaba con "Cannot find module".
-// Los paquetes de npm (@google/genai, @anthropic-ai/sdk) SÍ se resuelven, así
-// que los SDK se cargan de forma diferida (dynamic import) dentro de cada
-// proveedor. La validación es JavaScript plano (sin zod) para no fallar al cargar.
-// ─────────────────────────────────────────────────────────────────────────────
+// Archivo autocontenido: Vercel (con "type": "module") no empaqueta imports
+// relativos dentro de /api, así que los SDK se cargan con dynamic import.
 
 type ServingUnit = 'g' | 'ml' | 'unidad' | 'porcion';
 
@@ -38,7 +32,7 @@ type AnalyzeResult =
   | { ok: true; analysis: LabelAnalysis }
   | { ok: false; status: number; error: string };
 
-// ── Validación (JS plano, sin dependencias) ──────────────────────────────────
+// Validación sin dependencias
 function numOrNull(v: unknown): number | null {
   return typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : null;
 }
@@ -74,7 +68,7 @@ function validateLabel(raw: unknown): LabelAnalysis | null {
   };
 }
 
-// ── Selección de proveedor ───────────────────────────────────────────────────
+// Selección de proveedor
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 const MAX_BASE64_BYTES = 6 * 1024 * 1024;
 type Provider = 'google' | 'anthropic';
@@ -117,7 +111,11 @@ function buildPrompt(productName?: string): string {
 }
 
 function extractJson(text: string): unknown {
-  const cleaned = text.trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+  const cleaned = text
+    .trim()
+    .replace(/^```(?:json)?/i, '')
+    .replace(/```$/, '')
+    .trim();
   try {
     return JSON.parse(cleaned);
   } catch {
@@ -134,7 +132,7 @@ function extractJson(text: string): unknown {
   }
 }
 
-// ── Proveedor: Google Gemini (nivel gratuito) ────────────────────────────────
+// Proveedor: Google Gemini
 async function analyzeWithGoogle(input: AnalyzeInput): Promise<AnalyzeResult> {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!apiKey) return { ok: false, status: 503, error: 'Falta la clave de Gemini.' };
@@ -156,19 +154,27 @@ async function analyzeWithGoogle(input: AnalyzeInput): Promise<AnalyzeResult> {
   } catch (e) {
     const msg = e instanceof Error ? e.message : '';
     if (/quota|rate|429|RESOURCE_EXHAUSTED/i.test(msg)) {
-      return { ok: false, status: 429, error: 'Límite gratuito de Gemini alcanzado. Intenta más tarde.' };
+      return {
+        ok: false,
+        status: 429,
+        error: 'Límite gratuito de Gemini alcanzado. Intenta más tarde.',
+      };
     }
     if (/api key|permission|unauthor|401|403|invalid/i.test(msg)) {
       return { ok: false, status: 500, error: 'La clave de Gemini del servidor es inválida.' };
     }
     if (/not found|not_found|model/i.test(msg)) {
-      return { ok: false, status: 500, error: `El modelo "${model}" no está disponible. Cambia GEMINI_MODEL.` };
+      return {
+        ok: false,
+        status: 500,
+        error: `El modelo "${model}" no está disponible. Cambia GEMINI_MODEL.`,
+      };
     }
     return { ok: false, status: 502, error: 'El proveedor de IA (Gemini) devolvió un error.' };
   }
 }
 
-// ── Proveedor: Anthropic Claude ──────────────────────────────────────────────
+// Proveedor: Anthropic Claude
 const ANTHROPIC_TOOL_SCHEMA = {
   type: 'object',
   additionalProperties: false,
@@ -229,7 +235,8 @@ async function analyzeWithAnthropic(input: AnalyzeInput): Promise<AnalyzeResult>
       return { ok: false, status: 502, error: 'La IA no devolvió datos estructurados.' };
     }
     const analysis = validateLabel(toolBlock.input);
-    if (!analysis) return { ok: false, status: 502, error: 'La respuesta de la IA no superó la validación.' };
+    if (!analysis)
+      return { ok: false, status: 502, error: 'La respuesta de la IA no superó la validación.' };
     return { ok: true, analysis };
   } catch (e) {
     if (e instanceof Anthropic.AuthenticationError) {
@@ -248,7 +255,11 @@ async function analyzeWithAnthropic(input: AnalyzeInput): Promise<AnalyzeResult>
 async function analyzeLabelCore(input: AnalyzeInput): Promise<AnalyzeResult> {
   const provider = activeProvider();
   if (!provider) {
-    return { ok: false, status: 503, error: 'El análisis por IA no está configurado en el servidor.' };
+    return {
+      ok: false,
+      status: 503,
+      error: 'El análisis por IA no está configurado en el servidor.',
+    };
   }
   if (!input || typeof input.base64 !== 'string' || !input.base64) {
     return { ok: false, status: 400, error: 'Falta la imagen.' };
@@ -262,7 +273,7 @@ async function analyzeLabelCore(input: AnalyzeInput): Promise<AnalyzeResult> {
   return provider === 'google' ? analyzeWithGoogle(input) : analyzeWithAnthropic(input);
 }
 
-// ── Rate-limiting básico en memoria (best-effort) ────────────────────────────
+// Rate limiting en memoria, best-effort
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 10;
 const hits = new Map<string, number[]>();

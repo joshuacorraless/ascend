@@ -9,10 +9,7 @@ const ROTATION: Record<Direction, string> = {
   down: 'rotate-[135deg]',
 };
 
-/**
- * Afordancia direccional puramente geométrica (dos hairlines), no un pictograma.
- * Sustituye a los chevrons de iconos: hereda `currentColor`.
- */
+// Chevron dibujado con dos hairlines en lugar de un icono; hereda currentColor.
 export function Caret({
   dir = 'right',
   className,

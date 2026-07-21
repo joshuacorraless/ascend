@@ -1,4 +1,4 @@
-# DATA_MODEL.md — Entidades, relaciones y reglas históricas
+# Modelo de datos
 
 Fuente de verdad: los esquemas Zod en `src/lib/schema/`. Los tipos TypeScript se derivan de
 ellos. La forma persistida se versiona con `SCHEMA_VERSION` (actualmente **1**).
@@ -89,7 +89,7 @@ BodyWeightEntry (N)
 Se valida con Zod antes de importar; si la versión es anterior se migra (hoy no hay
 migraciones activas); si es más nueva, se rechaza. Importar **reemplaza** todos los datos.
 
-## Cálculos definidos (no inventados)
+## Cálculos definidos
 
 - **Macros de una cantidad:** `macro_porción × cantidad` (cantidad en nº de porciones; los
   gramos/ml se convierten con `cantidad = gramos / portionSize`).

@@ -11,12 +11,26 @@ const MACRO_COLORS = {
   fat: '#4DABF7',
 } as const;
 
-function MacroRow({ label, p, unit, color }: { label: string; p: MacroProgress; unit: string; color: string }) {
+function MacroRow({
+  label,
+  p,
+  unit,
+  color,
+}: {
+  label: string;
+  p: MacroProgress;
+  unit: string;
+  color: string;
+}) {
   return (
     <div>
       <div className="mb-2 flex items-baseline justify-between text-sm">
         <span className="flex items-center gap-2 font-semibold text-ink-soft">
-          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} aria-hidden />
+          <span
+            className="h-2.5 w-2.5 rounded-full"
+            style={{ backgroundColor: color }}
+            aria-hidden
+          />
           {label}
         </span>
         <span className="nums text-ink-muted">
@@ -44,7 +58,13 @@ export function MacrosOverview({ goal, consumed }: { goal: NutritionGoal; consum
   return (
     <div className="card">
       <div className="flex items-center gap-5">
-        <ProgressRing percent={cal.percent} over={cal.over > 0} color={MACRO_COLORS.cal} size={112} strokeWidth={11}>
+        <ProgressRing
+          percent={cal.percent}
+          over={cal.over > 0}
+          color={MACRO_COLORS.cal}
+          size={112}
+          strokeWidth={11}
+        >
           <div className="text-center leading-none">
             <p className="nums text-2xl font-extrabold text-ink">{round(cal.consumed)}</p>
             <p className="eyebrow mt-1">de {round(cal.target)}</p>

@@ -1,8 +1,5 @@
-// Genera los íconos PNG de la PWA sin dependencias nativas.
-// Dibuja el emblema de Ascend: barras en ascenso (rojo→amarillo→azul→verde)
-// sobre el gris de la app, y codifica PNG (RGBA, 8 bits) con el módulo `zlib`.
-//
-// Uso: node scripts/generate-icons.mjs
+// Genera los íconos PNG de la PWA (emblema de barras sobre el gris de la app)
+// sin dependencias nativas. Uso: node scripts/generate-icons.mjs
 import { deflateSync } from 'node:zlib';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -11,8 +8,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = resolve(__dirname, '../public/icons');
 
-// ── Barras en ascenso, en coordenadas normalizadas 0..1 ──────────────────────
-// (mismas proporciones que el SVG de la marca: 4 barras subiendo a la derecha)
+// Barras en coordenadas normalizadas 0..1, mismas proporciones que el SVG de la marca.
 const BARS = [
   { x: 0.15, top: 0.5625, color: [255, 135, 135] }, // rojo
   { x: 0.34167, top: 0.41667, color: [255, 212, 59] }, // amarillo
@@ -51,7 +47,7 @@ function renderRGBA(size, markScale) {
   return data;
 }
 
-// ── Codificador PNG mínimo (RGBA / color type 6) ──────────────────────────────
+// Codificador PNG mínimo (RGBA, color type 6)
 const CRC_TABLE = (() => {
   const table = new Int32Array(256);
   for (let n = 0; n < 256; n++) {
@@ -100,7 +96,6 @@ function encodePNG(size, rgba) {
   return Buffer.concat([sig, chunk('IHDR', ihdr), chunk('IDAT', idat), chunk('IEND', Buffer.alloc(0))]);
 }
 
-// ── Generación ────────────────────────────────────────────────────────────────
 const targets = [
   { file: 'icon-192.png', size: 192, scale: 0.72 },
   { file: 'icon-512.png', size: 512, scale: 0.72 },

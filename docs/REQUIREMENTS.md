@@ -1,4 +1,4 @@
-# REQUIREMENTS.md — Requisitos
+# Requisitos
 
 ## Funcionales (MVP)
 
@@ -30,7 +30,7 @@
 ## No funcionales
 
 - **Rendimiento/UX:** mobile-first, objetivos táctiles ≥ 44 px, formularios cortos, estados
-  vacíos útiles, skeletons/cargas, errores accionables, modo claro/oscuro.
+  vacíos útiles, skeletons/cargas, errores accionables.
 - **Accesibilidad:** etiquetas, roles ARIA, navegación por teclado, buen contraste.
 - **Calidad:** TypeScript estricto, validación Zod, ESLint + Prettier, pruebas de la lógica
   crítica, `typecheck`/`lint`/`test`/`build` verdes.
@@ -39,7 +39,3 @@
 - **Mantenibilidad:** componentes reutilizables, capa de datos desacoplada (repositorios),
   arquitectura preparada para Supabase.
 - **Compatibilidad:** Safari/iPhone como objetivo principal; responsive en escritorio.
-
-## Criterios de aceptación
-
-Los 20 criterios de la sección 28 del encargo. Estado actual en README → "Estado por criterio".

@@ -46,9 +46,7 @@ export function FoodFormModal({
   onSaved?: (food: Food) => void;
   /** Valores precargados (p. ej. extraídos por IA) al crear un alimento nuevo. */
   prefill?: Partial<FormValues>;
-  /** Aviso mostrado arriba del formulario (advertencias de IA, etc.). */
   banner?: ReactNode;
-  /** Origen del alimento al crearlo (manual | ai | …). */
   source?: FoodSource;
 }) {
   const { success } = useToast();
@@ -108,7 +106,12 @@ export function FoodFormModal({
       onClose={onClose}
       title={initial ? 'Editar alimento' : 'Nuevo alimento'}
       footer={
-        <button form="food-form" type="submit" className="btn-primary w-full" disabled={isSubmitting}>
+        <button
+          form="food-form"
+          type="submit"
+          className="btn-primary w-full"
+          disabled={isSubmitting}
+        >
           {initial ? 'Guardar cambios' : 'Crear alimento'}
         </button>
       }
@@ -116,7 +119,12 @@ export function FoodFormModal({
       <form id="food-form" onSubmit={submit} className="space-y-4">
         {banner}
         <Field label="Nombre" htmlFor="f-name" error={errors.name?.message}>
-          <input id="f-name" className={fieldInputClass(!!errors.name)} {...register('name')} autoFocus />
+          <input
+            id="f-name"
+            className={fieldInputClass(!!errors.name)}
+            {...register('name')}
+            autoFocus
+          />
         </Field>
         <Field label="Marca (opcional)" htmlFor="f-brand">
           <input id="f-brand" className="input" {...register('brand')} />
@@ -142,31 +150,75 @@ export function FoodFormModal({
           </Field>
         </div>
 
-        <p className="text-xs text-ink-muted">Valores nutricionales por la porción indicada arriba.</p>
+        <p className="text-xs text-ink-muted">
+          Valores nutricionales por la porción indicada arriba.
+        </p>
 
         <Field label="Calorías (kcal)" htmlFor="f-cal" error={errors.calories?.message}>
-          <input id="f-cal" type="text" inputMode="decimal" className={fieldInputClass(!!errors.calories)} {...register('calories', numReq)} />
+          <input
+            id="f-cal"
+            type="text"
+            inputMode="decimal"
+            className={fieldInputClass(!!errors.calories)}
+            {...register('calories', numReq)}
+          />
         </Field>
         <div className="grid grid-cols-3 gap-3">
           <Field label="Proteína (g)" htmlFor="f-prot" error={errors.protein?.message}>
-            <input id="f-prot" type="text" inputMode="decimal" className={fieldInputClass(!!errors.protein)} {...register('protein', numReq)} />
+            <input
+              id="f-prot"
+              type="text"
+              inputMode="decimal"
+              className={fieldInputClass(!!errors.protein)}
+              {...register('protein', numReq)}
+            />
           </Field>
           <Field label="Carbos (g)" htmlFor="f-carb" error={errors.carbs?.message}>
-            <input id="f-carb" type="text" inputMode="decimal" className={fieldInputClass(!!errors.carbs)} {...register('carbs', numReq)} />
+            <input
+              id="f-carb"
+              type="text"
+              inputMode="decimal"
+              className={fieldInputClass(!!errors.carbs)}
+              {...register('carbs', numReq)}
+            />
           </Field>
           <Field label="Grasas (g)" htmlFor="f-fat" error={errors.fat?.message}>
-            <input id="f-fat" type="text" inputMode="decimal" className={fieldInputClass(!!errors.fat)} {...register('fat', numReq)} />
+            <input
+              id="f-fat"
+              type="text"
+              inputMode="decimal"
+              className={fieldInputClass(!!errors.fat)}
+              {...register('fat', numReq)}
+            />
           </Field>
         </div>
         <div className="grid grid-cols-3 gap-3">
           <Field label="Fibra (g)" htmlFor="f-fib">
-            <input id="f-fib" type="text" inputMode="decimal" className="input" {...register('fiber', numOpt)} />
+            <input
+              id="f-fib"
+              type="text"
+              inputMode="decimal"
+              className="input"
+              {...register('fiber', numOpt)}
+            />
           </Field>
           <Field label="Azúcar (g)" htmlFor="f-sug">
-            <input id="f-sug" type="text" inputMode="decimal" className="input" {...register('sugar', numOpt)} />
+            <input
+              id="f-sug"
+              type="text"
+              inputMode="decimal"
+              className="input"
+              {...register('sugar', numOpt)}
+            />
           </Field>
           <Field label="Sodio (mg)" htmlFor="f-sod">
-            <input id="f-sod" type="text" inputMode="decimal" className="input" {...register('sodium', numOpt)} />
+            <input
+              id="f-sod"
+              type="text"
+              inputMode="decimal"
+              className="input"
+              {...register('sodium', numOpt)}
+            />
           </Field>
         </div>
 

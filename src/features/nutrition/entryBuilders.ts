@@ -13,14 +13,12 @@ export function amountToPortions(food: Food, amount: number): number {
   return amountToQuantity(amount, food.portionUnit, food.portionSize);
 }
 
-/** Valor inicial razonable del campo cantidad según la unidad del alimento. */
 export function defaultAmount(food: Food): number {
   return food.portionUnit === 'g' || food.portionUnit === 'ml' ? food.portionSize : 1;
 }
 
 const PLURALS: Record<string, string> = { unidad: 'unidades', porción: 'porciones' };
 
-/** Etiqueta legible de la cantidad, p. ej. "150 g" o "2 unidades". */
 export function describeAmount(food: Food, amount: number): string {
   const singular = PORTION_UNIT_LABELS[food.portionUnit] ?? food.portionUnit;
   if (food.portionUnit === 'g' || food.portionUnit === 'ml') {
@@ -30,7 +28,6 @@ export function describeAmount(food: Food, amount: number): string {
   return `${formatNumber(amount)} ${label}`;
 }
 
-/** Macros previsualizados para una cantidad dada de un alimento. */
 export function previewFoodMacros(food: Food, amount: number): Macros {
   return scaleMacros(macrosOf(food), amountToPortions(food, amount));
 }
@@ -56,7 +53,6 @@ export function buildEntryFromFood(
   });
 }
 
-/** Clona una entrada hacia otra fecha (para copiar/repetir comidas). */
 export function cloneEntryToDate(
   entry: MealEntry,
   dateKey: DateKey,

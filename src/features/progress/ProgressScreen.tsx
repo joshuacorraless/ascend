@@ -24,7 +24,11 @@ export function ProgressScreen() {
   const [tab, setTab] = useState<'entreno' | 'peso' | 'dias'>('entreno');
   return (
     <div className="space-y-5">
-      <PageHeader eyebrow="Análisis" title="Progreso" subtitle="Tu evolución y tus hábitos diarios." />
+      <PageHeader
+        eyebrow="Análisis"
+        title="Progreso"
+        subtitle="Tu evolución y tus hábitos diarios."
+      />
       <SegmentedControl
         stretch
         value={tab}
@@ -42,7 +46,6 @@ export function ProgressScreen() {
   );
 }
 
-// ── Entrenamiento: rutinas organizadas por día ───────────────────────────────
 function TrainingProgress() {
   const { settings } = useSettings();
   const navigate = useNavigate();
@@ -141,10 +144,13 @@ function TrainingProgress() {
   );
 }
 
-// ── Peso corporal ────────────────────────────────────────────────────────────
 function BodyWeightProgress() {
   const { settings } = useSettings();
-  const entries = useLiveQuery(() => getRepositories().bodyWeight.list(), [], [] as BodyWeightEntry[]);
+  const entries = useLiveQuery(
+    () => getRepositories().bodyWeight.list(),
+    [],
+    [] as BodyWeightEntry[],
+  );
   const list = entries ?? [];
   const unit = settings.weightUnit;
 
@@ -173,7 +179,8 @@ function BodyWeightProgress() {
     );
   }
 
-  const fmtDelta = (kg: number) => `${kg > 0 ? '+' : ''}${round(weightToDisplay(kg, unit), 1)} ${unit}`;
+  const fmtDelta = (kg: number) =>
+    `${kg > 0 ? '+' : ''}${round(weightToDisplay(kg, unit), 1)} ${unit}`;
 
   return (
     <div className="space-y-3">
@@ -181,7 +188,9 @@ function BodyWeightProgress() {
         <div>
           <p className="eyebrow">Actual</p>
           <p className="nums mt-1 font-semibold text-ink">
-            {stats.current !== undefined ? `${round(weightToDisplay(stats.current, unit), 1)} ${unit}` : '—'}
+            {stats.current !== undefined
+              ? `${round(weightToDisplay(stats.current, unit), 1)} ${unit}`
+              : '—'}
           </p>
         </div>
         <div>

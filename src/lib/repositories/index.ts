@@ -4,11 +4,7 @@ import type { Repositories } from './types';
 
 export * from './types';
 
-/**
- * Punto único de acceso a la persistencia. Hoy usa Dexie (IndexedDB).
- * Para migrar a Supabase: implementa otra fábrica `createSupabaseRepositories`
- * que cumpla `Repositories` y cámbiala aquí. La UI no necesita cambios.
- */
+// Punto único de acceso a la persistencia; la UI nunca importa Dexie directamente.
 let _repos: Repositories | null = null;
 
 export function getRepositories(): Repositories {

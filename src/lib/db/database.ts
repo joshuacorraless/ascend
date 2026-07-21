@@ -17,11 +17,9 @@ import type {
 } from '@/lib/schema';
 
 /**
- * Base de datos local (IndexedDB vía Dexie).
- *
- * El versionado de Dexie es independiente de SCHEMA_VERSION (el esquema lógico
- * de los datos exportables). Aquí versionamos la FORMA de los almacenes/índices.
- * Cuando cambie la estructura, añade `db.version(n).stores({...}).upgrade(...)`.
+ * Base de datos local (IndexedDB vía Dexie). El versionado de Dexie cubre la
+ * forma de almacenes e índices y es independiente de SCHEMA_VERSION, que
+ * versiona el esquema lógico de los datos exportables.
  */
 export class AscendDatabase extends Dexie {
   settings!: Table<UserSettings, string>;
@@ -42,7 +40,6 @@ export class AscendDatabase extends Dexie {
   constructor() {
     super('ascend');
 
-    // ── v1: esquema inicial ──────────────────────────────────────────────────
     this.version(1).stores({
       settings: 'id',
       goals: 'id, effectiveDate',
@@ -59,11 +56,6 @@ export class AscendDatabase extends Dexie {
       setLogs: 'id, sessionId, exerciseLogId, exerciseId',
       bodyWeightEntries: 'id, localDate',
     });
-
-    // Futuras migraciones (ejemplo documentado, no activo):
-    // this.version(2).stores({ foods: 'id, name, brand' }).upgrade(async (tx) => {
-    //   await tx.table('foods').toCollection().modify((f) => { f.brand ??= ''; });
-    // });
   }
 }
 

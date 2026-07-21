@@ -1,4 +1,4 @@
-# DECISIONS.md — Decisiones arquitectónicas y valores asumidos
+# Decisiones arquitectónicas
 
 Cada decisión incluye: decisión, motivo, alternativas, consecuencias y si es reversible.
 
@@ -85,7 +85,7 @@ Cada decisión incluye: decisión, motivo, alternativas, consecuencias y si es r
 
 ---
 
-## Valores no bloqueantes asumidos (defaults del protocolo)
+## Convenciones y valores por defecto
 
 | Tema | Valor |
 |---|---|
@@ -94,11 +94,11 @@ Cada decisión incluye: decisión, motivo, alternativas, consecuencias y si es r
 | Zona horaria por defecto | `America/Costa_Rica` (configurable) |
 | Peso (gym y corporal) | kg (interno), display kg/lb |
 | Agua | ml interno, display ml/L |
-| Tema | Claro/oscuro/automático |
+| Tema | Único (gris carbón); el campo `theme` se conserva en el esquema por compatibilidad |
 | Nombre de la app | **Ascend** |
-| Color de acento | Índigo/violeta (`brand` ≈ #4f46e5) |
+| Paleta | Datos en rojo/amarillo/azul/verde sobre gris carbón; verde para acciones primarias |
 | Notificaciones del sistema | No en el MVP (solo recordatorios internos) — ver ROADMAP |
 | Superseries / medidas / fotos progreso | Fuera del MVP — ver ROADMAP |
-| Datos de demostración | Disponibles, desactivados por defecto (Fase 7) |
+| Datos de demostración | Disponibles, desactivados por defecto |
 | Una sola sesión de entrenamiento activa a la vez | Sí |
 | Autoguardado de sesiones | Sí |

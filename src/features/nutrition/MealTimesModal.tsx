@@ -6,7 +6,6 @@ import { useToast } from '@/app/providers/toast';
 import { mealsOf, newMealId } from './mealTypes';
 import type { MealDef } from '@/lib/schema';
 
-/** Gestiona los tiempos de comida del usuario (añadir, renombrar, reordenar). */
 export function MealTimesModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { settings, update } = useSettings();
   const { success } = useToast();

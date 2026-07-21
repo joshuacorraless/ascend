@@ -58,7 +58,11 @@ export function macrosOf(food: Food): Macros {
  * la unidad del alimento es g o ml (porción = `portionSize` g/ml).
  * Para unidades 'unidad'/'porcion', la cantidad ya es el nº de porciones.
  */
-export function amountToQuantity(amount: number, portionUnit: PortionUnit, portionSize: number): number {
+export function amountToQuantity(
+  amount: number,
+  portionUnit: PortionUnit,
+  portionSize: number,
+): number {
   if (portionUnit === 'g' || portionUnit === 'ml') {
     return portionSize > 0 ? amount / portionSize : 0;
   }
@@ -92,13 +96,13 @@ export function recipeMacros(recipe: Recipe, foodsById: Map<string, Food>): Macr
   return sumMacros(parts);
 }
 
-/** Macros de UNA porción de la receta (total / servings). */
+/** Macros de una porción de la receta (total / servings). */
 export function recipeMacrosPerServing(recipe: Recipe, foodsById: Map<string, Food>): Macros {
   const total = recipeMacros(recipe, foodsById);
   return scaleMacros(total, recipe.servings > 0 ? 1 / recipe.servings : 0);
 }
 
-// ── Progreso frente a un objetivo ────────────────────────────────────────────
+// Progreso frente a un objetivo
 
 export interface MacroProgress {
   consumed: number;

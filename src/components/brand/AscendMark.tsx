@@ -1,9 +1,6 @@
 import { cn } from '@/lib/cn';
 
-/**
- * Emblema de Ascend: barras en ascenso sobre el gris de la app. Cada barra en
- * un color de la paleta (rojo → amarillo → azul → verde), subiendo a la meta.
- */
+// Emblema de la marca: cuatro barras en ascenso, una por color de la paleta.
 export function AscendMark({ className }: { className?: string }) {
   return (
     <div

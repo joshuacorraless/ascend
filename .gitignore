@@ -18,6 +18,8 @@ dev-dist
 .vercel
 
 # Editor / OS
+.claude
+.agents
 .DS_Store
 .idea
 *.suo

@@ -67,7 +67,6 @@ export async function startSessionFromRoutine(
   return session.id;
 }
 
-/** Inicia una sesión vacía (sin rutina). */
 export async function startEmptySession(dateKey: DateKey, name = 'Sesión libre'): Promise<string> {
   const repos = getRepositories();
   const session = newEntity<WorkoutSession>({
@@ -97,7 +96,13 @@ export async function addExerciseToSession(
   });
   await repos.workout.putExerciseLog(log);
   await repos.workout.putSetLog(
-    blankSet(sessionId, log.id, exercise.id, 1, options?.toFailure ? { setType: 'fallo' } : undefined),
+    blankSet(
+      sessionId,
+      log.id,
+      exercise.id,
+      1,
+      options?.toFailure ? { setType: 'fallo' } : undefined,
+    ),
   );
 }
 
@@ -107,7 +112,9 @@ export async function addExerciseToSession(
  */
 export async function addSet(log: ExerciseLog, existing: SetLog[]): Promise<void> {
   const repos = getRepositories();
-  const sets = existing.filter((s) => s.exerciseLogId === log.id).sort((a, b) => a.setNumber - b.setNumber);
+  const sets = existing
+    .filter((s) => s.exerciseLogId === log.id)
+    .sort((a, b) => a.setNumber - b.setNumber);
   const last = sets.at(-1);
   await repos.workout.putSetLog(
     blankSet(log.sessionId, log.id, log.exerciseId, (last?.setNumber ?? 0) + 1, {
@@ -117,7 +124,6 @@ export async function addSet(log: ExerciseLog, existing: SetLog[]): Promise<void
   );
 }
 
-/** Finaliza la sesión: calcula duración y la marca como completada. */
 export async function finishSession(session: WorkoutSession): Promise<void> {
   const repos = getRepositories();
   const endedAt = nowIso();
@@ -143,7 +149,9 @@ export async function previousExerciseSets(
 ): Promise<SetLog[]> {
   const repos = getRepositories();
   const sets = await repos.workout.listSetLogsForExercise(exerciseId);
-  const sessionIds = [...new Set(sets.map((s) => s.sessionId))].filter((id) => id !== excludeSessionId);
+  const sessionIds = [...new Set(sets.map((s) => s.sessionId))].filter(
+    (id) => id !== excludeSessionId,
+  );
   if (sessionIds.length === 0) return [];
   const sessions = (await Promise.all(sessionIds.map((id) => repos.workout.getSession(id)))).filter(
     (s): s is WorkoutSession => !!s && s.status === 'completed',

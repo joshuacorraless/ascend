@@ -9,7 +9,12 @@ interface ProgressBarProps {
   color?: string;
 }
 
-export function ProgressBar({ percent, over = false, className, color = '#E2E2E2' }: ProgressBarProps) {
+export function ProgressBar({
+  percent,
+  over = false,
+  className,
+  color = '#E2E2E2',
+}: ProgressBarProps) {
   const clamped = Math.max(0, Math.min(100, percent));
   return (
     <div

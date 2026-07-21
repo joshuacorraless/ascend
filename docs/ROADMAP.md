@@ -1,7 +1,6 @@
-# ROADMAP.md — Funcionalidades futuras (fuera del MVP)
+# Funcionalidades futuras (fuera del MVP)
 
-Estas funciones **no** se implementan en el MVP. Se registran aquí con sus dependencias. No
-están simuladas en la app.
+Estas funciones no forman parte del MVP; se registran aquí con sus dependencias.
 
 ## Sincronización y nube (Supabase)
 - Respaldo en la nube, sincronización multi-dispositivo, auth por magic link.
@@ -35,6 +34,6 @@ están simuladas en la app.
 ## Otras ideas
 - Exportar CSV; gráficos de adherencia; plantillas de comidas por horario; modo "cut/bulk".
 
-> Explícitamente **fuera de alcance** (sección 27 del encargo): red social, seguidores, chat,
+> Explícitamente **fuera de alcance**: red social, seguidores, chat,
 > suscripciones, pagos, marketplace, entrenadores externos, generación automática de dietas,
 > recomendaciones médicas, integración con wearables, conteo de pasos, microservicios.

@@ -1,11 +1,5 @@
 import type { Macros, NutritionGoal } from '@/lib/schema';
 
-/**
- * Evalúa si un día cumplió los hábitos (para el calendario de Progreso):
- * macros, hidratación y suplementos. Función pura y testeable; la carga de
- * datos vive en el hook de la pantalla.
- */
-
 /** Fracción del objetivo de macros que se considera "cumplido". */
 export const MACRO_GOAL_THRESHOLD = 0.9;
 

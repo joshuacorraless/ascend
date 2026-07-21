@@ -71,7 +71,7 @@ export function LabelScanModal({ open, onClose }: { open: boolean; onClose: () =
     }
   };
 
-  // ── Revisión obligatoria del alimento extraído por IA ──────────────────────
+  // Lo extraído por la IA siempre pasa por revisión manual antes de guardarse.
   if (stage === 'review' && analysis) {
     const prefill = {
       name: analysis.productName ?? productName.trim() ?? '',
@@ -107,16 +107,13 @@ export function LabelScanModal({ open, onClose }: { open: boolean; onClose: () =
         )}
       </div>
     );
-    return (
-      <FoodFormModal open onClose={closeAll} prefill={prefill} banner={banner} source="ai" />
-    );
+    return <FoodFormModal open onClose={closeAll} prefill={prefill} banner={banner} source="ai" />;
   }
 
   if (stage === 'manual') {
     return <FoodFormModal open onClose={closeAll} />;
   }
 
-  // ── Captura ────────────────────────────────────────────────────────────────
   return (
     <Modal open={open} onClose={closeAll} title="Escanear etiqueta">
       <div className="space-y-4">
@@ -126,7 +123,11 @@ export function LabelScanModal({ open, onClose }: { open: boolean; onClose: () =
           </div>
         )}
 
-        <Field label="Nombre del producto (opcional)" htmlFor="scan-name" hint="Ayuda a la IA a identificarlo.">
+        <Field
+          label="Nombre del producto (opcional)"
+          htmlFor="scan-name"
+          hint="Ayuda a la IA a identificarlo."
+        >
           <input
             id="scan-name"
             className="input"
@@ -137,7 +138,11 @@ export function LabelScanModal({ open, onClose }: { open: boolean; onClose: () =
         </Field>
 
         {preview && (
-          <img src={preview} alt="Etiqueta" className="mx-auto max-h-48 rounded-xl border border-line" />
+          <img
+            src={preview}
+            alt="Etiqueta"
+            className="mx-auto max-h-48 rounded-xl border border-line"
+          />
         )}
 
         {loading ? (
@@ -179,7 +184,8 @@ export function LabelScanModal({ open, onClose }: { open: boolean; onClose: () =
         />
 
         <p className="text-center text-xs text-ink-muted">
-          La foto se envía al proveedor de IA solo para extraer los datos; no se guarda de forma permanente.
+          La foto se envía al proveedor de IA solo para extraer los datos; no se guarda de forma
+          permanente.
         </p>
       </div>
     </Modal>

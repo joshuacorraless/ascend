@@ -33,9 +33,10 @@ export function WeightQuickAddModal({
   const [date, setDate] = useState<DateKey>(dateKey);
   const [value, setValue] = useState('');
   const [notes, setNotes] = useState('');
-  const placeholder = defaultKg ? String(round(weightToDisplay(defaultKg, settings.weightUnit), 1)) : '0';
+  const placeholder = defaultKg
+    ? String(round(weightToDisplay(defaultKg, settings.weightUnit), 1))
+    : '0';
 
-  // Al abrir, posiciona en el día indicado.
   useEffect(() => {
     if (open) setDate(dateKey);
   }, [open, dateKey]);
@@ -59,7 +60,6 @@ export function WeightQuickAddModal({
     const weightKg = weightToKg(num, settings.weightUnit);
     const time = localTime(new Date(), settings.timeZone);
     if (existing) {
-      // Sobrescribe el peso de ese día (un valor por día).
       await repos.bodyWeight.put(
         touch({ ...existing, weightKg, time, notes: notes.trim() || undefined }),
       );
@@ -92,7 +92,12 @@ export function WeightQuickAddModal({
       <div className="space-y-4">
         <div>
           <span className="label">Día</span>
-          <DateNav dateKey={date} onChange={setDate} timeZone={settings.timeZone} max={todayKey(settings.timeZone)} />
+          <DateNav
+            dateKey={date}
+            onChange={setDate}
+            timeZone={settings.timeZone}
+            max={todayKey(settings.timeZone)}
+          />
           {existing && (
             <p className="mt-1.5 text-xs text-ink-muted">
               Ya hay un peso ese día; al guardar lo reemplazas.

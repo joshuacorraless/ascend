@@ -11,10 +11,7 @@ import {
   positiveNumber,
 } from './common';
 
-/**
- * Macros de una porción. Reutilizado tanto en la definición del alimento
- * (por porción) como en el snapshot de una entrada registrada (total).
- */
+/** Macros por porción; también se reutiliza como snapshot del total en MealEntry. */
 export const macrosShape = {
   calories: nonNegativeNumber,
   protein: nonNegativeNumber,
@@ -36,7 +33,6 @@ export const foodSchema = z.object({
   portionSize: positiveNumber,
   portionUnit: portionUnitSchema,
   ...macrosShape,
-  /** Imagen opcional como data URL (no se persiste foto de etiqueta de IA). */
   imageDataUrl: z.string().optional(),
   source: foodSourceSchema,
   favorite: z.boolean(),
@@ -45,10 +41,9 @@ export const foodSchema = z.object({
 });
 export type Food = z.infer<typeof foodSchema>;
 
-/** Ingrediente de una receta: referencia a un alimento + cantidad en porciones. */
+/** Ingrediente de una receta: alimento + cantidad en porciones. */
 export const recipeIngredientSchema = z.object({
   foodId: idSchema,
-  /** Multiplicador de porciones del alimento. */
   quantity: positiveNumber,
 });
 export type RecipeIngredient = z.infer<typeof recipeIngredientSchema>;
@@ -83,15 +78,14 @@ export const nutritionGoalSchema = z.object({
 export type NutritionGoal = z.infer<typeof nutritionGoalSchema>;
 
 /**
- * Entrada de comida registrada. Guarda un SNAPSHOT de los macros del total
- * consumido para que editar/archivar el alimento no altere el historial.
+ * Entrada de comida registrada. Guarda un snapshot de los macros del total
+ * consumido para que editar o archivar el alimento no altere el historial.
  */
 export const mealEntrySchema = z.object({
   ...baseEntityShape,
   localDate: localDateSchema,
   loggedAt: isoSchema,
   mealType: mealTypeSchema,
-  /** Referencia opcional al alimento/receta de origen (puede archivarse). */
   foodId: idSchema.optional(),
   recipeId: idSchema.optional(),
   /** Snapshot del nombre y la marca al momento de registrar. */

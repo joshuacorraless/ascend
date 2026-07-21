@@ -29,9 +29,7 @@ export function RecipeFormModal({
 
   const [name, setName] = useState(initial?.name ?? '');
   const [servings, setServings] = useState(String(initial?.servings ?? 1));
-  const [ingredients, setIngredients] = useState<RecipeIngredient[]>(
-    initial?.ingredients ?? [],
-  );
+  const [ingredients, setIngredients] = useState<RecipeIngredient[]>(initial?.ingredients ?? []);
 
   const draft: Recipe = {
     id: initial?.id ?? 'draft',
@@ -101,9 +99,19 @@ export function RecipeFormModal({
     >
       <div className="space-y-4">
         <Field label="Nombre" htmlFor="r-name">
-          <input id="r-name" className="input" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+          <input
+            id="r-name"
+            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoFocus
+          />
         </Field>
-        <Field label="Porciones que rinde" htmlFor="r-serv" hint="Los macros se dividen entre estas porciones.">
+        <Field
+          label="Porciones que rinde"
+          htmlFor="r-serv"
+          hint="Los macros se dividen entre estas porciones."
+        >
           <input
             id="r-serv"
             type="text"
@@ -147,7 +155,9 @@ export function RecipeFormModal({
                     inputMode="decimal"
                     className="input w-20"
                     value={ing.quantity}
-                    onChange={(e) => updateIngredient(i, { quantity: parseDecimalInput(e.target.value) || 0 })}
+                    onChange={(e) =>
+                      updateIngredient(i, { quantity: parseDecimalInput(e.target.value) || 0 })
+                    }
                     aria-label="Porciones"
                   />
                   <button

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
-  /** Micro-rótulo editorial sobre el título. */
+  /** Rótulo pequeño sobre el título. */
   eyebrow?: string;
   right?: ReactNode;
 }
