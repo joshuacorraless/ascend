@@ -1,7 +1,13 @@
 # Modelo de datos
 
-Fuente de verdad: los esquemas Zod en `src/lib/schema/`. Los tipos TypeScript se derivan de
-ellos. La forma persistida se versiona con `SCHEMA_VERSION` (actualmente **1**).
+El modelo separa definiciones editables de hechos históricos. Los esquemas Zod en `src/lib/schema/` son la fuente de verdad, los tipos TypeScript se derivan de ellos y la forma persistida utiliza `SCHEMA_VERSION = 1`.
+
+| Principio | Aplicación |
+| :-- | :-- |
+| Identidad | UUID y marcas ISO 8601 para cada entidad. |
+| Tiempo local | `localDate` conserva el día observado por el usuario. |
+| Historia | Los registros copian los valores necesarios para no depender del catálogo actual. |
+| Portabilidad | Un sobre versionado contiene y valida todas las tablas. |
 
 Convención común a toda entidad: `id` (UUID), `createdAt`, `updatedAt` (ISO 8601). Las
 entidades de un día concreto añaden `localDate` (`YYYY-MM-DD`).
@@ -96,3 +102,5 @@ migraciones activas); si es más nueva, se rechaza. Importar **reemplaza** todos
 - **Volumen de entrenamiento:** Σ `peso × reps` de series de trabajo completadas.
 - **1RM estimado (Epley):** `peso × (1 + reps/30)`; con 1 rep = el propio peso.
 - **Media móvil de peso:** promedio de los registros dentro de los últimos 7 días naturales.
+
+[Volver al README](../README.md) · [Consultar decisiones](./DECISIONS.md)

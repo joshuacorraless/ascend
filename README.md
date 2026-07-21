@@ -1,76 +1,124 @@
-# Ascend
+<div align="center">
 
-PWA local-first para registrar nutrición, hidratación, suplementos, peso corporal y
-entrenamiento. Diseñada para uso diario a una mano desde el teléfono: instalable en la
-pantalla de inicio, funcional sin conexión y sin cuentas ni rastreadores — los datos viven
-en el dispositivo.
+<h1>ASCEND</h1>
 
-## Características
+<p><strong>El sistema personal que convierte hábitos diarios en progreso verificable.</strong></p>
 
-- **Dashboard diario**: macros consumidos / objetivo / restante, agua, checklist de
-  suplementos, entrenamiento planeado, peso reciente y acciones rápidas.
-- **Nutrición**: biblioteca de alimentos y recetas, registro por comida con cálculo de
-  macros por porciones o gramos, copiar días, totales por comida y por día.
-- **Entrenamiento**: rutinas por día, sesiones con series (peso, reps, RPE), datos de la
-  sesión anterior, autoguardado y recuperación de sesiones interrumpidas.
-- **Progreso**: gráficos por ejercicio (1RM estimado, volumen, mejor serie), récords
-  personales, calendario de hábitos y tendencias de peso corporal.
-- **Objetivos con vigencia**: cambiar metas no reescribe el histórico; cada día conserva
-  el objetivo que le aplicaba.
-- **Datos portables**: exportar e importar todo en JSON validado con versionado de esquema.
-- **Análisis de etiquetas (opcional)**: crear un alimento desde la foto de su tabla
-  nutricional vía un endpoint serverless, siempre con revisión manual antes de guardar.
-  La app funciona completa sin configurar ninguna clave.
+<p>
+  Nutrición, entrenamiento, hidratación y evolución física en una PWA privada,<br>
+  instalable y diseñada para funcionar incluso sin conexión.
+</p>
 
-## Stack
+<br>
 
-React 19 · TypeScript · Vite · Tailwind CSS · React Router · Dexie (IndexedDB) · Zod ·
-React Hook Form · Recharts · vite-plugin-pwa · Vitest · ESLint · Prettier.
-Desplegada en Vercel; el análisis de etiquetas corre en una función serverless (`/api`).
+<a href="#producto"><img alt="Producto" src="https://img.shields.io/badge/PRODUCTO-Local--first-183D32?style=for-the-badge"></a>
+<a href="#arquitectura"><img alt="Arquitectura" src="https://img.shields.io/badge/ARQUITECTURA-Offline--ready-276749?style=for-the-badge"></a>
+<a href="#calidad"><img alt="Calidad" src="https://img.shields.io/badge/CALIDAD-Strict%20TypeScript-2F855A?style=for-the-badge"></a>
 
-## Desarrollo
+<br><br>
 
-```bash
-npm install
-npm run dev        # http://localhost:5173
-npm run check      # typecheck + lint + tests + build
-```
+<code>React 19</code> · <code>TypeScript</code> · <code>IndexedDB</code> · <code>Zod</code> · <code>Vite PWA</code>
 
-Variables de entorno, despliegue e instalación en iPhone: [docs/SETUP.md](./docs/SETUP.md).
+</div>
+
+---
+
+<table>
+  <tr>
+    <td width="33%"><strong>Privacidad por diseño</strong><br><sub>Sin cuentas, analytics ni rastreadores. Los datos permanecen en el dispositivo.</sub></td>
+    <td width="33%"><strong>Historial confiable</strong><br><sub>Snapshots inmutables evitan que una edición presente reescriba el pasado.</sub></td>
+    <td width="33%"><strong>Operación resiliente</strong><br><sub>La experiencia principal funciona offline y los respaldos son portables.</sub></td>
+  </tr>
+</table>
+
+## Producto
+
+Ascend reúne las decisiones que determinan el progreso físico en una sola superficie móvil. El dashboard diario conecta objetivos, consumo, agua, suplementos, peso y entrenamiento; cada dominio conserva contexto histórico y evita métricas aisladas.
+
+| Superficie | Resultado |
+| :-- | :-- |
+| **Día** | Balance de macros, agua, suplementos, entrenamiento planeado y peso reciente. |
+| **Nutrición** | Biblioteca, recetas, registro por porción o gramos y reutilización de comidas. |
+| **Entrenamiento** | Rutinas, sesiones con autoguardado, RPE, series previas y recuperación de interrupciones. |
+| **Progreso** | 1RM estimado, volumen, récords, frecuencia, hábitos y tendencia de peso. |
+| **Datos** | Exportación e importación JSON validadas y versionadas. |
+| **Captura asistida** | Lectura opcional de etiquetas con IA y confirmación humana antes de persistir. |
 
 ## Arquitectura
 
+```text
+Interfaz React
+      │
+      ▼
+Casos de uso por dominio ──► lógica pura y testeable
+      │
+      ▼
+Contratos de repositorio
+      │
+      ▼
+Dexie / IndexedDB ──► respaldo JSON versionado
+
+Imagen nutricional ──► función serverless ──► proveedor de visión
 ```
-api/                Función serverless para el análisis de etiquetas
-src/
-  app/              Router, layout, providers (settings, toast, confirm)
-  components/       UI reutilizable (Modal, Field, ProgressRing, …)
-  features/         Pantallas por dominio (nutrition, training, progress, …)
-  lib/
-    schema/         Esquemas Zod: fuente de verdad del modelo de datos
-    db/             Base Dexie con versionado de almacenes
-    repositories/   Interfaces de acceso a datos + implementación Dexie
-    domain/         Lógica pura con tests (macros, 1RM, volumen, hábitos)
-    backup/         Export/import JSON con validación y migración
+
+La interfaz desconoce el motor de persistencia. Los repositorios aíslan Dexie; los esquemas Zod validan formularios, respaldos y respuestas externas; las entidades históricas guardan el valor observado en el momento del registro.
+
+| Decisión | Garantía |
+| :-- | :-- |
+| Persistencia local detrás de interfaces | El almacenamiento puede evolucionar sin reescribir el producto. |
+| Objetivos con fecha de vigencia | Cambiar una meta no altera jornadas anteriores. |
+| Snapshots en registros históricos | Alimentos, suplementos y ejercicios conservan su contexto original. |
+| IA fuera del cliente | Las claves permanecen en el entorno serverless. |
+| Carga por ruta | Las pantallas de mayor peso no penalizan el arranque. |
+
+## Estructura
+
+```text
+api/                  análisis serverless de etiquetas
+src/app/              composición, navegación y providers
+src/components/       sistema de componentes compartidos
+src/features/         experiencia organizada por dominio
+src/lib/domain/       cálculos puros
+src/lib/schema/       contratos Zod y tipos derivados
+src/lib/repositories/ frontera de persistencia
+src/lib/backup/       portabilidad y migración de datos
+docs/                 decisiones, modelo, operación y alcance
 ```
 
-Decisiones de diseño relevantes:
+## Ejecución
 
-- **Local-first real**: toda la UI lee de IndexedDB con `useLiveQuery`; no hay estado
-  servidor. La capa de repositorios aísla Dexie, por lo que un backend futuro (p. ej.
-  Supabase) solo requiere otra implementación de las mismas interfaces.
-- **Snapshots inmutables**: los registros diarios (comidas, series, suplementos) guardan
-  copia de los valores en el momento del registro; editar una definición no altera el
-  histórico.
-- **Dominio puro y testeado**: los cálculos (macros, 1RM, medias móviles, hábitos) son
-  funciones puras separadas de React y cubiertas por Vitest.
-- **Claves fuera del cliente**: las claves de IA solo existen en el endpoint serverless;
-  el frontend nunca las recibe.
+Requiere Node.js 20 o superior.
 
-Más detalle en [docs/DECISIONS.md](./docs/DECISIONS.md),
-[docs/DATA_MODEL.md](./docs/DATA_MODEL.md) y [docs/LIMITATIONS.md](./docs/LIMITATIONS.md).
+```bash
+npm install
+npm run dev
+```
 
-## Privacidad
+La aplicación queda disponible en `http://localhost:5173`. El recorrido completo de configuración y despliegue está en [Instalación y operación](./docs/SETUP.md).
 
-Sin analytics ni cuentas. Lo único que puede salir del dispositivo es la foto de una
-etiqueta si se usa el análisis con IA, y no se almacena de forma permanente.
+## Calidad
+
+```bash
+npm run check
+```
+
+El gate ejecuta tipado estricto, lint, pruebas y build de producción. Las pruebas cubren la lógica crítica de dominio, incluida la estimación de 1RM, los agregados y la integridad de respaldos.
+
+## Documentación
+
+| Documento | Decisión que responde |
+| :-- | :-- |
+| [Requisitos](./docs/REQUIREMENTS.md) | Qué debe resolver el producto. |
+| [Decisiones](./docs/DECISIONS.md) | Por qué el sistema está construido así. |
+| [Modelo de datos](./docs/DATA_MODEL.md) | Cómo se conserva la verdad histórica. |
+| [Instalación](./docs/SETUP.md) | Cómo ejecutar, configurar y desplegar. |
+| [Limitaciones](./docs/LIMITATIONS.md) | Qué riesgos y fronteras existen hoy. |
+| [Evolución](./docs/ROADMAP.md) | Qué sigue y qué queda fuera del producto. |
+
+---
+
+<div align="center">
+
+<sub>Diseñado para registrar menos, entender más y conservar el control de los datos.</sub>
+
+</div>

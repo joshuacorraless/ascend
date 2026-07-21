@@ -1,96 +1,73 @@
-# Instalación, variables de entorno y despliegue
+# Instalación y operación
 
-## Requisitos
-- Node.js **20+** (probado con 22) y npm.
+Esta guía cubre el recorrido desde una copia local hasta una PWA desplegada. Ninguna integración externa es necesaria para utilizar el registro manual.
 
-## Desarrollo local
+## Base local
+
+| Requisito | Versión |
+| :-- | :-- |
+| Node.js | 20 o superior; validado con 22 |
+| npm | Incluido con Node.js |
+
 ```bash
 npm install
-npm run dev          # http://localhost:5173
+npm run dev
 ```
 
-Scripts útiles:
-```bash
-npm run typecheck    # TypeScript (app + tooling)
-npm run lint         # ESLint
-npm run test         # Vitest (una pasada)
-npm run test:watch   # Vitest en watch
-npm run build        # typecheck + build de producción (genera PWA)
-npm run preview      # sirve el build de producción
-npm run icons        # regenera los íconos PWA (public/icons)
-npm run check        # typecheck + lint + test + build (todo junto)
-```
+La aplicación queda en `http://localhost:5173` y el middleware local expone `/api/analyze-label`.
 
-## Variables de entorno
-Copia `.env.example` a `.env.local` (ignorado por git). **Todo es opcional**: la app funciona
-para registro manual sin ninguna clave.
+## Comandos
 
-El análisis de etiquetas admite dos proveedores; elige uno con `AI_PROVIDER` (o deja vacío y se
-usa el que tenga clave). **Recomendado: Google Gemini, que tiene nivel gratuito.**
+| Comando | Resultado |
+| :-- | :-- |
+| `npm run dev` | Servidor local con recarga. |
+| `npm run typecheck` | Verificación TypeScript de aplicación y tooling. |
+| `npm run lint` | Análisis estático con ESLint. |
+| `npm run test` | Suite Vitest en una pasada. |
+| `npm run build` | Tipado y build PWA de producción. |
+| `npm run preview` | Vista local del artefacto productivo. |
+| `npm run icons` | Regeneración de iconos en `public/icons`. |
+| `npm run check` | Gate completo: tipos, lint, pruebas y build. |
 
-| Variable | Para qué | ¿Cliente? |
-|---|---|---|
-| `AI_PROVIDER` | `google` (gratis) o `anthropic` (de pago). | **No** |
-| `GEMINI_API_KEY` | Clave **gratis** de Google AI Studio. | **No** |
-| `GEMINI_MODEL` | Modelo de visión (por defecto `gemini-2.5-flash`). | No |
-| `ANTHROPIC_API_KEY` | Alternativa de pago (Claude). | **No** |
-| `ANTHROPIC_MODEL` | Modelo (por defecto `claude-opus-4-8`). | No |
-| `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | Futuro (Supabase). | Sí (anon key es pública por diseño) |
+## Configuración opcional
 
-> La clave de IA **nunca** se expone al frontend: solo la usa la función serverless
-> `api/analyze-label`. No la pongas en variables `VITE_*`.
+Copia `.env.example` a `.env.local`. Las claves solo son leídas por la función serverless; nunca deben utilizar el prefijo `VITE_`.
 
-### Conseguir una clave GRATIS de Gemini
-1. Entra a **https://aistudio.google.com/app/apikey** e inicia sesión con tu cuenta de Google.
-2. **Create API key** → cópiala (no requiere tarjeta para el nivel gratuito).
-3. Pégala en `.env.local` como `GEMINI_API_KEY=...` (deja `AI_PROVIDER=google`).
+| Variable | Uso | Exposición |
+| :-- | :-- | :-- |
+| `AI_PROVIDER` | Selecciona `google` o `anthropic`. | Servidor |
+| `GEMINI_API_KEY` | Credencial de Google Gemini. | Servidor |
+| `GEMINI_MODEL` | Modelo; predeterminado `gemini-2.5-flash`. | Servidor |
+| `ANTHROPIC_API_KEY` | Credencial alternativa de Anthropic. | Servidor |
+| `ANTHROPIC_MODEL` | Modelo; predeterminado `claude-opus-4-8`. | Servidor |
 
-### Probar el endpoint de IA en local
-`npm run dev` ya monta el endpoint `/api/analyze-label` mediante un middleware de desarrollo y
-lee las variables de `.env.local`. Basta con:
-1. Copiar `.env.example` a `.env.local` y poner tu `GEMINI_API_KEY` (o `ANTHROPIC_API_KEY`).
-2. Ejecutar `npm run dev` (reinícialo si ya estaba corriendo).
-3. En la app: **Alimentación → Biblioteca → Escanear** (o al agregar una comida → **Escanear**).
+Sin `AI_PROVIDER`, el endpoint prioriza Google cuando existe su clave y después Anthropic. Sin claves responde como no configurado y la aplicación conserva todas las funciones manuales.
 
-Comprobación rápida: `GET http://localhost:5173/api/analyze-label` debe devolver
-`{"available":true}` cuando la clave está configurada.
+### Verificación del análisis
 
-Alternativa con el runtime real de Vercel: `npm i -g vercel` y `vercel dev`.
+1. Configura una clave en `.env.local`.
+2. Reinicia `npm run dev`.
+3. Consulta `GET http://localhost:5173/api/analyze-label`; debe responder `{"available":true}`.
+4. Abre **Alimentación → Biblioteca → Escanear** y revisa el resultado antes de guardarlo.
 
 ## Despliegue en Vercel
-1. Sube el repo a GitHub.
-2. En Vercel: **New Project → Import** el repositorio. Framework detectado: **Vite**.
-   - Build command: `npm run build` · Output dir: `dist` (por defecto).
-3. (Opcional) En **Settings → Environment Variables** añade `ANTHROPIC_API_KEY`,
-   `ANTHROPIC_MODEL`, `AI_PROVIDER` para habilitar la IA.
-4. **Deploy**. Vercel detecta `api/*.ts` como funciones serverless automáticamente.
-5. `vercel.json` ya incluye el *rewrite* SPA para que el enrutado del cliente funcione.
 
-## Instalar en iPhone (PWA)
-1. Abre la URL desplegada en **Safari** (no Chrome) en el iPhone.
-2. Toca **Compartir** (cuadro con flecha) → **Agregar a pantalla de inicio**.
-3. Confirma el nombre (**Ascend**) → **Agregar**.
-4. Ábrela desde el ícono: se ejecuta en modo standalone (sin barras del navegador).
-5. Las funciones principales (comida, agua, suplementos, peso, entreno) funcionan **sin
-   conexión**. Exporta respaldos periódicamente (Ajustes → Datos).
+1. Importa el repositorio desde GitHub y conserva el preset de Vite.
+2. Usa `npm run build` y el directorio de salida `dist`.
+3. Añade las variables serverless únicamente si habilitarás análisis de etiquetas.
+4. Despliega. `vercel.json` mantiene el rewrite de la SPA y Vercel detecta `api/*.ts`.
 
----
+## Instalación en iPhone
 
-## Cómo añadir Supabase después (no necesario para el MVP)
-La capa de datos está desacoplada tras la interfaz `Repositories` (`src/lib/repositories/`).
-Pasos sugeridos:
+1. Abre el despliegue en Safari.
+2. Selecciona **Compartir → Agregar a pantalla de inicio**.
+3. Confirma **Ascend** y abre la aplicación instalada.
+4. Completa una primera carga con conexión; el app shell y los flujos principales quedarán disponibles offline.
 
-1. **Proyecto Supabase** y tablas equivalentes a las entidades de `DATA_MODEL.md` (con RLS por
-   usuario). Mantén los mismos campos/snapshots.
-2. **Auth** con magic link (`supabase.auth.signInWithOtp`). Guarda la sesión.
-3. Implementa `createSupabaseRepositories(client): Repositories` cumpliendo la misma interfaz
-   que `createDexieRepositories`. Cambia **una línea** en `src/lib/repositories/index.ts`.
-4. **Estrategia de sincronización:** local-first con Dexie como caché + cola de cambios y
-   *push/pull* a Supabase, resolviendo conflictos por `updatedAt`. (Diseño pendiente; ver
-   ROADMAP.)
-5. Variables `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` (la anon key es pública; la
-   seguridad real la dan las políticas RLS).
-6. El frontend sigue en Vercel; Supabase aporta base de datos, auth y almacenamiento.
+Los datos permanecen en ese navegador. Exporta respaldos desde **Ajustes → Datos**.
 
-> Verifica siempre la documentación oficial vigente de Supabase antes de implementar; aquí solo
-> se describe la arquitectura, no una API concreta.
+## Evolución hacia nube
+
+`src/lib/repositories/` desacopla la interfaz de datos de Dexie. Una integración futura debe implementar los mismos contratos, mantener IndexedDB como operación local y definir autenticación, RLS, cola de cambios y resolución de conflictos. Las variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` están reservadas como referencia, no activan sincronización.
+
+[Volver al README](../README.md) · [Consultar limitaciones](./LIMITATIONS.md)

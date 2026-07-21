@@ -1,44 +1,24 @@
-# Limitaciones conocidas
+# Límites operativos
 
-Limitaciones de la versión actual y sus mitigaciones, donde aplican.
+Ascend hace explícitas sus fronteras para no confundir una PWA local con un servicio sincronizado o un sistema clínico.
 
-## Almacenamiento local (IndexedDB)
-- Los datos viven en **este navegador/dispositivo**. Borrar los datos del sitio, desinstalar
-  la PWA o (en iOS) un periodo largo sin abrir la app pueden provocar que Safari **desaloje**
-  el almacenamiento. **Mitigación:** exporta respaldos JSON con regularidad (Ajustes → Datos).
-- No hay sincronización entre dispositivos en el MVP (ver ROADMAP/SETUP para Supabase).
+| Área | Límite actual | Mitigación |
+| :-- | :-- | :-- |
+| Persistencia | Los datos pertenecen al navegador y dispositivo actuales. | Exportar respaldos JSON con regularidad. |
+| iOS | Safari puede desalojar almacenamiento tras inactividad o limpieza del sitio. | Instalar la PWA, usarla periódicamente y conservar respaldos externos. |
+| Sincronización | No existe réplica entre dispositivos. | La capa de repositorios permite una futura estrategia local-first. |
+| Primera carga | El app shell necesita conexión antes de quedar disponible offline. | Completar una primera apertura con red. |
+| IA | El análisis de etiquetas requiere conexión y una clave serverless. | El registro manual permanece disponible. |
+| Notificaciones | No se envían avisos push. | Los recordatorios actuales viven dentro de la interfaz. |
 
-## PWA en iOS / Safari
-- La instalación es manual: **Compartir → Agregar a pantalla de inicio** (Safari no muestra un
-  botón automático de instalación como Chrome en Android).
-- **Notificaciones push:** no se usan en el MVP. En iOS solo funcionarían con la PWA instalada
-  (iOS 16.4+) y de forma poco fiable. Los recordatorios son internos (en pantalla).
-- El service worker cachea el "app shell" para uso offline; la primera carga necesita conexión.
+## Precisión
 
-## Funciones que requieren conexión
-- Análisis de etiquetas por **IA** (envía la imagen al endpoint). Sin clave configurada, la
-  función se desactiva con un mensaje claro y el **registro manual sigue funcionando**.
-- Cualquier futura sincronización (Supabase).
+La lectura de una etiqueta puede fallar ante desenfoque, iluminación deficiente o columnas ambiguas. La respuesta se valida, muestra advertencias y exige confirmación antes de persistir.
 
-## IA de etiquetas (cuando se configure)
-- El modelo puede equivocarse con etiquetas borrosas, con varias columnas (por porción vs por
-  100 g) o mal iluminadas. Por eso **siempre** hay pantalla de revisión y confirmación humana
-  antes de guardar, con advertencias y un campo de confianza. No se guarda nada automáticamente.
-- No se almacena la fotografía de la etiqueta de forma permanente.
+El 1RM usa la fórmula de Epley y representa una estimación. Ascend no interpreta variaciones de peso como composición corporal, no ajusta suplementos y no produce recomendaciones médicas.
 
-## Cálculos
-- El **1RM es estimado** (fórmula de Epley), no una medición real.
-- Los gráficos son **por ejercicio**; no se comparan ejercicios o variantes distintas.
-- La app **no** interpreta cambios de peso como grasa/músculo, ni emite recomendaciones
-  médicas, ni ajusta dosis de suplementos.
+## Alcance técnico
 
-## Alcance
-- Sin cuentas, sin funciones sociales, sin pagos, sin wearables ni conteo de pasos (ver
-  ROADMAP). Sin escaneo de códigos de barras en el MVP.
+Las vistas pesadas y Recharts se cargan por ruta. El endpoint `/api/analyze-label` se monta durante `npm run dev` mediante middleware de Vite y se publica como función serverless en Vercel. Sin proveedor configurado responde como no disponible sin degradar el resto del producto.
 
-## Técnicas menores
-- Las pantallas pesadas y los gráficos (Recharts) se cargan **bajo demanda** (code-splitting por
-  ruta), así que el arranque inicial es ligero.
-- El endpoint `/api` no corre con `vite dev` por defecto en producción, pero esta app incluye un
-  middleware de desarrollo que lo monta en `npm run dev` (requiere `ANTHROPIC_API_KEY` en
-  `.env.local`). En producción lo sirve Vercel. `vercel dev` también funciona.
+[Volver al README](../README.md) · [Consultar evolución](./ROADMAP.md)

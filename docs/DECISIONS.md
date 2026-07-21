@@ -1,8 +1,13 @@
-# Decisiones arquitectónicas
+# Registro de decisiones
 
-Cada decisión incluye: decisión, motivo, alternativas, consecuencias y si es reversible.
+Estas decisiones explican las garantías estructurales de Ascend y el costo de cambiarlas. La reversibilidad expresa impacto técnico, no prioridad de producto.
 
----
+| Eje | Elección |
+| :-- | :-- |
+| Ejecución | SPA local-first con una única función serverless opcional. |
+| Persistencia | IndexedDB detrás de contratos de repositorio. |
+| Integridad | Zod en fronteras y snapshots en el histórico. |
+| Evolución | Sustituciones incrementales, sin dependencia prematura de nube. |
 
 ## D1 · Framework: Vite + React + TypeScript (no Next.js)
 
@@ -67,10 +72,10 @@ Cada decisión incluye: decisión, motivo, alternativas, consecuencias y si es r
 - **Motivo:** Fórmula estándar, simple y transparente. Documentada en LIMITATIONS.md.
 - **Reversible:** Alta (la función acepta otras fórmulas a futuro).
 
-## D8 · IA opcional y desacoplada; la app funciona sin clave
+## D8 · IA opcional y desacoplada
 
-- **Decisión:** Interfaz `NutritionLabelAnalyzer`; proveedor por defecto Anthropic (Claude
-  con visión). La clave vive **solo** en el endpoint serverless, nunca en el frontend.
+- **Decisión:** Interfaz `NutritionLabelAnalyzer`; Google y Anthropic son proveedores
+  intercambiables. Sin selección explícita se prioriza Google cuando su clave existe. La clave vive **solo** en el endpoint serverless, nunca en el frontend.
   Confirmación humana obligatoria antes de guardar un alimento extraído de una imagen.
 - **Motivo:** Seguridad (sin secretos en el cliente) y degradación funcional: el registro
   manual funciona siempre.
@@ -102,3 +107,5 @@ Cada decisión incluye: decisión, motivo, alternativas, consecuencias y si es r
 | Datos de demostración | Disponibles, desactivados por defecto |
 | Una sola sesión de entrenamiento activa a la vez | Sí |
 | Autoguardado de sesiones | Sí |
+
+[Volver al README](../README.md) · [Consultar modelo de datos](./DATA_MODEL.md)

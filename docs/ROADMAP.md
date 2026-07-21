@@ -1,39 +1,30 @@
-# Funcionalidades futuras (fuera del MVP)
+# Evolución del producto
 
-Estas funciones no forman parte del MVP; se registran aquí con sus dependencias.
+Ascend prioriza profundidad local antes que amplitud conectada. Cada iniciativa futura debe conservar tres garantías: operación offline, control del usuario y estabilidad del historial.
 
-## Sincronización y nube (Supabase)
-- Respaldo en la nube, sincronización multi-dispositivo, auth por magic link.
-- **Dependencia:** capa de repositorios ya preparada (D2/D9). Implementar
-  `createSupabaseRepositories` + estrategia de sync/conflictos. Ver SETUP.md.
+## Horizonte
 
-## Notificaciones / recordatorios del sistema
-- Recordatorios de agua, suplementos o entreno vía notificaciones push.
-- **Dependencia / límite real:** las notificaciones push en iOS solo funcionan para PWAs
-  **instaladas** (iOS 16.4+) y son poco fiables. El MVP usa recordatorios internos (lo que se
-  ve en pantalla). Requiere Web Push + permiso del usuario + (idealmente) backend.
+| Prioridad | Capacidad | Condición de entrada |
+| :-- | :-- | :-- |
+| **Siguiente** | Sincronización y respaldo en nube | Autenticación, RLS, cola local y estrategia explícita de conflictos. |
+| **Siguiente** | Objetivos por tipo de día | Extender vigencia sin romper registros históricos. |
+| **Después** | Superseries, circuitos y descansos | Modelo de agrupación y experiencia de sesión validados. |
+| **Después** | Medidas y fotografías | Política de privacidad, cuotas y almacenamiento de objetos. |
+| **Explorar** | Código de barras | Fuente de productos confiable y captura compatible. |
+| **Explorar** | Exportación CSV y adherencia | Contratos de exportación y métricas comprensibles. |
 
-## Entrenamiento avanzado
-- **Superseries / circuitos**, cronómetro de descanso con avisos, plantillas de progresión.
-- **Dependencia:** modelo de `ExerciseLog` admite agrupar; falta UI y lógica de circuito.
+## Sincronización
 
-## Composición corporal
-- Medidas corporales (cintura, brazo…) y fotos de progreso.
-- **Dependencia:** nuevas entidades + almacenamiento de imágenes (cuidado con la cuota de
-  IndexedDB y la privacidad).
+La capa de repositorios admite una implementación remota, pero sincronizar no consiste en sustituir Dexie. La evolución prevista mantiene IndexedDB como fuente operativa local, añade una cola de cambios y coordina `push/pull` con resolución de conflictos por entidad.
 
-## Código de barras
-- Escaneo para autocompletar alimentos.
-- **Dependencia:** API de cámara + base de datos de productos (externa). Solo si no retrasa lo
-  principal.
+Supabase es la opción de referencia, no una dependencia comprometida. Antes de implementarlo deben definirse identidad, recuperación, borrado, políticas RLS, idempotencia y comportamiento offline.
 
-## Objetivos por tipo de día
-- Metas distintas en día de entrenamiento vs descanso.
-- **Dependencia:** extender `NutritionGoal` con `dayType` y resolver por tipo + fecha.
+## Recordatorios del sistema
 
-## Otras ideas
-- Exportar CSV; gráficos de adherencia; plantillas de comidas por horario; modo "cut/bulk".
+Los avisos push requieren permiso, backend Web Push y una PWA instalada en iOS 16.4 o superior. Hasta que esa ruta sea confiable, Ascend conserva recordatorios dentro de la aplicación.
 
-> Explícitamente **fuera de alcance**: red social, seguidores, chat,
-> suscripciones, pagos, marketplace, entrenadores externos, generación automática de dietas,
-> recomendaciones médicas, integración con wearables, conteo de pasos, microservicios.
+## Fuera de alcance
+
+Ascend no proyecta red social, seguidores, chat, marketplace, pagos, entrenadores externos, recomendaciones médicas, planes automáticos, wearables ni conteo de pasos. Esa frontera protege el propósito del producto: seguimiento personal privado y comprensible.
+
+[Volver al README](../README.md) · [Consultar limitaciones](./LIMITATIONS.md)
