@@ -55,16 +55,18 @@ definición.
 ### WorkoutRoutine + RoutineExercise — plantilla
 `WorkoutRoutine`: `name`, `description?`, `daysOfWeek[]`, `exercises[]`, `active`, `archived`.
 `RoutineExercise`: `exerciseId`, `order`, `targetSets`, `repRangeMin`, `repRangeMax`,
-`restSeconds?`, `notes?`. **La plantilla es independiente de las sesiones realizadas.**
+`restSeconds?`, `toFailure?`, `prescribedSets?`, `notes?`. Los objetivos individuales conservan
+rango de reps, fallo y notas de cada serie. **La plantilla es independiente de las sesiones realizadas.**
 
 ### WorkoutSession + ExerciseLog + SetLog — ejecución (normalizada)
 `WorkoutSession`: `routineId?`, `name` (snapshot), `localDate`, `startedAt`, `endedAt?`,
 `durationSeconds?`, `status` (active|completed|cancelled), `notes?`.
 `ExerciseLog`: `sessionId`, `exerciseId`, `exerciseName` (snapshot), `trackingType`, `order`,
 `notes?`.
-`SetLog`: `sessionId`, `exerciseLogId`, `exerciseId`, `setNumber`, `weightKg`, `reps`, `rpe?`,
+`SetLog`: `sessionId`, `exerciseLogId`, `exerciseId`, `setNumber`, `weightKg`, `reps`, `rpe?`, `rir?`,
 `setType` (calentamiento|efectiva|dropset|fallo), `completed`, `notes?`.
 Borrar una sesión elimina en cascada sus `ExerciseLog` y `SetLog`.
+RIR y RPE son valores opcionales distintos. La ausencia de RIR no equivale a cero.
 
 ### BodyWeightEntry — peso corporal
 `localDate`, `loggedAt`, `weightKg` (interno), `time?` (HH:mm), `notes?`.
@@ -100,6 +102,10 @@ no existen versiones previas ni migraciones activas; una versión más nueva se 
 
 - **Macros de una cantidad:** `macro_porción × cantidad` (cantidad en número de porciones; los
   gramos/ml se convierten con `cantidad = gramos / portionSize`).
+- **Progreso por serie:** compara peso y reps del mismo número de serie entre sesiones de una rutina;
+  incorpora RIR solo cuando ambos registros lo contienen. Los cambios contrapuestos son mixtos.
+  Los gráficos conservan huecos donde faltan valores. Volumen y 1RM siguen como utilidades internas,
+  pero no se usan como indicadores en estas vistas.
 - **Volumen de entrenamiento:** Σ `peso × reps` de series de trabajo completadas.
 - **1RM estimado (Epley):** `peso × (1 + reps/30)`; con 1 rep = el propio peso.
 - **Media móvil de peso:** promedio de los registros dentro de los últimos 7 días naturales.

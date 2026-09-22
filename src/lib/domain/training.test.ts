@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { epleyOneRm, personalRecords, progressSeries, totalVolume } from './training';
+import {
+  epleyOneRm,
+  exerciseSessionSummaries,
+  personalRecords,
+  progressSeries,
+  totalVolume,
+} from './training';
 import type { SetLog } from '@/lib/schema';
 
 function set(partial: Partial<SetLog>): SetLog {
@@ -64,6 +70,29 @@ describe('personalRecords', () => {
 });
 
 describe('progressSeries', () => {
+  it('ordena sesiones del mismo día por hora para el gráfico y la comparación', () => {
+    const sets = [
+      set({ sessionId: 'morning', weightKg: 50 }),
+      set({ sessionId: 'evening', weightKg: 60 }),
+    ];
+    const dates = new Map([
+      ['evening', '2026-09-22'],
+      ['morning', '2026-09-22'],
+    ]);
+    const starts = new Map([
+      ['evening', '2026-09-22T23:00:00.000Z'],
+      ['morning', '2026-09-22T13:00:00.000Z'],
+    ]);
+    for (const input of [sets, [...sets].reverse()]) {
+      expect(
+        progressSeries(input, dates, 'maxWeight', 'epley', starts).map((p) => p.sessionId),
+      ).toEqual(['morning', 'evening']);
+      const summaries = exerciseSessionSummaries(input, dates, 'epley', starts);
+      expect(summaries.map((summary) => summary.sessionId)).toEqual(['evening', 'morning']);
+      expect(summaries[0]!.maxWeightKg - summaries[1]!.maxWeightKg).toBe(10);
+    }
+  });
+
   it('produce un punto por sesión ordenado por fecha', () => {
     const sets = [
       set({ sessionId: 'a', weightKg: 100, reps: 5 }),

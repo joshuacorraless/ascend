@@ -130,6 +130,7 @@ export function progressSeries(
   sessionDates: Map<string, string>,
   metric: ProgressMetric,
   formula: OneRmFormula = 'epley',
+  sessionStarts?: Map<string, string>,
 ): ProgressPoint[] {
   const grouped = new Map<string, SetLog[]>();
   for (const s of sets) {
@@ -165,7 +166,11 @@ export function progressSeries(
     points.push({ sessionId, date: sessionDates.get(sessionId) ?? '', value: round(value, 1) });
   }
 
-  return points.sort((a, b) => a.date.localeCompare(b.date));
+  return points.sort(
+    (a, b) =>
+      a.date.localeCompare(b.date) ||
+      (sessionStarts?.get(a.sessionId) ?? '').localeCompare(sessionStarts?.get(b.sessionId) ?? ''),
+  );
 }
 
 /** Duración de una sesión: usa durationSeconds o el delta start→end. */
@@ -197,6 +202,7 @@ export function exerciseSessionSummaries(
   sets: SetLog[],
   sessionDates: Map<string, string>,
   formula: OneRmFormula = 'epley',
+  sessionStarts?: Map<string, string>,
 ): ExerciseSessionSummary[] {
   const grouped = new Map<string, SetLog[]>();
   for (const s of sets) {
@@ -225,5 +231,9 @@ export function exerciseSessionSummaries(
     });
   }
 
-  return summaries.sort((a, b) => b.date.localeCompare(a.date));
+  return summaries.sort(
+    (a, b) =>
+      b.date.localeCompare(a.date) ||
+      (sessionStarts?.get(b.sessionId) ?? '').localeCompare(sessionStarts?.get(a.sessionId) ?? ''),
+  );
 }
