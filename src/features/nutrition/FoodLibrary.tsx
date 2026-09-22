@@ -46,7 +46,6 @@ export function FoodLibrary() {
   const [showArchived, setShowArchived] = useState(false);
   const [editFood, setEditFood] = useState<Food | null>(null);
   const [editRecipe, setEditRecipe] = useState<Recipe | null>(null);
-  const [newFood, setNewFood] = useState(false);
   const [newRecipe, setNewRecipe] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
 
@@ -99,18 +98,10 @@ export function FoodLibrary() {
         <div className="flex gap-2">
           <button
             className="btn-primary !min-h-0 px-3.5 py-2 text-sm"
-            onClick={() => (tab === 'alimentos' ? setNewFood(true) : setNewRecipe(true))}
+            onClick={() => (tab === 'alimentos' ? setScanOpen(true) : setNewRecipe(true))}
           >
             {tab === 'alimentos' ? 'Nuevo' : 'Nueva receta'}
           </button>
-          {tab === 'alimentos' && (
-            <button
-              className="btn-secondary !min-h-0 px-3.5 py-2 text-sm"
-              onClick={() => setScanOpen(true)}
-            >
-              Escanear
-            </button>
-          )}
         </div>
         <label className="flex items-center gap-2 text-xs text-ink-muted">
           <input
@@ -188,7 +179,6 @@ export function FoodLibrary() {
         </ul>
       )}
 
-      <FoodFormModal open={newFood} onClose={() => setNewFood(false)} />
       {editFood && <FoodFormModal open onClose={() => setEditFood(null)} initial={editFood} />}
       <LabelScanModal open={scanOpen} onClose={() => setScanOpen(false)} />
       <RecipeFormModal open={newRecipe} onClose={() => setNewRecipe(false)} />

@@ -292,6 +292,7 @@ export function SettingsScreen() {
         <GoalForm
           volumeUnit={settings.volumeUnit}
           initial={latestGoal ?? SUGGESTED_GOAL}
+          initialMode={latestGoal ? 'custom' : 'guided'}
           submitLabel="Guardar objetivos"
           onSubmit={saveGoal}
         />
