@@ -1,18 +1,18 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { getRepositories } from '@/lib/repositories';
-import { totalVolume } from '@/lib/domain';
-import { diffDaysKeys, todayKey } from '@/lib/datetime';
-import type { WorkoutRoutine, WorkoutSession } from '@/lib/schema';
+import { diffDaysKeys } from '@/lib/datetime';
+import type { SetLog, WorkoutRoutine, WorkoutSession } from '@/lib/schema';
+import { useToday } from '@/app/hooks/useToday';
 
-export interface RoutineSessionVolume {
+export interface RoutineSessionData {
   session: WorkoutSession;
-  volume: number;
+  sets: SetLog[];
 }
 
 export interface RoutineProgressData {
   routine: WorkoutRoutine | undefined;
-  /** Sesiones completadas de esta rutina (más reciente primero) con su volumen. */
-  sessions: RoutineSessionVolume[];
+  /** Sesiones completadas de esta rutina, más reciente primero. */
+  sessions: RoutineSessionData[];
   sessionCount: number;
   lastDate: string | undefined;
   /** Sesiones por semana (promedio de las últimas 4 semanas). */
@@ -28,6 +28,7 @@ const EMPTY: RoutineProgressData = {
 };
 
 export function useRoutineProgress(routineId?: string): RoutineProgressData | undefined {
+  const { dateKey } = useToday();
   return useLiveQuery(async () => {
     if (!routineId) return EMPTY;
     const repos = getRepositories();
@@ -35,13 +36,16 @@ export function useRoutineProgress(routineId?: string): RoutineProgressData | un
     const all = await repos.workout.listSessions(); // completadas, desc por startedAt
     const forRoutine = all.filter((s) => s.routineId === routineId);
     const sessions = await Promise.all(
-      forRoutine.map(async (session) => ({
-        session,
-        volume: totalVolume(await repos.workout.listSetLogs(session.id)),
-      })),
+      forRoutine.map(async (session) => {
+        const sets = await repos.workout.listSetLogs(session.id);
+        return { session, sets };
+      }),
     );
-    const today = todayKey();
-    const recent = forRoutine.filter((s) => diffDaysKeys(today, s.localDate) <= 28).length;
+    const today = dateKey;
+    const recent = forRoutine.filter((s) => {
+      const age = diffDaysKeys(today, s.localDate);
+      return age >= 0 && age < 28;
+    }).length;
     return {
       routine,
       sessions,
@@ -49,5 +53,5 @@ export function useRoutineProgress(routineId?: string): RoutineProgressData | un
       lastDate: forRoutine[0]?.localDate,
       perWeek: Math.round((recent / 4) * 10) / 10,
     };
-  }, [routineId]);
+  }, [routineId, dateKey]);
 }

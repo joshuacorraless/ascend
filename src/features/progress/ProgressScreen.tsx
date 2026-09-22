@@ -8,9 +8,10 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Caret } from '@/components/ui/Caret';
 import { ProgressCalendar } from './ProgressCalendar';
 import { useSettings } from '@/app/providers/settings';
+import { useToday } from '@/app/hooks/useToday';
 import { getRepositories } from '@/lib/repositories';
 import { bodyWeightStats, withMovingAverage } from '@/lib/domain';
-import { WEEKDAY_LABELS, formatKeyRelative, formatKeyShort } from '@/lib/datetime';
+import { WEEKDAY_LABELS, formatKeyRelative, formatKeyShort, diffDaysKeys } from '@/lib/datetime';
 import { round, weightToDisplay } from '@/lib/units';
 import { cn } from '@/lib/cn';
 import type { BodyWeightEntry } from '@/lib/schema';
@@ -24,11 +25,7 @@ export function ProgressScreen() {
   const [tab, setTab] = useState<'entreno' | 'peso' | 'dias'>('entreno');
   return (
     <div className="space-y-5">
-      <PageHeader
-        eyebrow="Análisis"
-        title="Progreso"
-        subtitle="Tu evolución y tus hábitos diarios."
-      />
+      <PageHeader eyebrow="Análisis" title="Progreso" subtitle="De tu semana a cada repetición." />
       <SegmentedControl
         stretch
         value={tab}
@@ -50,6 +47,7 @@ function TrainingProgress() {
   const { settings } = useSettings();
   const navigate = useNavigate();
   const [day, setDay] = useState<number | 'all'>('all');
+  const { dateKey } = useToday();
 
   const data = useLiveQuery(async () => {
     const repos = getRepositories();
@@ -63,8 +61,21 @@ function TrainingProgress() {
       if (!cur.last) cur.last = s.localDate; // sessions vienen descendentes
       byRoutine.set(s.routineId, cur);
     }
-    return { routines, byRoutine };
-  }, []);
+    const recent = sessions.filter((s) => {
+      const age = diffDaysKeys(dateKey, s.localDate);
+      return age >= 0 && age < 28;
+    });
+    return {
+      routines: [...routines].sort((a, b) => {
+        const firstDay = (days: number[]) => Math.min(...days.map((day) => (day + 6) % 7), 7);
+        return (
+          firstDay(a.daysOfWeek) - firstDay(b.daysOfWeek) || a.name.localeCompare(b.name, 'es')
+        );
+      }),
+      byRoutine,
+      recentCount: recent.length,
+    };
+  }, [dateKey]);
 
   const routines = data?.routines ?? [];
   const filtered =
@@ -86,6 +97,16 @@ function TrainingProgress() {
 
   return (
     <div className="space-y-3">
+      <p className="px-1 text-sm text-ink-muted">
+        {data?.recentCount ?? 0} entrenamiento{data?.recentCount === 1 ? '' : 's'} en las últimas 4
+        semanas.
+      </p>
+      <div className="px-1 pt-3">
+        <h2 className="text-base font-semibold">Tus rutinas</h2>
+        <p className="mt-1 text-xs text-ink-muted">
+          Compara peso, reps y RIR de cada serie, semana a semana.
+        </p>
+      </div>
       {/* Filtro por día */}
       <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
         <button
@@ -94,13 +115,13 @@ function TrainingProgress() {
         >
           Todas
         </button>
-        {WEEKDAY_LABELS.map((label, idx) => (
+        {[1, 2, 3, 4, 5, 6, 0].map((idx) => (
           <button
             key={idx}
             className={cn('chip shrink-0', day === idx && 'chip-active')}
             onClick={() => setDay(idx)}
           >
-            {label}
+            {WEEKDAY_LABELS[idx]}
           </button>
         ))}
       </div>
@@ -151,7 +172,7 @@ function BodyWeightProgress() {
     [],
     [] as BodyWeightEntry[],
   );
-  const list = entries ?? [];
+  const list = useMemo(() => entries ?? [], [entries]);
   const unit = settings.weightUnit;
 
   const stats = useMemo(() => bodyWeightStats(list), [list]);

@@ -6,17 +6,17 @@ export default {
     extend: {
       colors: {
         // Superficies
-        canvas: '#3C3C3C', // fondo de la app
-        paper: '#474747', // tarjetas / superficies elevadas
-        inset: '#343434', // rieles / cajas hundidas
-        line: '#565656', // bordes / separadores
+        canvas: '#121A16', // fondo de la app
+        paper: '#1B241F', // tarjetas / superficies elevadas
+        inset: '#151E19', // rieles / cajas hundidas
+        line: '#35433C', // bordes / separadores
 
         // Texto
         ink: {
-          DEFAULT: '#F5F5F5', // principal
-          soft: '#D2D2D2',
-          muted: '#B5B5B5', // secundario
-          faint: '#8C8C8C', // terciario / metadatos
+          DEFAULT: '#F2F4ED', // principal
+          soft: '#D4DDD5',
+          muted: '#ABB9AF', // secundario
+          faint: '#8F9F94', // terciario / metadatos
         },
 
         // Acento de marca / interacción
@@ -26,8 +26,8 @@ export default {
           200: '#a3ecc1',
           300: '#72e0a0',
           400: '#4dd488',
-          500: '#37c97e',
-          600: '#46d488', // texto de enlaces / fondo de botón
+          500: '#8DD9B0',
+          600: '#9DE2BA', // texto de enlaces / fondo de botón
           700: '#33c178',
           800: '#28a566',
           900: '#218a55',

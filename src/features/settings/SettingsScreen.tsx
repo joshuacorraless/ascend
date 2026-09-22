@@ -233,8 +233,8 @@ export function SettingsScreen() {
 
       <Section title="Datos y respaldo">
         <p className="text-sm text-ink-muted">
-          <span className="nums">{totalRecords}</span> registros en este dispositivo. Tus datos
-          nunca salen de aquí salvo que tú los exportes.
+          <span className="nums">{totalRecords}</span> registros en este dispositivo. Tus datos se
+          guardan en este navegador; puedes exportarlos como respaldo.
         </p>
         <div className="grid grid-cols-2 gap-2">
           <button className="btn-secondary" onClick={onExport}>
@@ -283,8 +283,9 @@ export function SettingsScreen() {
 
       <Section title="Privacidad">
         <p className="text-sm text-ink-muted">
-          Ascend no usa cuentas, analíticas ni rastreadores. El escaneo de etiquetas es opcional y
-          solo envía la imagen que eliges analizar.
+          Ascend no usa cuentas, analíticas ni rastreadores. El análisis opcional envía la imagen,
+          el documento o el texto que elijas al proveedor de IA configurado. El dictado utiliza el
+          servicio de reconocimiento de tu navegador.
         </p>
       </Section>
 
@@ -292,6 +293,7 @@ export function SettingsScreen() {
         <GoalForm
           volumeUnit={settings.volumeUnit}
           initial={latestGoal ?? SUGGESTED_GOAL}
+          initialMode={latestGoal ? 'custom' : 'guided'}
           submitLabel="Guardar objetivos"
           onSubmit={saveGoal}
         />

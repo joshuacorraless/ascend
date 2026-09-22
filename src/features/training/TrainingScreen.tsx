@@ -10,7 +10,11 @@ export function TrainingScreen() {
 
   return (
     <div className="space-y-5">
-      <PageHeader eyebrow="Fuerza" title="Entrenamiento" />
+      <PageHeader
+        eyebrow="Tu semana"
+        title="Entrenamiento"
+        subtitle="Carga tu plan. Entrena. Registra cada serie."
+      />
 
       <SegmentedControl
         stretch

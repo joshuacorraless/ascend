@@ -52,6 +52,7 @@ export const router = createBrowserRouter([
       { path: 'entrenamiento/sesion/:sessionId', element: <SessionScreen /> },
       { path: 'progreso', element: <ProgressScreen /> },
       { path: 'progreso/rutina/:routineId', element: <RoutineProgressScreen /> },
+      { path: 'progreso/rutina/:routineId/ejercicio/:exerciseId', element: <ExerciseDetailScreen /> },
       { path: 'progreso/ejercicio/:exerciseId', element: <ExerciseDetailScreen /> },
       { path: 'agua', element: <WaterScreen /> },
       { path: 'suplementos', element: <SupplementsScreen /> },

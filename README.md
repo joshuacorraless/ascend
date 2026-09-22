@@ -34,10 +34,10 @@ Ascend reúne en una sola aplicación el seguimiento diario de alimentación, ag
 | :-- | :-- |
 | **Día** | Balance de macros, agua, suplementos, entrenamiento planeado y peso reciente. |
 | **Nutrición** | Biblioteca, recetas, registro por porción o gramos y reutilización de comidas. |
-| **Entrenamiento** | Rutinas, sesiones con autoguardado, RPE, series previas y recuperación de interrupciones. |
-| **Progreso** | 1RM estimado, volumen, récords, frecuencia, hábitos y tendencia de peso. |
+| **Entrenamiento** | Rutinas desde PDF, imagen o texto; objetivos por serie, dictado de peso/reps/RIR y autoguardado. |
+| **Progreso** | Peso, reps y RIR de cada serie entre semanas, por rutina y ejercicio; hábitos y tendencia de peso corporal. |
 | **Datos** | Exportación e importación JSON validadas y versionadas. |
-| **Captura asistida** | Lectura opcional de etiquetas con IA y confirmación humana antes de persistir. |
+| **Captura asistida** | Cámara o fototeca para etiquetas, reintento de la misma imagen y revisión antes de guardar. |
 
 ## Arquitectura
 
@@ -97,7 +97,7 @@ La aplicación queda disponible en `http://localhost:5173`. El recorrido complet
 npm run check
 ```
 
-`npm run check` verifica tipos, lint, pruebas y build de producción. La suite cubre cálculos de 1RM, métricas de entrenamiento y respaldo de datos.
+`npm run check` verifica tipos, lint, pruebas y build de producción. La suite cubre importación de rutinas, dictado, progreso por serie y RIR, balance de macros, fotos y respaldo de datos.
 
 ## Documentación
 

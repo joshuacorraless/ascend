@@ -11,6 +11,7 @@ import { newEntity, touch } from '@/lib/factories';
 import { WEEKDAY_LABELS } from '@/lib/datetime';
 import { cn } from '@/lib/cn';
 import type { Exercise, RoutineExercise, WorkoutRoutine } from '@/lib/schema';
+import { workoutRoutineSchema } from '@/lib/schema';
 
 export function RoutineEditorModal({
   open,
@@ -92,6 +93,27 @@ export function RoutineEditorModal({
     const saved: WorkoutRoutine = initial
       ? touch({ ...initial, ...values, description: description.trim() || undefined })
       : newEntity<WorkoutRoutine>({ ...values, active: true, archived: false });
+    if (
+      !workoutRoutineSchema.safeParse(saved).success ||
+      items.some((item) =>
+        item.prescribedSets
+          ? item.prescribedSets.length !== item.targetSets ||
+            item.prescribedSets.some(
+              (set) =>
+                (!set.toFailure &&
+                  (set.repRangeMin === undefined || set.repRangeMax === undefined)) ||
+                (set.repRangeMin !== undefined &&
+                  set.repRangeMax !== undefined &&
+                  set.repRangeMin > set.repRangeMax),
+            )
+          : item.repRangeMin > item.repRangeMax,
+      )
+    ) {
+      error(
+        'Revisá los objetivos: 1–20 series, 1–100 reps y un máximo de reps mayor o igual al mínimo.',
+      );
+      return;
+    }
     await repos.routines.put(saved);
     success(initial ? 'Rutina actualizada.' : 'Rutina creada.');
     onClose();
@@ -201,21 +223,106 @@ export function RoutineEditorModal({
                       </button>
                     </div>
 
-                    <button
-                      onClick={() => update(i, { toFailure: !it.toFailure })}
-                      aria-pressed={!!it.toFailure}
-                      className={cn('chip mb-2.5', it.toFailure && 'chip-active')}
-                    >
-                      Al fallo
-                    </button>
+                    {!it.prescribedSets && (
+                      <button
+                        onClick={() => update(i, { toFailure: !it.toFailure })}
+                        aria-pressed={!!it.toFailure}
+                        className={cn('chip mb-2.5', it.toFailure && 'chip-active')}
+                      >
+                        Al fallo
+                      </button>
+                    )}
+
+                    {it.prescribedSets && (
+                      <div className="mb-3 space-y-3">
+                        <p className="text-xs font-semibold">
+                          {it.prescribedSets.length} series · objetivos individuales
+                        </p>
+                        {it.prescribedSets.map((set, s) => {
+                          const updateSet = (patch: Partial<typeof set>) =>
+                            update(i, {
+                              prescribedSets: it.prescribedSets!.map((entry, index) =>
+                                index === s ? { ...entry, ...patch } : entry,
+                              ),
+                            });
+                          return (
+                            <div key={s} className="space-y-2 rounded-lg border border-line p-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-xs font-semibold">Serie {s + 1}</span>
+                                <button
+                                  className={cn('chip', set.toFailure && 'chip-active')}
+                                  aria-pressed={!!set.toFailure}
+                                  onClick={() => updateSet({ toFailure: !set.toFailure })}
+                                >
+                                  Al fallo
+                                </button>
+                              </div>
+                              {(set.repRangeMin !== undefined || !set.toFailure) && (
+                                <div className="grid grid-cols-2 gap-2">
+                                  <NumField
+                                    label="Rep min"
+                                    value={set.repRangeMin ?? 0}
+                                    onChange={(value) => updateSet({ repRangeMin: value })}
+                                  />
+                                  <NumField
+                                    label="Rep max"
+                                    value={set.repRangeMax ?? 0}
+                                    onChange={(value) => updateSet({ repRangeMax: value })}
+                                  />
+                                </div>
+                              )}
+                              <label className="block">
+                                <span className="label">Indicación de la serie</span>
+                                <input
+                                  className="input text-sm"
+                                  value={set.notes ?? ''}
+                                  onChange={(event) => updateSet({ notes: event.target.value })}
+                                />
+                              </label>
+                              <button
+                                className="text-xs text-ink-muted"
+                                disabled={it.prescribedSets!.length === 1}
+                                onClick={() =>
+                                  update(i, {
+                                    prescribedSets: it.prescribedSets!.filter(
+                                      (_, index) => index !== s,
+                                    ),
+                                    targetSets: it.prescribedSets!.length - 1,
+                                  })
+                                }
+                              >
+                                Quitar serie
+                              </button>
+                            </div>
+                          );
+                        })}
+                        <button
+                          className="btn-secondary w-full text-sm"
+                          disabled={it.prescribedSets.length >= 20}
+                          onClick={() =>
+                            update(i, {
+                              prescribedSets: [
+                                ...it.prescribedSets!,
+                                { ...it.prescribedSets!.at(-1) },
+                              ],
+                              targetSets: it.prescribedSets!.length + 1,
+                            })
+                          }
+                        >
+                          Añadir serie
+                        </button>
+                      </div>
+                    )}
 
                     <div className={cn('grid gap-2', it.toFailure ? 'grid-cols-2' : 'grid-cols-4')}>
-                      <NumField
-                        label="Series"
-                        value={it.targetSets}
-                        onChange={(v) => update(i, { targetSets: v })}
-                      />
-                      {!it.toFailure && (
+                      {!it.prescribedSets && (
+                        <NumField
+                          label="Series"
+                          value={it.targetSets}
+                          onChange={(v) => update(i, { targetSets: v })}
+                        />
+                      )}
+                      {!it.prescribedSets && (
                         <>
                           <NumField
                             label="Rep min"
@@ -240,6 +347,14 @@ export function RoutineEditorModal({
                         Registrarás las repeticiones reales alcanzadas en cada serie.
                       </p>
                     )}
+                    <label className="mt-3 block">
+                      <span className="label">Notas del ejercicio</span>
+                      <textarea
+                        className="input text-sm"
+                        value={it.notes ?? ''}
+                        onChange={(event) => update(i, { notes: event.target.value })}
+                      />
+                    </label>
                     {ex && (
                       <p className="mt-1.5 text-xs text-ink-muted">
                         {MUSCLE_LABELS[ex.primaryMuscle]}

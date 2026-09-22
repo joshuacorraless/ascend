@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Modal } from '@/components/ui/Modal';
@@ -9,6 +9,7 @@ import { useConfirm } from '@/app/providers/confirm';
 import { getRepositories } from '@/lib/repositories';
 import { touch } from '@/lib/factories';
 import { SET_TYPE_LABELS } from './constants';
+import { MicrophoneIcon, VoiceWorkoutModal } from './VoiceWorkoutModal';
 import {
   addExerciseToSession,
   addSet,
@@ -16,7 +17,6 @@ import {
   finishSession,
   previousExerciseSets,
 } from './sessionActions';
-import { totalVolume } from '@/lib/domain';
 import { formatDuration } from '@/lib/datetime';
 import { round, weightToDisplay, weightToKg } from '@/lib/units';
 import { cn } from '@/lib/cn';
@@ -33,7 +33,10 @@ export function SessionScreen() {
   const confirm = useConfirm();
   const repos = getRepositories();
 
-  const session = useLiveQuery(() => repos.workout.getSession(sessionId), [sessionId]);
+  const session = useLiveQuery(
+    async () => (await repos.workout.getSession(sessionId)) ?? null,
+    [sessionId],
+  );
   const logs = useLiveQuery(
     () => repos.workout.listExerciseLogs(sessionId),
     [sessionId],
@@ -45,6 +48,10 @@ export function SessionScreen() {
     [] as SetLog[],
   );
   const [addOpen, setAddOpen] = useState(false);
+  const [voiceLogId, setVoiceLogId] = useState<string | null>(null);
+  const pendingSaves = useRef(new Set<Promise<unknown>>());
+  const finishingRef = useRef(false);
+  const [finishing, setFinishing] = useState(false);
 
   const elapsed = useElapsed(session?.startedAt);
 
@@ -65,21 +72,40 @@ export function SessionScreen() {
   const readOnly = session.status !== 'active';
   const orderedLogs = [...(logs ?? [])].sort((a, b) => a.order - b.order);
   const allSets = sets ?? [];
-  const volume = totalVolume(allSets);
   const doneSets = allSets.filter((s) => s.completed).length;
 
+  const trackSave = (save: Promise<unknown>) => {
+    pendingSaves.current.add(save);
+    void save.finally(() => pendingSaves.current.delete(save));
+  };
+
   const finish = async () => {
-    if (doneSets === 0) {
-      const ok = await confirm({
-        title: 'Finalizar sin series',
-        message: 'No marcaste ninguna serie como completada. ¿Finalizar igual?',
-        confirmLabel: 'Finalizar',
-      });
-      if (!ok) return;
+    if (finishingRef.current) return;
+    finishingRef.current = true;
+    setFinishing(true);
+    try {
+      // The focused field blurs immediately before the Finalizar click. Its
+      // queued write must finish while the session is still active.
+      while (pendingSaves.current.size) {
+        const saved = await Promise.all([...pendingSaves.current]);
+        if (saved.some((result) => result === false)) return;
+      }
+      const latestSets = await repos.workout.listSetLogs(session.id);
+      if (!latestSets.some((set) => set.completed)) {
+        const ok = await confirm({
+          title: 'Finalizar sin series',
+          message: 'No marcaste ninguna serie como completada. ¿Finalizar igual?',
+          confirmLabel: 'Finalizar',
+        });
+        if (!ok) return;
+      }
+      await finishSession(session);
+      success('Sesión finalizada. ¡Buen trabajo!');
+      navigate('/entrenamiento');
+    } finally {
+      finishingRef.current = false;
+      setFinishing(false);
     }
-    await finishSession(session);
-    success('Sesión finalizada. ¡Buen trabajo!');
-    navigate('/entrenamiento');
   };
 
   const cancel = async () => {
@@ -119,8 +145,8 @@ export function SessionScreen() {
           <div className="min-w-0">
             <h1 className="truncate text-lg font-semibold text-ink">{session.name}</h1>
             <p className="nums text-xs text-ink-muted">
-              {readOnly ? 'Completada' : formatDuration(elapsed)} · {doneSets} series · vol{' '}
-              {round(volume)} {settings.weightUnit}
+              {readOnly ? 'Completada' : formatDuration(elapsed)} · {doneSets}/{allSets.length}{' '}
+              series completadas
             </p>
           </div>
           {!readOnly ? (
@@ -131,8 +157,12 @@ export function SessionScreen() {
               >
                 Descartar
               </button>
-              <button className="btn-primary !min-h-0 px-3.5 py-2 text-sm" onClick={finish}>
-                Finalizar
+              <button
+                className="btn-primary !min-h-0 px-3.5 py-2 text-sm"
+                onClick={finish}
+                disabled={finishing}
+              >
+                {finishing ? 'Guardando…' : 'Finalizar'}
               </button>
             </div>
           ) : (
@@ -157,12 +187,14 @@ export function SessionScreen() {
           key={log.id}
           log={log}
           sets={allSets.filter((s) => s.exerciseLogId === log.id)}
-          readOnly={readOnly}
+          readOnly={readOnly || finishing}
           isFirst={i === 0}
           isLast={i === orderedLogs.length - 1}
           onRemove={() => removeExercise(log)}
           onMoveUp={() => moveExercise(i, -1)}
           onMoveDown={() => moveExercise(i, 1)}
+          onDictate={() => setVoiceLogId(log.id)}
+          onPendingSave={trackSave}
         />
       ))}
 
@@ -180,6 +212,15 @@ export function SessionScreen() {
           setAddOpen(false);
         }}
       />
+      {voiceLogId && !readOnly && (
+        <VoiceWorkoutModal
+          logs={orderedLogs}
+          sets={allSets}
+          initialLogId={voiceLogId}
+          defaultUnit={settings.weightUnit}
+          onClose={() => setVoiceLogId(null)}
+        />
+      )}
     </div>
   );
 }
@@ -193,6 +234,8 @@ function ExerciseCard({
   onRemove,
   onMoveUp,
   onMoveDown,
+  onDictate,
+  onPendingSave,
 }: {
   log: ExerciseLog;
   sets: SetLog[];
@@ -202,6 +245,8 @@ function ExerciseCard({
   onRemove: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  onDictate: () => void;
+  onPendingSave: (save: Promise<unknown>) => void;
 }) {
   const { settings } = useSettings();
   const repos = getRepositories();
@@ -220,9 +265,10 @@ function ExerciseCard({
   // siguientes (sin pisar las ya editadas ni completadas). Siguen siendo editables.
   const propagateWeight = async (weightKg: number) => {
     if (weightKg <= 0) return;
+    const current = await repos.workout.listSetLogs(log.sessionId);
     await Promise.all(
-      ordered
-        .filter((s) => s.weightKg === 0 && !s.completed)
+      current
+        .filter((s) => s.exerciseLogId === log.id && s.weightKg === 0 && !s.completed)
         .map((s) => repos.workout.putSetLog(touch({ ...s, weightKg }))),
     );
   };
@@ -258,6 +304,11 @@ function ExerciseCard({
           {exercise?.description && (
             <p className="mt-0.5 text-xs text-ink-muted">{exercise.description}</p>
           )}
+          {log.notes && (
+            <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-ink-muted">
+              {log.notes}
+            </p>
+          )}
         </div>
         {!readOnly && (
           <>
@@ -288,6 +339,16 @@ function ExerciseCard({
         )}
       </div>
 
+      {!readOnly &&
+        (log.trackingType === 'weight_reps' || log.trackingType === 'bodyweight_reps') && (
+          <button
+            className="mb-3 inline-flex min-h-10 items-center gap-2 rounded-xl border border-line px-3 text-sm font-medium text-ink transition hover:bg-canvas"
+            onClick={onDictate}
+          >
+            <MicrophoneIcon /> Dictar series
+          </button>
+        )}
+
       {prev && prev.length > 0 && (
         <div className="mb-2.5 flex items-center justify-between gap-2 rounded-lg border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink-muted">
           <span className="nums truncate">
@@ -305,10 +366,11 @@ function ExerciseCard({
         </div>
       )}
 
-      <div className="grid grid-cols-[2rem_1fr_1fr_2rem] items-center gap-2 px-1 pb-1.5 text-2xs font-medium text-ink-faint">
+      <div className="grid grid-cols-[2rem_minmax(0,1fr)_minmax(0,1fr)_3rem_2rem] items-center gap-1.5 px-1 pb-1.5 text-2xs font-medium text-ink-faint">
         <span>#</span>
         <span>{unit}</span>
         <span>Reps</span>
+        <span title="Repeticiones en reserva · opcional">RIR</span>
         <span></span>
       </div>
 
@@ -320,6 +382,7 @@ function ExerciseCard({
             unit={unit}
             readOnly={readOnly}
             onWeightCommit={idx === 0 ? propagateWeight : undefined}
+            onPendingSave={onPendingSave}
           />
         ))}
       </div>
@@ -342,43 +405,85 @@ function SetRow({
   unit,
   readOnly,
   onWeightCommit,
+  onPendingSave,
 }: {
   set: SetLog;
   unit: WeightUnit;
   readOnly: boolean;
   /** Notifica el peso confirmado (la primera serie lo replica en las demás). */
   onWeightCommit?: (weightKg: number) => void;
+  onPendingSave: (save: Promise<unknown>) => void;
 }) {
   const repos = getRepositories();
+  const { error: showError } = useToast();
+  const saveQueue = useRef<Promise<unknown>>(Promise.resolve());
   const [weight, setWeight] = useState(() =>
     set.weightKg ? String(round(weightToDisplay(set.weightKg, unit), 2)) : '',
   );
   const [reps, setReps] = useState(() => (set.reps ? String(set.reps) : ''));
+  const [rir, setRir] = useState(() => (set.rir === undefined ? '' : String(set.rir)));
+  const [rirError, setRirError] = useState('');
 
   // Resincroniza si el set o la unidad cambian desde fuera (p. ej. "Copiar anterior",
   // autocarga del peso, o cambiar kg/lb).
   useEffect(() => {
     setWeight(set.weightKg ? String(round(weightToDisplay(set.weightKg, unit), 2)) : '');
+  }, [set.weightKg, unit]);
+  useEffect(() => {
     setReps(set.reps ? String(set.reps) : '');
-  }, [set.weightKg, set.reps, unit]);
+  }, [set.reps]);
+  useEffect(() => {
+    setRir(set.rir === undefined ? '' : String(set.rir));
+  }, [set.rir]);
 
-  const persist = (patch: Partial<SetLog>) => repos.workout.putSetLog(touch({ ...set, ...patch }));
+  // Blur and completion can fire before the live query refreshes. Queue each
+  // change and merge it into the latest saved row, never into a stale render.
+  const persist = (patch: Partial<SetLog> | ((current: SetLog) => Partial<SetLog>)) => {
+    const next = saveQueue.current
+      .then(async () => {
+        const session = await repos.workout.getSession(set.sessionId);
+        const current = (await repos.workout.listSetLogs(set.sessionId)).find(
+          (row) => row.id === set.id,
+        );
+        if (session?.status !== 'active' || !current) return false;
+        const changes = typeof patch === 'function' ? patch(current) : patch;
+        await repos.workout.putSetLog(touch({ ...current, ...changes }));
+        return true;
+      })
+      .catch(() => {
+        showError('No se pudo guardar la serie. Revisa los valores y vuelve a intentarlo.');
+        return false;
+      });
+    saveQueue.current = next;
+    onPendingSave(next);
+    return next;
+  };
 
-  const persistWeight = () => {
+  const persistWeight = async () => {
     const v = parseDecimalInput(weight);
     const kg = Number.isFinite(v) && v > 0 ? weightToKg(v, unit) : 0;
-    persist({ weightKg: kg });
-    if (kg > 0) onWeightCommit?.(kg);
+    const saved = await persist({ weightKg: kg });
+    if (saved && kg > 0) onWeightCommit?.(kg);
   };
   const persistReps = () => {
     const v = Number(reps);
     persist({ reps: Number.isFinite(v) && v > 0 ? Math.round(v) : 0 });
   };
+  const persistRir = () => {
+    const value = rir.trim() === '' ? undefined : parseDecimalInput(rir);
+    if (value !== undefined && (!Number.isFinite(value) || value < 0 || value > 10)) {
+      setRirError('RIR debe estar entre 0 y 10, o quedar vacío.');
+      return;
+    }
+    setRirError('');
+    persist({ rir: value });
+  };
 
   const cycleType = () => {
-    const idx = SET_TYPE_CYCLE.indexOf(set.setType);
-    const next = SET_TYPE_CYCLE[(idx + 1) % SET_TYPE_CYCLE.length]!;
-    persist({ setType: next });
+    persist((current) => {
+      const idx = SET_TYPE_CYCLE.indexOf(current.setType);
+      return { setType: SET_TYPE_CYCLE[(idx + 1) % SET_TYPE_CYCLE.length]! };
+    });
   };
 
   const typeBadge =
@@ -394,7 +499,7 @@ function SetRow({
   return (
     <div
       className={cn(
-        'grid grid-cols-[2rem_1fr_1fr_2rem] items-center gap-2',
+        'grid grid-cols-[2rem_minmax(0,1fr)_minmax(0,1fr)_3rem_2rem] items-center gap-1.5',
         set.completed && 'opacity-70',
       )}
     >
@@ -412,6 +517,7 @@ function SetRow({
       <input
         type="text"
         inputMode="decimal"
+        aria-label={`Peso de la serie ${set.setNumber} en ${unit}`}
         disabled={readOnly}
         className="input nums !px-2 !py-1.5 text-center"
         value={weight}
@@ -422,6 +528,7 @@ function SetRow({
       <input
         type="number"
         inputMode="numeric"
+        aria-label={`Repeticiones de la serie ${set.setNumber}`}
         disabled={readOnly}
         className="input nums !px-2 !py-1.5 text-center"
         value={reps}
@@ -429,8 +536,25 @@ function SetRow({
         onBlur={persistReps}
         placeholder="0"
       />
+      <input
+        type="text"
+        inputMode="decimal"
+        aria-label={`RIR de la serie ${set.setNumber} (opcional)`}
+        aria-invalid={!!rirError}
+        aria-describedby={rirError ? `rir-error-${set.id}` : undefined}
+        title="Repeticiones en reserva · opcional, de 0 a 10"
+        disabled={readOnly}
+        className="input nums !px-1 !py-1.5 text-center"
+        value={rir}
+        onChange={(event) => {
+          setRir(event.target.value);
+          setRirError('');
+        }}
+        onBlur={persistRir}
+        placeholder="—"
+      />
       <button
-        onClick={() => persist({ completed: !set.completed })}
+        onClick={() => persist((current) => ({ completed: !current.completed }))}
         disabled={readOnly}
         aria-label="Completada"
         aria-pressed={set.completed}
@@ -441,6 +565,16 @@ function SetRow({
       >
         {set.completed && <span className="h-2 w-2 rounded-full bg-canvas" />}
       </button>
+      {rirError && (
+        <p id={`rir-error-${set.id}`} role="alert" className="col-span-5 text-xs text-danger-600">
+          {rirError}
+        </p>
+      )}
+      {set.rpe !== undefined && (
+        <span className="col-span-5 -mt-1 pl-10 text-2xs text-ink-muted">
+          RPE {set.rpe} · esfuerzo percibido
+        </span>
+      )}
     </div>
   );
 }

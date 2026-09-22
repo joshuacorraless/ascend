@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { SimpleLineChart } from '@/components/ui/SimpleLineChart';
@@ -9,170 +9,244 @@ import { useExerciseProgress } from './useExerciseProgress';
 import { useSettings } from '@/app/providers/settings';
 import { useToday } from '@/app/hooks/useToday';
 import { getRepositories } from '@/lib/repositories';
+import { addDaysToKey, formatKeyRelative, formatKeyShort, localTime } from '@/lib/datetime';
+import { formatWeight } from '@/lib/units';
 import {
-  exerciseSessionSummaries,
-  personalRecords,
-  progressSeries,
-  type ExerciseSessionSummary,
-  type ProgressMetric,
-} from '@/lib/domain';
-import { addDaysToKey, formatKeyRelative, formatKeyShort } from '@/lib/datetime';
-import { formatWeight, round, weightToDisplay } from '@/lib/units';
+  buildSetSessions,
+  compareSessionSets,
+  setChartData,
+  type SetChange,
+  type SetSession,
+} from './setPerformance';
+import type { SetLog, WeightUnit } from '@/lib/schema';
 
-const METRICS: { value: ProgressMetric; label: string; weighted: boolean }[] = [
-  { value: 'estimatedOneRm', label: '1RM est.', weighted: true },
-  { value: 'maxWeight', label: 'Peso máx', weighted: true },
-  { value: 'volume', label: 'Volumen', weighted: true },
-  { value: 'totalReps', label: 'Reps', weighted: false },
-];
+const COLORS = ['#8DD9B0', '#7FB5F2', '#F3C979', '#D6A6F2', '#F1A6A6', '#77D4D1'];
 const RANGES = [
-  { value: '30', label: '30d' },
-  { value: '90', label: '90d' },
-  { value: '365', label: '1a' },
+  { value: '28', label: '4 sem' },
+  { value: '84', label: '12 sem' },
   { value: 'all', label: 'Todo' },
 ] as const;
+const CHANGES: Record<SetChange, { label: string; style: string }> = {
+  progress: { label: '↑ Avance', style: 'text-brand-500' },
+  regress: { label: '↓ Retroceso', style: 'text-danger-400' },
+  same: { label: '= Igual', style: 'text-ink-muted' },
+  mixed: { label: '↕ Mixto', style: 'text-macro-carbs' },
+  harder: { label: 'Más esfuerzo', style: 'text-macro-carbs' },
+  new: { label: 'Nueva', style: 'text-ink-muted' },
+  missing: { label: 'Sin registro', style: 'text-ink-muted' },
+  ambiguous: { label: 'Revisar', style: 'text-macro-carbs' },
+};
 
 export function ExerciseDetailScreen() {
-  const { exerciseId = '' } = useParams();
+  const { exerciseId = '', routineId } = useParams();
   const navigate = useNavigate();
   const { settings } = useSettings();
   const { dateKey } = useToday();
   const unit = settings.weightUnit;
-
   const exercise = useLiveQuery(
     () => (exerciseId ? getRepositories().exercises.get(exerciseId) : Promise.resolve(undefined)),
     [exerciseId],
   );
-  const progress = useExerciseProgress(exerciseId);
-  const [metric, setMetric] = useState<ProgressMetric>('estimatedOneRm');
-  const [range, setRange] = useState<(typeof RANGES)[number]['value']>('90');
-
-  const metricDef = METRICS.find((m) => m.value === metric)!;
-
-  const points = useMemo(() => {
-    if (!progress) return [];
-    const all = progressSeries(progress.sets, progress.sessionDates, metric, settings.oneRmFormula);
-    const filtered =
-      range === 'all' ? all : all.filter((p) => p.date >= addDaysToKey(dateKey, -Number(range)));
-    return filtered.map((p) => ({
-      date: p.date,
-      valor: metricDef.weighted ? round(weightToDisplay(p.value, unit), 1) : p.value,
-    }));
-  }, [progress, metric, range, settings, dateKey, metricDef.weighted, unit]);
-
-  const summaries = useMemo(
+  const routine = useLiveQuery(
+    () => (routineId ? getRepositories().routines.get(routineId) : Promise.resolve(undefined)),
+    [routineId],
+  );
+  const progress = useExerciseProgress(exerciseId, routineId);
+  const [metric, setMetric] = useState<'weight' | 'reps' | 'rir'>('weight');
+  const [range, setRange] = useState<(typeof RANGES)[number]['value']>('84');
+  const [selectedSet, setSelectedSet] = useState<number | 'all'>('all');
+  const sessions = useMemo(
     () =>
       progress
-        ? exerciseSessionSummaries(progress.sets, progress.sessionDates, settings.oneRmFormula)
+        ? buildSetSessions(progress.sets, progress.sessionDates, progress.sessionStarts)
         : [],
-    [progress, settings.oneRmFormula],
+    [progress],
   );
-  const prs = useMemo(
-    () => (progress ? personalRecords(progress.sets, settings.oneRmFormula) : undefined),
-    [progress, settings.oneRmFormula],
+  const filtered = useMemo(
+    () =>
+      sessions.filter(
+        (session) => range === 'all' || session.date >= addDaysToKey(dateKey, -Number(range) + 1),
+      ),
+    [sessions, range, dateKey],
   );
-
-  const fmtW = (kg: number) => formatWeight(kg, unit);
-  const fmtVol = (kg: number) => `${round(weightToDisplay(kg, unit))} ${unit}`;
+  const chart = useMemo(() => setChartData(filtered, metric, unit), [filtered, metric, unit]);
+  const visibleNumbers =
+    selectedSet === 'all'
+      ? chart.numbers
+      : chart.numbers.filter((number) => number === selectedSet);
+  const latest = sessions.at(-1);
+  const previous = sessions.at(-2);
+  const sessionLabel = (id: string) => {
+    const session = sessions.find((entry) => entry.sessionId === id);
+    return session
+      ? `${formatKeyShort(session.date)}${session.startedAt ? ` · ${localTime(new Date(session.startedAt), settings.timeZone)}` : ''}`
+      : '';
+  };
 
   return (
     <div className="space-y-5">
       <button
-        onClick={() => navigate(-1)}
+        onClick={() => navigate(routineId ? `/progreso/rutina/${routineId}` : '/progreso')}
         className="mt-1 flex items-center gap-1.5 text-sm font-medium text-ink-muted transition hover:text-ink"
       >
-        <Caret dir="left" /> Volver
+        <Caret dir="left" /> {routine?.name ?? 'Progreso'}
       </button>
-
       <header className="px-1">
-        <h1 className="text-2xl font-semibold text-ink">{exercise?.name ?? 'Ejercicio'}</h1>
-        <p className="nums mt-1 text-sm text-ink-muted">
-          {progress
-            ? `${progress.sessionCount} sesión${progress.sessionCount === 1 ? '' : 'es'} registradas`
-            : ''}
+        <p className="eyebrow mb-2">
+          {routineId ? 'Rutina / Ejercicio' : 'Ejercicio / Todas las rutinas'}
         </p>
+        <h1 className="text-2xl font-semibold text-ink">
+          {exercise?.name ?? 'Ejercicio anterior'}
+        </h1>
+        <p className="mt-2 text-sm text-ink-muted">Peso, repeticiones y RIR, serie por serie.</p>
       </header>
-
-      {progress && progress.sessionCount === 0 ? (
+      {routineId && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line px-4 py-3 text-xs">
+          <span className="text-ink-muted">Solo {routine?.name ?? 'esta rutina'}</span>
+          <Link className="font-semibold text-brand-500" to={`/progreso/ejercicio/${exerciseId}`}>
+            Ver todas las rutinas
+          </Link>
+        </div>
+      )}
+      {!progress ? (
+        <p className="py-12 text-center text-sm text-ink-muted">Cargando tus series…</p>
+      ) : !latest ? (
         <EmptyState
-          title="Aún sin datos"
-          description="Completa una sesión con este ejercicio para ver gráficos e historial."
+          title="Aún sin series registradas"
+          description="Completa las series de este ejercicio y termina el entrenamiento para compararlas aquí."
         />
       ) : (
         <>
-          {summaries.length >= 1 && (
-            <Comparison last={summaries[0]!} prev={summaries[1]} fmtW={fmtW} fmtVol={fmtVol} />
-          )}
-
-          {/* Gráfico */}
-          <section className="card space-y-3">
+          <section className="card space-y-4">
+            <div>
+              <h2 className="text-base font-semibold text-ink">De una sesión a la siguiente</h2>
+              <p className="mt-1 text-xs text-ink-muted">
+                Cada línea sigue la misma serie. Toca un punto para ver peso y reps juntos.
+              </p>
+            </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <SegmentedControl
                 size="sm"
                 value={metric}
                 onChange={setMetric}
-                options={METRICS.map((m) => ({ value: m.value, label: m.label }))}
+                options={[
+                  { value: 'weight', label: `Peso (${unit})` },
+                  { value: 'reps', label: 'Reps' },
+                  { value: 'rir', label: 'RIR' },
+                ]}
               />
               <SegmentedControl
                 size="sm"
                 value={range}
-                onChange={setRange}
-                options={RANGES.map((r) => ({ ...r }))}
+                onChange={(value) => {
+                  setRange(value);
+                  setSelectedSet('all');
+                }}
+                options={RANGES.map((entry) => ({ ...entry }))}
               />
             </div>
-            {points.length < 1 ? (
-              <p className="py-8 text-center text-sm text-ink-muted">Sin datos en este rango.</p>
+            {chart.data.length ? (
+              <>
+                {chart.data.some((point) =>
+                  visibleNumbers.some((number) => typeof point[`set_${number}`] === 'number'),
+                ) ? (
+                  <SimpleLineChart
+                    data={chart.data}
+                    xKey="sessionId"
+                    xFormatter={sessionLabel}
+                    integer={metric === 'reps'}
+                    unit={metric === 'weight' ? ` ${unit}` : metric === 'reps' ? ' reps' : ' RIR'}
+                    connectNulls={false}
+                    showDots
+                    lines={visibleNumbers.map((number) => ({
+                      key: `set_${number}`,
+                      name: `Serie ${number}`,
+                      color: COLORS[(number - 1) % COLORS.length]!,
+                      dashed: number > COLORS.length,
+                    }))}
+                    tooltipValueFormatter={(_value, key, point) =>
+                      `${point[`${key}_weight`]} ${unit} × ${point[`${key}_reps`]} reps${point[`${key}_effort`] ? ` · ${point[`${key}_effort`]}` : ''}`
+                    }
+                  />
+                ) : (
+                  <p className="py-10 text-center text-sm text-ink-muted">
+                    {metric === 'rir'
+                      ? 'Aún no hay RIR registrado para estas series.'
+                      : 'Sin valores comparables para estas series.'}
+                  </p>
+                )}
+                <div className="flex flex-wrap gap-2" aria-label="Series del gráfico">
+                  <button
+                    className={`chip ${selectedSet === 'all' ? 'chip-active' : ''}`}
+                    aria-pressed={selectedSet === 'all'}
+                    onClick={() => setSelectedSet('all')}
+                  >
+                    Todas
+                  </button>
+                  {chart.numbers.map((number) => (
+                    <button
+                      key={number}
+                      className={`chip gap-2 ${selectedSet === number ? 'chip-active' : ''}`}
+                      aria-pressed={selectedSet === number}
+                      onClick={() => setSelectedSet(number)}
+                    >
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ background: COLORS[(number - 1) % COLORS.length] }}
+                        aria-hidden
+                      />
+                      Serie {number}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-ink-faint">
+                  Las series sin registrar dejan un espacio; no se cuentan como cero.
+                </p>
+                {metric === 'rir' && (
+                  <p className="text-xs text-ink-muted">
+                    RIR = repeticiones que te quedaban. Más RIR con el mismo peso y reps indica más
+                    reserva. Si no lo registraste, el punto queda vacío.
+                  </p>
+                )}
+              </>
             ) : (
-              <SimpleLineChart
-                data={points}
-                xKey="date"
-                xFormatter={formatKeyShort}
-                unit={metricDef.weighted ? ` ${unit}` : ''}
-                lines={[{ key: 'valor', name: metricDef.label, color: '#51CF66', width: 2.5 }]}
-              />
-            )}
-            {metric === 'estimatedOneRm' && (
-              <p className="text-center text-2xs text-ink-faint">
-                1RM estimado (fórmula de Epley); no es una medición exacta.
-              </p>
+              <p className="py-8 text-center text-sm text-ink-muted">Sin series en este rango.</p>
             )}
           </section>
 
-          {/* Récords */}
-          {prs && (
-            <section className="card">
-              <h2 className="mb-4 text-base font-semibold text-ink">Récords personales</h2>
-              <div className="grid grid-cols-2 gap-2.5">
-                <Pr label="Peso máximo" value={fmtW(prs.maxWeightKg)} />
-                <Pr label="Reps máximas" value={`${prs.maxReps}`} />
-                <Pr label="1RM estimado" value={fmtW(prs.bestEstimatedOneRm)} />
-                <Pr label="Volumen / sesión" value={fmtVol(prs.maxSessionVolume)} />
-              </div>
-            </section>
-          )}
+          <Comparison
+            current={latest}
+            previous={previous}
+            unit={unit}
+            sessionLabel={sessionLabel}
+          />
 
-          {/* Historial */}
           <section className="space-y-2.5">
-            <h2 className="px-1 text-base font-semibold text-ink">Historial</h2>
-            <ul className="space-y-2.5">
-              {summaries.map((s) => (
-                <li key={s.sessionId} className="card">
-                  <div className="mb-2 flex items-baseline justify-between gap-2">
-                    <p className="text-sm font-semibold capitalize text-ink">
-                      {formatKeyRelative(s.date, settings.timeZone)}
-                    </p>
-                    <p className="nums text-xs text-ink-muted">
-                      {s.workingSets} series · {s.totalReps} reps · {fmtVol(s.volume)}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {s.sets.map((set) => (
-                      <span
-                        key={set.id}
-                        className="nums rounded-md border border-line bg-canvas px-1.5 py-0.5 text-xs font-medium text-ink-soft"
-                      >
-                        {round(weightToDisplay(set.weightKg, unit), 1)}×{set.reps}
-                      </span>
+            <div className="flex items-baseline justify-between px-1">
+              <h2 className="text-base font-semibold text-ink">Tus sesiones</h2>
+              <span className="text-xs text-ink-muted">{sessions.length} registradas</span>
+            </div>
+            <ul className="space-y-3">
+              {[...sessions].reverse().map((session) => (
+                <li key={session.sessionId} className="card !p-4">
+                  <p className="mb-3 text-sm font-semibold capitalize text-ink">
+                    {formatKeyRelative(session.date, settings.timeZone)}
+                    {session.startedAt &&
+                      ` · ${localTime(new Date(session.startedAt), settings.timeZone)}`}
+                  </p>
+                  <div className="divide-y divide-line">
+                    {session.sets.map((set) => (
+                      <div key={set.id} className="flex items-baseline justify-between gap-3 py-2">
+                        <span className="text-xs text-ink-muted">Serie {set.setNumber}</span>
+                        <span className="nums text-right text-sm font-medium text-ink">
+                          {formatWeight(set.weightKg, unit)} × {set.reps} reps
+                          {(set.rir !== undefined || set.rpe !== undefined) && (
+                            <span className="ml-2 text-xs font-normal text-ink-muted">
+                              {set.rir !== undefined ? `RIR ${set.rir}` : `RPE ${set.rpe}`}
+                            </span>
+                          )}
+                        </span>
+                      </div>
                     ))}
                   </div>
                 </li>
@@ -185,87 +259,92 @@ export function ExerciseDetailScreen() {
   );
 }
 
-function Comparison({
-  last,
-  prev,
-  fmtW,
-  fmtVol,
-}: {
-  last: ExerciseSessionSummary;
-  prev: ExerciseSessionSummary | undefined;
-  fmtW: (kg: number) => string;
-  fmtVol: (kg: number) => string;
-}) {
+function SetValue({ set, unit }: { set: SetLog | undefined; unit: WeightUnit }) {
+  if (!set) return <span className="text-ink-faint">—</span>;
   return (
-    <section className="card">
-      <h2 className="mb-1 text-base font-semibold text-ink">Última sesión vs anterior</h2>
-      <p className="mb-4 text-xs text-ink-muted">
-        {prev
-          ? 'Comparado con tu sesión previa de este ejercicio.'
-          : 'Aún no hay una sesión previa para comparar.'}
-      </p>
-      <div className="grid grid-cols-2 gap-2.5">
-        <Metric
-          label="Peso máx"
-          current={fmtW(last.maxWeightKg)}
-          delta={prev ? last.maxWeightKg - prev.maxWeightKg : undefined}
-          display={(d) => fmtW(Math.abs(d))}
-        />
-        <Metric
-          label="Volumen"
-          current={fmtVol(last.volume)}
-          delta={prev ? last.volume - prev.volume : undefined}
-          display={(d) => fmtVol(Math.abs(d))}
-        />
-        <Metric
-          label="Reps totales"
-          current={`${last.totalReps}`}
-          delta={prev ? last.totalReps - prev.totalReps : undefined}
-          display={(d) => `${Math.abs(d)}`}
-        />
-        <Metric
-          label="Series"
-          current={`${last.workingSets}`}
-          delta={prev ? last.workingSets - prev.workingSets : undefined}
-          display={(d) => `${Math.abs(d)}`}
-        />
-      </div>
-    </section>
+    <span className="nums whitespace-nowrap">
+      {formatWeight(set.weightKg, unit)}
+      <span className="block text-ink-muted">
+        × {set.reps} reps
+        {set.rir !== undefined
+          ? ` · RIR ${set.rir}`
+          : set.rpe !== undefined
+            ? ` · RPE ${set.rpe}`
+            : ''}
+      </span>
+    </span>
   );
 }
 
-function Metric({
-  label,
+function Comparison({
   current,
-  delta,
-  display,
+  previous,
+  unit,
+  sessionLabel,
 }: {
-  label: string;
-  current: string;
-  delta: number | undefined;
-  display: (d: number) => string;
+  current: SetSession;
+  previous?: SetSession;
+  unit: WeightUnit;
+  sessionLabel: (id: string) => string;
 }) {
-  const dir = delta === undefined || Math.abs(delta) < 1e-6 ? 0 : delta > 0 ? 1 : -1;
+  const rows = compareSessionSets(current, previous);
   return (
-    <div className="rounded-xl border border-line bg-canvas px-3.5 py-2.5">
-      <p className="eyebrow">{label}</p>
-      <p className="nums mt-1 text-lg font-semibold text-ink">{current}</p>
-      {delta !== undefined && (
-        <p className="nums mt-1 flex items-center gap-1.5 text-xs font-medium text-ink-muted">
-          {dir > 0 && <Caret dir="up" />}
-          {dir < 0 && <Caret dir="down" />}
-          {dir === 0 ? 'igual' : display(delta)}
+    <section className="card !px-4">
+      <h2 className="text-base font-semibold text-ink">Última vs. anterior</h2>
+      <p className="mt-1 text-xs leading-relaxed text-ink-muted">
+        {previous
+          ? `${sessionLabel(previous.sessionId)} → ${sessionLabel(current.sessionId)}`
+          : 'Tu primera referencia. La próxima sesión se comparará serie por serie.'}
+      </p>
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full text-left text-xs">
+          <thead className="text-ink-muted">
+            <tr>
+              <th className="pb-2 font-medium">Serie</th>
+              <th className="pb-2 font-medium">Anterior</th>
+              <th className="pb-2 font-medium">Última</th>
+              <th className="pb-2 text-right font-medium">Cambio</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
+            {rows.map((row) => (
+              <tr key={row.setNumber}>
+                <th className="py-3 pr-2 align-top font-medium">{row.setNumber}</th>
+                <td className="py-3 pr-2 align-top">
+                  <SetValue set={row.previous} unit={unit} />
+                </td>
+                <td className="py-3 pr-2 align-top">
+                  <SetValue set={row.current} unit={unit} />
+                </td>
+                <td
+                  className={`py-3 text-right align-top font-medium ${CHANGES[row.change].style}`}
+                >
+                  {CHANGES[row.change].label}
+                  {row.current && row.previous && (
+                    <span className="mt-1 block text-2xs font-normal text-ink-muted">
+                      {row.reserveDelta === undefined
+                        ? 'RIR sin comparar'
+                        : row.reserveDelta === 0
+                          ? 'Mismo RIR'
+                          : `${row.reserveDelta > 0 ? '+' : ''}${row.reserveDelta} RIR`}
+                    </span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-3 text-xs leading-relaxed text-ink-muted">
+        Avance: más peso o reps sin bajar el otro, o más RIR con ambos iguales. Si progresaste
+        usando menos reserva, el cambio es mixto. Sin RIR comparable, la señal solo refleja peso y
+        reps; considera también la técnica.
+      </p>
+      {rows.some((row) => row.change === 'ambiguous') && (
+        <p className="mt-2 text-xs text-macro-carbs">
+          Hay números de serie repetidos en una sesión; revisa el historial antes de compararlos.
         </p>
       )}
-    </div>
-  );
-}
-
-function Pr({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-line bg-canvas px-3.5 py-2.5">
-      <p className="eyebrow">{label}</p>
-      <p className="nums mt-1 text-lg font-semibold text-ink">{value}</p>
-    </div>
+    </section>
   );
 }

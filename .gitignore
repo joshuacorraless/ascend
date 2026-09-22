@@ -43,3 +43,7 @@ coverage
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Local review artifacts and personal imported documents
+tmp/
+output/
