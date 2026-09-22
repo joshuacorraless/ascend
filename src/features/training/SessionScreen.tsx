@@ -9,6 +9,7 @@ import { useConfirm } from '@/app/providers/confirm';
 import { getRepositories } from '@/lib/repositories';
 import { touch } from '@/lib/factories';
 import { SET_TYPE_LABELS } from './constants';
+import { MicrophoneIcon, VoiceWorkoutModal } from './VoiceWorkoutModal';
 import {
   addExerciseToSession,
   addSet,
@@ -16,7 +17,6 @@ import {
   finishSession,
   previousExerciseSets,
 } from './sessionActions';
-import { totalVolume } from '@/lib/domain';
 import { formatDuration } from '@/lib/datetime';
 import { round, weightToDisplay, weightToKg } from '@/lib/units';
 import { cn } from '@/lib/cn';
@@ -33,7 +33,10 @@ export function SessionScreen() {
   const confirm = useConfirm();
   const repos = getRepositories();
 
-  const session = useLiveQuery(() => repos.workout.getSession(sessionId), [sessionId]);
+  const session = useLiveQuery(
+    async () => (await repos.workout.getSession(sessionId)) ?? null,
+    [sessionId],
+  );
   const logs = useLiveQuery(
     () => repos.workout.listExerciseLogs(sessionId),
     [sessionId],
@@ -45,6 +48,7 @@ export function SessionScreen() {
     [] as SetLog[],
   );
   const [addOpen, setAddOpen] = useState(false);
+  const [voiceLogId, setVoiceLogId] = useState<string | null>(null);
 
   const elapsed = useElapsed(session?.startedAt);
 
@@ -65,7 +69,6 @@ export function SessionScreen() {
   const readOnly = session.status !== 'active';
   const orderedLogs = [...(logs ?? [])].sort((a, b) => a.order - b.order);
   const allSets = sets ?? [];
-  const volume = totalVolume(allSets);
   const doneSets = allSets.filter((s) => s.completed).length;
 
   const finish = async () => {
@@ -119,8 +122,8 @@ export function SessionScreen() {
           <div className="min-w-0">
             <h1 className="truncate text-lg font-semibold text-ink">{session.name}</h1>
             <p className="nums text-xs text-ink-muted">
-              {readOnly ? 'Completada' : formatDuration(elapsed)} · {doneSets} series · vol{' '}
-              {round(volume)} {settings.weightUnit}
+              {readOnly ? 'Completada' : formatDuration(elapsed)} · {doneSets}/{allSets.length}{' '}
+              series completadas
             </p>
           </div>
           {!readOnly ? (
@@ -163,6 +166,7 @@ export function SessionScreen() {
           onRemove={() => removeExercise(log)}
           onMoveUp={() => moveExercise(i, -1)}
           onMoveDown={() => moveExercise(i, 1)}
+          onDictate={() => setVoiceLogId(log.id)}
         />
       ))}
 
@@ -180,6 +184,15 @@ export function SessionScreen() {
           setAddOpen(false);
         }}
       />
+      {voiceLogId && !readOnly && (
+        <VoiceWorkoutModal
+          logs={orderedLogs}
+          sets={allSets}
+          initialLogId={voiceLogId}
+          defaultUnit={settings.weightUnit}
+          onClose={() => setVoiceLogId(null)}
+        />
+      )}
     </div>
   );
 }
@@ -193,6 +206,7 @@ function ExerciseCard({
   onRemove,
   onMoveUp,
   onMoveDown,
+  onDictate,
 }: {
   log: ExerciseLog;
   sets: SetLog[];
@@ -202,6 +216,7 @@ function ExerciseCard({
   onRemove: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  onDictate: () => void;
 }) {
   const { settings } = useSettings();
   const repos = getRepositories();
@@ -258,6 +273,11 @@ function ExerciseCard({
           {exercise?.description && (
             <p className="mt-0.5 text-xs text-ink-muted">{exercise.description}</p>
           )}
+          {log.notes && (
+            <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-ink-muted">
+              {log.notes}
+            </p>
+          )}
         </div>
         {!readOnly && (
           <>
@@ -287,6 +307,16 @@ function ExerciseCard({
           </>
         )}
       </div>
+
+      {!readOnly &&
+        (log.trackingType === 'weight_reps' || log.trackingType === 'bodyweight_reps') && (
+          <button
+            className="mb-3 inline-flex min-h-10 items-center gap-2 rounded-xl border border-line px-3 text-sm font-medium text-ink transition hover:bg-canvas"
+            onClick={onDictate}
+          >
+            <MicrophoneIcon /> Dictar series
+          </button>
+        )}
 
       {prev && prev.length > 0 && (
         <div className="mb-2.5 flex items-center justify-between gap-2 rounded-lg border border-line bg-canvas px-2.5 py-1.5 text-xs text-ink-muted">
@@ -441,6 +471,11 @@ function SetRow({
       >
         {set.completed && <span className="h-2 w-2 rounded-full bg-canvas" />}
       </button>
+      {(set.rir !== undefined || set.rpe !== undefined) && (
+        <span className="col-span-4 -mt-1 pl-10 text-2xs text-ink-muted">
+          {set.rir !== undefined ? `RIR ${set.rir}` : `RPE ${set.rpe}`}
+        </span>
+      )}
     </div>
   );
 }

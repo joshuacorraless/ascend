@@ -42,6 +42,18 @@ export const routineExerciseSchema = z.object({
   restSeconds: z.number().int().min(0).max(3600).optional(),
   /** Series llevadas al fallo: se registran las reps reales alcanzadas. */
   toFailure: z.boolean().optional(),
+  /** Objetivos distintos por serie, en el orden del documento original. */
+  prescribedSets: z
+    .array(
+      z.object({
+        repRangeMin: z.number().int().min(1).max(100).optional(),
+        repRangeMax: z.number().int().min(1).max(100).optional(),
+        toFailure: z.boolean().optional(),
+        notes: z.string().optional(),
+      }),
+    )
+    .max(20)
+    .optional(),
   notes: z.string().optional(),
 });
 export type RoutineExercise = z.infer<typeof routineExerciseSchema>;
@@ -98,8 +110,9 @@ export const setLogSchema = z.object({
   setNumber: z.number().int().min(1),
   weightKg: nonNegativeNumber,
   reps: nonNegativeNumber,
-  /** RPE 1-10 o RIR; opcional. */
+  /** Esfuerzo percibido (RPE), separado de repeticiones en reserva (RIR). */
   rpe: z.number().min(0).max(10).optional(),
+  rir: z.number().min(0).max(10).optional(),
   setType: setTypeSchema,
   completed: z.boolean(),
   notes: z.string().optional(),

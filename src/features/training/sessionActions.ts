@@ -1,4 +1,5 @@
 import { getRepositories } from '@/lib/repositories';
+import { getDb } from '@/lib/db/database';
 import { newEntity } from '@/lib/factories';
 import { nowIso } from '@/lib/ids';
 import type { DateKey } from '@/lib/datetime';
@@ -7,9 +8,34 @@ import type {
   ExerciseLog,
   SetLog,
   SetType,
+  RoutineExercise,
   WorkoutRoutine,
   WorkoutSession,
 } from '@/lib/schema';
+
+export function routinePrescriptionNotes(exercise: RoutineExercise): string {
+  const range = (min?: number, max?: number) =>
+    min === undefined
+      ? 'reps no indicadas'
+      : min === max || max === undefined
+        ? `${min} reps`
+        : `${min}–${max} reps`;
+  const targets = exercise.prescribedSets?.length
+    ? exercise.prescribedSets
+        .map(
+          (set, i) =>
+            `Serie ${i + 1}: ${set.toFailure ? `${set.repRangeMin !== undefined ? `${range(set.repRangeMin, set.repRangeMax)} · ` : ''}al fallo` : range(set.repRangeMin, set.repRangeMax)}${set.notes ? ` · ${set.notes}` : ''}`,
+        )
+        .join('\n')
+    : `${exercise.targetSets} series · ${range(exercise.repRangeMin, exercise.repRangeMax)}${exercise.toFailure ? ' · al fallo' : ''}`;
+  return [
+    targets,
+    exercise.restSeconds !== undefined ? `Descanso: ${exercise.restSeconds} s` : '',
+    exercise.notes ?? '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
 
 function blankSet(
   sessionId: string,
@@ -35,36 +61,49 @@ export async function startSessionFromRoutine(
   routine: WorkoutRoutine,
   exercisesById: Map<string, Exercise>,
   dateKey: DateKey,
+  options?: { replaceSessionId?: string },
 ): Promise<string> {
   const repos = getRepositories();
-  const session = newEntity<WorkoutSession>({
-    routineId: routine.id,
-    name: routine.name,
-    localDate: dateKey,
-    startedAt: nowIso(),
-    status: 'active',
-  });
-  await repos.workout.putSession(session);
-
-  const ordered = [...routine.exercises].sort((a, b) => a.order - b.order);
-  for (const [i, rex] of ordered.entries()) {
-    const exercise = exercisesById.get(rex.exerciseId);
-    const log = newEntity<ExerciseLog>({
-      sessionId: session.id,
-      exerciseId: rex.exerciseId,
-      exerciseName: exercise?.name ?? 'Ejercicio',
-      trackingType: exercise?.trackingType ?? 'weight_reps',
-      order: i,
-    });
-    await repos.workout.putExerciseLog(log);
-    const setType: SetType | undefined = rex.toFailure ? 'fallo' : undefined;
-    for (let n = 1; n <= rex.targetSets; n++) {
-      await repos.workout.putSetLog(
-        blankSet(session.id, log.id, rex.exerciseId, n, setType ? { setType } : undefined),
-      );
+  const db = getDb();
+  return db.transaction('rw', db.sessions, db.exerciseLogs, db.setLogs, async () => {
+    const active = await repos.workout.getActiveSession();
+    if (active && active.id !== options?.replaceSessionId) {
+      throw new Error('Ya hay una sesión activa. Continuá esa sesión o volvé a elegir la rutina.');
     }
-  }
-  return session.id;
+    if (active && active.id === options?.replaceSessionId)
+      await repos.workout.removeSession(active.id);
+    const session = newEntity<WorkoutSession>({
+      routineId: routine.id,
+      name: routine.name,
+      localDate: dateKey,
+      startedAt: nowIso(),
+      status: 'active',
+    });
+    await repos.workout.putSession(session);
+
+    const ordered = [...routine.exercises].sort((a, b) => a.order - b.order);
+    for (const [i, rex] of ordered.entries()) {
+      const exercise = exercisesById.get(rex.exerciseId);
+      const log = newEntity<ExerciseLog>({
+        sessionId: session.id,
+        exerciseId: rex.exerciseId,
+        exerciseName: exercise?.name ?? 'Ejercicio',
+        trackingType: exercise?.trackingType ?? 'weight_reps',
+        order: i,
+        notes: routinePrescriptionNotes(rex),
+      });
+      await repos.workout.putExerciseLog(log);
+      for (let n = 1; n <= rex.targetSets; n++) {
+        const prescribed = rex.prescribedSets?.[n - 1];
+        const setType: SetType | undefined =
+          (prescribed?.toFailure ?? rex.toFailure) ? 'fallo' : undefined;
+        await repos.workout.putSetLog(
+          blankSet(session.id, log.id, rex.exerciseId, n, setType ? { setType } : undefined),
+        );
+      }
+    }
+    return session.id;
+  });
 }
 
 export async function startEmptySession(dateKey: DateKey, name = 'Sesión libre'): Promise<string> {

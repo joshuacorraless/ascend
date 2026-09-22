@@ -1,4 +1,5 @@
 import { getRepositories } from '@/lib/repositories';
+import { getDb } from '@/lib/db/database';
 import { newEntity } from '@/lib/factories';
 import { todayKey } from '@/lib/datetime';
 import type {
@@ -31,6 +32,7 @@ export interface ParsedExercise {
   toFailure: boolean;
   restSeconds?: number;
   notes?: string;
+  prescribedSets?: RoutineExercise['prescribedSets'];
 }
 
 export interface ParsedRoutine {
@@ -394,6 +396,7 @@ export function parseRoutineImport(text: string): RoutineImportParse {
 export function buildImportEntities(
   routines: ParsedRoutine[],
   existing: Exercise[],
+  options?: { activate?: boolean },
 ): { newExercises: Exercise[]; routines: WorkoutRoutine[]; summary: RoutineImportSummary } {
   const byName = new Map<string, string>();
   for (const ex of existing) byName.set(norm(ex.name), ex.id);
@@ -427,6 +430,7 @@ export function buildImportEntities(
         repRangeMin: pe.repRangeMin,
         repRangeMax: pe.repRangeMax,
         toFailure: pe.toFailure,
+        ...(pe.prescribedSets ? { prescribedSets: pe.prescribedSets } : {}),
         ...(pe.restSeconds !== undefined ? { restSeconds: pe.restSeconds } : {}),
         ...(pe.notes ? { notes: pe.notes } : {}),
       };
@@ -437,7 +441,7 @@ export function buildImportEntities(
         name: r.name,
         daysOfWeek: r.daysOfWeek,
         exercises: routineExercises,
-        active: false,
+        active: options?.activate ?? false,
         archived: false,
         ...(r.description ? { description: r.description } : {}),
       }),
@@ -456,13 +460,24 @@ export function buildImportEntities(
 }
 
 /** Aplica la importación: crea ejercicios faltantes y guarda las rutinas. */
-export async function applyRoutineImport(routines: ParsedRoutine[]): Promise<RoutineImportSummary> {
+export async function applyRoutineImport(
+  routines: ParsedRoutine[],
+  options?: { activate?: boolean },
+): Promise<RoutineImportSummary> {
   const repos = getRepositories();
-  const existing = await repos.exercises.list({ includeArchived: true });
-  const { newExercises, routines: routinesOut, summary } = buildImportEntities(routines, existing);
-  if (newExercises.length > 0) await repos.exercises.bulkPut(newExercises);
-  for (const routine of routinesOut) await repos.routines.put(routine);
-  return summary;
+  const db = getDb();
+  // All-or-nothing: a failed write must not leave half a plan or duplicate days on retry.
+  return db.transaction('rw', db.exercises, db.routines, async () => {
+    const existing = await repos.exercises.list({ includeArchived: true });
+    const {
+      newExercises,
+      routines: routinesOut,
+      summary,
+    } = buildImportEntities(routines, existing, options);
+    if (newExercises.length > 0) await repos.exercises.bulkPut(newExercises);
+    for (const routine of routinesOut) await repos.routines.put(routine);
+    return summary;
+  });
 }
 
 // Plantilla de ejemplo descargable
